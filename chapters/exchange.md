@@ -1,3 +1,7 @@
+---
+layout: page
+title: Exchange
+---
 # Exchanges and Exchange Adapters
 
 The Melon Protocol integrates with exchanges to facilitate the trading of Assets, one of the essential functionalities of a Melon Fund.
