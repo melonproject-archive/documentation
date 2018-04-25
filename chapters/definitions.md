@@ -82,3 +82,7 @@ A Melon Fund is an Ethereum smart contract deployed to the Ethereum blockchain. 
 #### Blockchain
 
 #### Transaction
+
+#### NAV
+
+#### GAV 

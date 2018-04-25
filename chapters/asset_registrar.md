@@ -30,51 +30,32 @@ The Asset Registrar is primarily a smart contract to hold and provide maintenanc
 
 | Name | Type | Description |
 | -------- | -------- | -------- |
-| ofAsset | address | The contract address of the token Asset |
+| `ofAsset` | `address` | The contract address of the token Asset |
 | name | bytes32 | Human-readable name of the Asset as found in the ERC223 token standard |
 | symbol | bytes8 | Human-readable symbol of the Asset as found in ERC223 token standard |
 | decimal | uint | Precision specified as the number of decimals |
 | url | string | url address for Asset's extended information |
 | ipfsHash | string  | ipfs  address for Asset's extended information |
 | chainId | bytes32 | Chain where the asset resides |
-|breakIn | address | Address  of  break  in  contract  on destination chain |
-| breakOut | address | Address  of  break  out  contract  on this chain |
+|breakIn | address | Address  of  break-in  contract  on destination chain |
+| breakOut | address | Address  of  break-out contract on the native chain |
 
-  address ofAsset,
-  bytes32 name,
-  bytes8 symbol,
-  uint decimal,
-  string url,
-  string ipfsHash,
-  bytes32 chainId,
-  address breakIn,
-  address breakOut
+add more detail on: AR 1st, then price feed...
 
-  /// @param ofAsset Address of asset to be registered
-  /// @param name Human-readable name of the Asset as in ERC223 token standard
-  /// @param symbol Human-readable symbol of the Asset as in ERC223 token standard
-  /// @param decimal Human-readable symbol of the Asset as in ERC223 token standard
-  /// @param url Url for extended information of the asset
-  /// @param ipfsHash Same as url but for ipfs
-  /// @param chainId Chain where the asset resides
-  /// @param breakIn Address of break in contract on destination chain
-  /// @param breakOut Address of break out contract on this chain
-
-
-[To consider: asset Classification/Type attributes or array of attributes]
+Future versions may... [To consider: asset Classification/Type attributes or array of attributes]
 
 The owner can interact with the Asset Registrar in the following ways:
 
-- register()
+- `register()`
 
-- updateDescriptiveInformation()
+- `updateDescriptiveInformation()`
 
-- remove()
+- `remove()`
 
 The public can view-interact with the Asset Registrar in the following ways:
 
-- getName()
+- `getName()`
 
-- getSymbol()
+- `getSymbol()`
 
-- getDecimals()
+- `getDecimals()`
