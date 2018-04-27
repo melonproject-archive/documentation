@@ -24,7 +24,7 @@ The Asset Registrar stores data about each investment-eligible asset on-chain.
 
 The Asset Registrar holds the following public mapping:
 
-  mapping (address => Asset) public information;
+  `mapping (address => Asset) public information;`
 
 The Asset Registrar is primarily a smart contract to hold and provide maintenance infrastructure for a list of investment-eligible assets.  Assets have the following characteristics:
 

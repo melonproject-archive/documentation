@@ -85,4 +85,17 @@ A Melon Fund is an Ethereum smart contract deployed to the Ethereum blockchain. 
 
 #### NAV
 
-#### GAV 
+#### GAV
+
+#### Investment Asset
+
+#### Redemption Asset
+
+#### Quote Asset
+
+#### allocate vs invest
+Just a note: should we try to tighten up our language to avoid ambiguity?:  
+
+Allocate: The Investment Manager chooses and trades for specific assets within the fund. Allocation is the only discretionary power with the Investment Manager regarding the Melon Fund's underlying holdings.
+
+Invest: The Investor transfers tokens to the Melon Fund. Technically, the Melon Fund also invests into the underlying holdings; this underscores the fact that the underlying holdings' ownership is completely segregated from the Investment Manager and resided with the Melon Fund smart contract, and ultimately, with the Investor.
