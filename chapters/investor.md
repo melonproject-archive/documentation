@@ -20,7 +20,8 @@ Example Ethereum Address:
 `0xdd4A3d9D44A670a80bAbbd60FD300a4C8C38561f`
 
 Example Ethereum Private Key:
-`d43689ae52d6a4e0e95d41bc638e95a66c4e7d0852f6db83d44c234ce9267d0d
+`d43689ae52d6a4e0e95d41bc638e95a66c4e7d0852f6db83d44c234ce9267d0d`
+
 
 Investing addresses can interact with the Melon Fund through the following functions:
 
@@ -37,7 +38,6 @@ Conditions:
 - If Compliance criteria has been set with the Compliance Module by the Investment Manager, a check against these criteria is run to ensure that `isInvestmentPermitted() == true`.
 
 
-
 #### `requestRedemption()`
 
 Investors redeem assets from the Melon Fund by calling this function. Investors will redeem in the same asset with which was initially invested (ETH or MLN).
@@ -49,6 +49,22 @@ Conditions for successful redemption:
 - The Melon Fund must not be in the state: `isShutDown == true`.
 - The asset in which the redemption request is being made is currently permitted: `isRedeemAllowed[redemptionAsset] == true`
 - If Compliance criteria has been set with the Compliance Module by the Investment Manager, a check against these criteria is run to ensure that `isRedemptionPermitted() == true`.
+
+#### `executeRequest()`
+
+This function is called to process an active request.  The function enforces conditions and delays such that no party can materially exploit asymmetric informational advantages inherent in transparent decentralized exchanges.
+
+Conditions for successful request execution:
+
+- The Melon Fund must not be in the state: `isShutDown == true`.
+
+- The request's status must be active: `requests[id].status == RequestStatus.active`.
+
+- The request's type must not be a redemption, or if it is, the quantity of shares to be redeemed must be less than or equal to the Investor's shares held: `requests[id].requestType != RequestType.redeem || requests[id].shareQuantity <= balances[requests[id].participant]`.
+
+- The total quantity of shares in the Melon Fund is 0 (i.e. first investment) `totalSupply == 0` or, at least one price feed update time interval (in seconds) *and* two price feed updates have occurred.
+
+
 
 #### `cancelRequest()`
 
