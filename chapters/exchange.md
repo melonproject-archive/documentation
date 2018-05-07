@@ -9,6 +9,7 @@ The Melon Protocol integrates with exchanges to facilitate the trading of Assets
 Exchanges can be roughly classified as Centralized and Decentralized.
 
 #### Centralized Exchanges
+
 Centralized Exchanges are the exchanges that have been in use since the beginning of asset trading. They are setup and run by third parties and offer the service of trading assets to individual clients. Centralized Exchanges manage accounts for individual investors and their assets, essentially providing a matchmaking and custody service.
 
 Investors must put their full faith and trust in the exchanges operators and the institutions that regulate them. Security considerations exist over the operators' willful mishandling of investor funds, innocent mistakes and poor security measures/procedures which malicious parties exploit as "hacks". Further these exchanges and their investors must also trust internal staff.
@@ -16,6 +17,7 @@ Investors must put their full faith and trust in the exchanges operators and the
 Investor assets are often stored communally at known address, making them an attractive target for nefarious actors.
 
 #### Decentralized Exchanges
+
 Decentralized Exchanges (DEX) are an entirely new phenomenon and only exist due to blockchain and smart contract technology. They are characterized by having matching and custody functionality entirely on the blockchain. This means that the decentralized exchange's smart contract itself holds custody of investors' assets. Investors ultimately retain power over their assets, even if not their actual custody. Trades are executed as atomistic swaps, meaning that the two assets involved in the trade are transactionally transferred as a single unit of work, i.e. either both assets transfer successfully, or none.
 
 The DEX's security is only as good as it's smart contract integrity. However, the greater the value transacted over the DEX, the greater the confidence in the DEX's security becomes.
@@ -25,9 +27,11 @@ DEXs maintain their order books (list of live buy- and sell orders) either on-ch
 The Melon Protocol will utilize DEXs for the actual trading infrastructure of Melon Funds. Retaining control of assets within Melon Funds is a defining characteristic of the platform and paramount to its success.
 
 #### DEX Smart Contracts
+
 Each DEX implements their designed trading behavior individually, although some standards have appeared for the relaying of orders (e.g. 0x Protocol). This means that a Melon Fund must accommodate multiple different DEX smart contracts if the fund is to draw from a wider pool of liquidity.
 
 #### Exchange Adapters
+
 Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the Melon Fund and the DEX.
 
 Currently, the Melon Protocol has adapters to integrate the following DEXs:
@@ -36,11 +40,9 @@ Currently, the Melon Protocol has adapters to integrate the following DEXs:
 - RadarRelay (0x-based)
 - ERCDex (0x-based)
 
+CHECK: Oasis DEX details
 
-Notes on...
-Oasis DEX details
-
-0x details
+#### 0x-based Exchange Details
 
 The `fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
 
@@ -56,14 +58,14 @@ A single event is emitted by the Exchange Adapter:
 
 The following functions are public view functions:
 
-- `isApproveOnly()`
+- `isApproveOnly()` - Constant view function which returns a boolean indicating whether a specific DEX implementation requires asset approve instead of transfer on make orders.
 
-- `getLastOrderId()`
+- `getLastOrderId()` - Constant view function which returns the last order Id on a specific exchange.
 
-- `isActive()`
+- `isActive()` - Constant view function which returns a boolean indicating whether a specific order on a specific DEX is `active` at the time of function call.
 
-- `getOwner()`
+- `getOwner()` - Constant view function which returns the address of the `Owner` of a (CHECK) specific order on a specific exchange.
 
-- `getOrder()`
+- `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
 
-- `getTimestamp()`
+- `getTimestamp()` - Constant view function which returns the timestamp of when a specific order on a specific exchange was made.

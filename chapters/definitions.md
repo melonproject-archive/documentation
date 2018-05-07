@@ -89,11 +89,17 @@ A Melon Fund is an Ethereum smart contract deployed to the Ethereum blockchain. 
 
 #### GAV
 
-#### Investment Asset
+#### Investment/Subscription Asset
 
 #### Redemption Asset
 
 #### Quote Asset
+
+#### Native Asset
+
+#### Base Asset
+
+#### Reference Asset
 
 #### allocate vs invest
 Just a note: should we try to tighten up our language to avoid ambiguity?:  
