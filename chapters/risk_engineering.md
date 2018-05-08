@@ -51,7 +51,7 @@ All institutional fund managers use software to help them manage portfolios.  Th
 
 In Melon, it's different. We're not doing risk management, rather are we doing *risk engineering* ie. anticipating the risk ahead of time, and handling it in the code of the smart contract. Being proactive vs reactive. 
 
-*risk engineering* = the anticipation and identification of different risks ahead of time, and the action of preventing their occurence through code. Rules coded into smart contracts that are mean. Making sure that something **will not** happen in the context of a Melon fund.
+*risk engineering* = the anticipation and identification of different risks ahead of time, and the action of preventing their occurence through code. Rules coded into smart contracts that are meant to make sure that something **will not** happen in the context of a Melon fund.
 
 **What risks can we identify within the context of a Melon fund?**
 
