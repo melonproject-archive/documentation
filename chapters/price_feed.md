@@ -29,7 +29,7 @@ The sampling of the price feed data is implemented as the statistical median for
 
 #### Price Feed Update
 
-The Price Feed Update establishes, on the blockchain, the performance track record of individual assets over time. Once selected by the Melon Protocol and written to state, the price point is a permant part of the historical track record of the asset. The frequency of the Price Feed Update is defined by the Price Feed Interval.
+The Price Feed Update establishes, on the blockchain, the performance track record of individual assets over time. Once selected by the Melon Protocol and written to state, the price point is a permanent part of the historical track record of the asset. The frequency of the Price Feed Update is defined by the Price Feed Interval.
 
 
 #### Price Feed Interval
@@ -43,21 +43,47 @@ Staking value only has effective economic incentive if the value can be lost. Th
 
 #### Future Governance
 
-It is the intention provide a more decentralized goverance mechanism which can be applied to different domains of the Melon Protocol, including Price Feed Operator Governance. This envisions the creation of a "Technical Council" to adjudicate. For further details on the Technical Council, please refer to the Governance section.
+It is the intention provide a more decentralized governance mechanism which can be applied to different domains of the Melon Protocol, including Price Feed Operator Governance. This envisions the creation of a "Technical Council" to adjudicate. For further details on the Technical Council, please refer to the Governance section.
 
-----
+#### Public Functions
 
-We should address this: A member of the pool of Price Feed Operators (PFO) can manipulate the protocol-selected price data point as follows: Assume a pool of 5 PFOs. PFOs 1-4 submit price points:
+`update()`  only owner
+Function callable only by contract `owner` which updates price of asset(s) relative to the quote asset. An array of asset addresses and an equal length array of asset prices are sent as parameters to the function call.
 
-PFO1 22.14
-PFO2 22.76
-PFO3 23.18
-PFO4 23.21
+#### Public View Functions
 
-PFO 5 can basically determine price the price 22.76 or 23.18 by waiting for all others, analyzing the result and submitting a price point <= 22.14 or >= 23.21, respectively.  They could also select their own price by arbitrarily submitting a price point between 22.76 and 23.18. This could also result in PFOs all waiting until the last possible moment to submit price data in order to essentially have the privledged role of determining price.
+`getQuoteAsset()`
+Function which returns the address of the quote asset.
 
-Possible solutions to mitigate this risk:
-1. commit and delayed reveal of a hash of the price point and a salt.
-2. historical analysis of PFO temporal submission order. Penalize PFOs chronically submitting last/late.
+`getInterval()`
+Function which returns the frequency of asset price updates in seconds.
 
----
+`getValidity()`
+Function which returns the time in seconds for which price data is considered current; the `VALIDITY` parameter.
+
+`getLastUpdateId()`
+Function which returns the Id of the last update. Can be viewed as an update counter.
+
+`hasRecentPrice()`
+Function which returns a boolean indicating whether a specific asset has had a current price update. Current is determined by the number of seconds specified by the `VALIDITY` parameter.
+
+`hasRecentPrices()`
+Function which returns a boolean indicating whether an array of assets has had a current prices update. Current is determined by the number of seconds specified by the `VALIDITY` parameter.
+
+`getPrice()`
+Function which returns the validity, price and decimals of a specific asset.
+
+`getPrices()`
+Function which returns the validity, price and decimals of an array of assets.
+
+`getInvertedPrice()`
+Function which returns the validity, inverted price and number of decimals of the quote asset.
+
+`getReferencePrice()`
+Function which returns the validity, reference price and number of decimals for the asset given the address of the base asset and the address of the quote asset.
+
+`getOrderPrice()`
+Function which returns the implicit price of an order given the sell asset address, buy asset address, sell quantity and buy quantity. CHECK: buyAsset not used.
+
+`existsPriceOnAssetPair()`
+Function which returns a boolean indicating whether current price data for a specific buy/sell asset pair exists. One of the specified assets must be the quote asset.
