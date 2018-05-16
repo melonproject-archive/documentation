@@ -1,3 +1,10 @@
+---
+layout: page
+title: Security
+---
+
+# Security
+
 smart contract (programming) security
 personal (also how rng is done)
 chain security

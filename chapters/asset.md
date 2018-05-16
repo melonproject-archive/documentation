@@ -1,5 +1,7 @@
 # Assets
 
+A Fund is a structure which holds assets and seeks to fairly distribute ownership of the collective value of the assets.
+
 Assets are the underlying constituent members of a Melon Fund. Assets are exclusively Tokens on the Ethereum blockchain implementing the ERC20 standard token interface.
 
 The Technical Council determines the Asset universe for Melon Funds in that it periodically analyzes the eligibility for tokens given their exchange membership, liquidity and underlying use.

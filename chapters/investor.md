@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Investors
+title: Investor
 ---
 # Investors
 

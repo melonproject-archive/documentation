@@ -1,3 +1,8 @@
+---
+layout: page
+title: Asset Registrar
+---
+
 # Asset Registrar
 
 Asset  registrar  module  is  intended  for  registering  assets  and information associated with them on-chain. Subsequent modules  check  if  an  asset  is  registered  in  the  Asset  registration before  performing  different  operations.  Registration  can  be done via the register function that takes the following parameters:
