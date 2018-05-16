@@ -1,0 +1,70 @@
+{% capture tocWorkspace %}
+    {% comment %}
+        Using Allejo's Jekyll TOC version 1.0.4
+        https://github.com/allejo/jekyll-toc
+    {% endcomment %}
+
+    {% capture my_toc %}{% endcapture %}
+    {% assign orderedList = include.ordered | default: false %}
+    {% assign minHeader = include.h_min | default: 1 %}
+    {% assign maxHeader = include.h_max | default: 6 %}
+    {% assign nodes = include.html | markdownify | split: '<h' %}
+    {% assign fixed_header = include.header %}
+    {% assign firstHeader = true %}
+    {% capture listModifier %}{% if orderedList %}1.{% else %}-{% endif %}{% endcapture %}
+    {% for node in nodes %}
+        {% if node == "" %}
+            {% continue %}
+        {% endif %}
+        {% assign headerLevel = node | replace: '"', '' | slice: 0, 1 | times: 1 %}
+        {% if headerLevel < minHeader or headerLevel > maxHeader %}
+            {% continue %}
+        {% endif %}
+        {% comment %}
+            This block assumes the first heading in an md file is the highest level one
+        {% endcomment %}
+        {% if firstHeader %}
+            {% assign minHeader = headerLevel %}
+        {% endif %}
+        {% if fixed_header %}
+          {% increment headerLevel %}
+        {% endif %}
+        {% assign indentAmount = headerLevel | minus: minHeader | add: 1 %}
+        {% assign _workspace = node | split: '</h' %}
+        {% assign _idWorkspace = _workspace[0] | split: 'id="' %}
+        {% assign _idWorkspace = _idWorkspace[1] | split: '"' %}
+        {% assign html_id = _idWorkspace[0] %}
+        {% capture _hAttrToStrip %}{{ _workspace[0] | split: '>' | first }}>{% endcapture %}
+        {% assign header = _workspace[0] | replace: _hAttrToStrip, '' %}
+        {% assign space = '' %}
+        {% for i in (1..indentAmount) %}
+            {% assign space = space | prepend: '    ' %}
+        {% endfor %}
+        {% assign spaceNext = space | prepend: '    ' %}
+        {% unless include.item_class == blank %}
+            {% capture listItemClass %}{:.{{ include.item_class | replace: '%level%', headerLevel }}}{% endcapture %}
+        {% endunless %}
+        {% capture url %}{{ site.baseurl }}{{ include.url }}#{{ html_id }}{% endcapture %}
+        {% capture label %}{% if include.sanitize %}{{ header | strip_html }}{% else %}{{ header }}{% endif %}{% endcapture %}
+        {% assign id = url | replace:'/','_'| replace:'#','_' %}
+        {% if firstHeader %}
+            {% capture my_toc %}{{ my_toc }}
+{{ space }}{{ listModifier }} {{ listItemClass }} <label for="{{ id }}">{{ label }}</label>
+<input type="checkbox" id="{{ id }}" {% if page.url != include.url %}checked>{% else %}><script> document.getElementById("{{ id }}").scrollIntoView(); </script>{% endif %}{% endcapture %}
+            {% capture my_toc %}{{ my_toc }}
+{{ spaceNext }}{{ listModifier }} {{ listItemClass }} [Introduction]({{ url }}){% endcapture %}
+        {% else %}
+            {% capture my_toc %}{{ my_toc }}
+{{ space }}{{ listModifier }} {{ listItemClass }} [{{ label }}]({%if firstHeader %}#{% else %}{{ url }}{% endif %}){% endcapture %}
+        {% endif %}
+        {% assign firstHeader = false %}
+    {% endfor %}
+    {% if include.class %}
+        {% capture my_toc %}{:.{{ include.class }}}
+{{ my_toc | lstrip }}{% endcapture %}
+    {% endif %}
+    {% if include.id %}
+        {% capture my_toc %}{: /#{{ include.id }}}
+{{ my_toc | lstrip }}{% endcapture %}
+    {% endif %}
+{% endcapture %}{% assign tocWorkspace = '' %}{{ my_toc | markdownify | strip }}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="{{ site.lang | default: " en-US " }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
+</head>
+
+<body>
+    <main>
+        <section>
+            {{ content }}
+        </section>
+    </main>
+    <aside id="nav">
+        <header>
+            <a href="{{ site.baseurl }}/" class="logo">
+                <h1>{{ site.title | default: site.github.repository_name }}</h1>
+                <p>{{ site.description | default: site.github.project_tagline }}</p>
+            </a>
+        </header>
+        <nav>
+          {% capture trash %}
+          {% assign pages = site.pages | sort: "dir.size"  %}
+          {% assign done = "" %}
+
+          ### Fetch all submodules from the list of pages and mark them as "done".
+          ### Menu is inserted below other TOCs.
+
+          {% for node in pages %}
+            {% if node.name == "README.md" and node.dir != "/" %}
+              {% assign packageDir = node.dir %}
+              {% capture done %} {{ done }},{{ node.path }}{% endcapture %}
+            
+              {% if site.submodules == "detailed" %}
+                {% capture submodules %}{{ submodules }}
+                  {% include toc.html html=node.content url=node.url h_max=2 %}
+                {% endcapture %}
+              {% elsif site.submodules != "none" %}
+                {% capture submodules %}{{ submodules }}
+                  <li><a href="{{ site.baseurl }}{{ node.url }}">{{ node.title }}</a></li>
+                {% endcapture %}
+              {% endif %}
+
+              {% for sub_doc in pages %}
+                {% if sub_doc.name == "README.md" or packageDir == sub_doc.dir %}
+                  {% continue %}
+                {% endif %}
+
+                {% assign x = sub_doc.dir | split: packageDir %}
+                {% if x.size > 1 %}
+                  ### Filter out submodule pages as they clutter the menu too much.
+                  {% capture done %} {{ done }},{{ sub_doc.path }}{% endcapture %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+
+          ### make TOCs for remaining pages
+
+          {% assign superToc = "" %}
+          {% for node in pages %}
+            {% assign current = false %}
+            {% assign min = 1000 %}
+            {% assign doneList = done | split: "," %}
+            {% for node in pages %}
+              {% if node.dir.size < min %}
+                  {% unless doneList contains node.path %}
+                    {% assign current = node %}
+                    {% assign min = current.dir.size %}
+                {% endunless %}
+              {% endif %}
+            {% endfor %}
+
+            {% unless current %}
+              {% break %}
+            {% endunless %}
+
+            {% capture superToc %}{{ superToc }}{% include toc.html html=current.content url=current.url h_max=2 %}{% endcapture %}
+
+            {% capture done %} {{ done }},{{ current.path }}{% endcapture %}
+          {% endfor %}
+          {% assign submodules = submodules | strip %}
+          {% endcapture %}{{ superToc }}
+          {% if submodules.size > 0 %}
+          <ul>
+            <li>
+              <label for="sections">Submodules</label>
+              <input type="checkbox" id="sections" checked="">
+              <ul>
+                {{ submodules }}
+              </ul>
+            </li>
+          </ul>
+          {% endif %}
+
+        </nav>
+    </aside>
+    <a href="#" id="nav-backdrop"></a>
+</body>
+
+</html>

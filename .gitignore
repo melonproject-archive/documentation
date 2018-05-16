@@ -2,7 +2,4 @@
 /dist/docs/
 /_site
 Gemfile.lock
-_includes
-_layouts
-assets
 .sass-cache
