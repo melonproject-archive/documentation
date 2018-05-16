@@ -1,28 +1,15 @@
 # Assets
 
-A Fund is a structure which holds assets and seeks to fairly distribute ownership of the collective value of the assets.
+Assets are the underlying constituent members of a Melon Fund. Assets are exclusively Tokens on the Ethereum blockchain implementing the ERC20 or ERC223 standard token interfaces.
 
-Assets are the underlying constituent members of a Melon Fund. Assets are exclusively Tokens on the Ethereum blockchain implementing the ERC20 standard token interface.
+The Technical Council determines the asset universe through the [asset registrar](https://github.com/melonproject/documentation/blob/first-draft/chapters/asset_registrar.md) for Melon Funds in that it periodically analyzes the eligibility for tokens given their exchange membership, liquidity and underlying use.
 
-The Technical Council determines the Asset universe for Melon Funds in that it periodically analyzes the eligibility for tokens given their exchange membership, liquidity and underlying use.
+## Fund is an Asset
 
-When an asset
+A Fund is basically an ERC223 compliant asset with super powers. It is a structure which holds assets and seeks to fairly distribute ownership of the collective value of the assets. Since fund is also an asset, a fund can hold different fund shares as it's holdings just like any other normal asset.
 
+Fund keeps track of all the assets it holds using a variable called ownedAssets.
 
-address breakIn; // Break in contract on destination chain
-address breakOut; // Break out contract on this chain; A way to leave
-bytes32 chainId; // On which chain this asset resides
-uint decimal; // Decimal, order of magnitude of precision, of the Asset as in ERC223 token standard
-bool exists; // Is this asset registered
-string ipfsHash; // Same as url but for ipfs
-bytes32 name; // Human-readable name of the Asset as in ERC223 token standard
-uint price; // Price of asset quoted against `QUOTE_ASSET` * 10 ** decimals
-bytes8 symbol; // Human-readable symbol of the Asset as in ERC223 token standard
-uint timestamp; // Timestamp of last price update of this asset
-string url; // URL for additional information of Asset
+## Fund Assets limit
 
-
-
-
-Note: ETH is not an ERC20
-GAS
+Due to gas constraints of Ethereum network, there is a limit on the number of assets a fund can hold. This is calculated by performing gas price analysis and basically make sure no function exceeds the gas limit.
