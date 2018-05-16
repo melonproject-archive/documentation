@@ -18,16 +18,16 @@ The Melon Fund is responsible for, and performs:
 At fund instantiation, the fund creator (Investment Manager, "owner") may discretionarily elect to activate Compliance and/or Risk Engineering functionality. This enables the fund to constrain Investor or Investment Manager interaction in specific and configurable ways.
 
 #### Asset Custody
-In the context of a Melon Fund, Assets are cryptographic Tokens [link] adhering to the ERC20 standard [link] on the Ethereum blockchain.  The Asset universe for Melon Funds necessarily requires a that a liquid market exists for the token on one or more decentralized exchanges [link] in order to facilitate price feed and trade execution functionality. The Technical Council [link] shall determine membership of specific Tokens in the Melon Asset universe.
+In the context of a Melon Fund, Assets are cryptographic Tokens [link] adhering to the ERC20 standard [link] on the Ethereum blockchain.  The Asset universe for Melon Funds necessarily requires that a liquid market exists for the token on one or more decentralized exchanges [link] in order to facilitate price feed and trade execution functionality. The Technical Council [link] shall determine membership of specific Tokens in the Melon Asset universe.
 
 In the legacy financial system, assets are held by custodian banks.
 
 #### Structs
 The Melon Fund contract specifies the following types as structs:
 
-- Modules - Modules represent non-core fund functionality which implemented as separate contracts which adhere to a standardized interface.
+- Modules - Modules represent non-core fund functionality which are implemented as separate contracts that adhere to a standardized interface.
 
- - Price Feed - Mandatory module which delivers real-time price information to be used internally by the Melon Fund for valuation- and performance calculation purposes.
+ - Price Feed - Mandatory module which delivers real-time price information to be used internally by the Melon Fund for valuation and performance calculation purposes, as well as conducting risk management.
 
  - Compliance - Discretionary module which can specify the Investor interaction with the Melon Fund.
 
@@ -50,7 +50,7 @@ The Melon Fund contract specifies the following types as structs:
 
   - Unclaimed Fees - That portion of accrued Management- and Performance Fees due to the Investment Manager, but not claimed. Unclaimed fees represent a liability which reduces the GAV of the Melon Fund. [Note: In subsequent versions, it may be interesting to implement this: As a condition to claiming fees, the Investment Manager must remedy all current, passive Risk Engineering breaches.]
 
-  - High-watermark - Indicates the highest performance level or NAV within a given period. If the NAV at the time of measurement is less than the previous High-watermark, then the previous High-watermark retains its status. In the current version, this is used to determine if positive fund performance has been achieved since the close previous performance period.
+  - High-watermark - Indicates the highest performance level or NAV within a given period. If the NAV at the time of measurement is less than the previous High-watermark, then the previous High-watermark retains its status. In the current version, this is used to determine if positive fund performance has been achieved since the end of the previous performance period.
 
     [Note:  In subsequent versions, because individual Investors can invest at different and arbitrary times, a blanket treatment of the highwatermark must be reworked so that the performance fee amount can be fairly calculated for each individual investment, depending on the time of subscription.]
 
@@ -96,17 +96,17 @@ The Melon Fund contract specifies the following types as structs:
 
   - expiredAt - Timestamp value determining when a specific order expires.
 
-By default, solidity function types are `internal`
+By default, solidity function types are `public`.
 
 
 #### Functions External
-These functions define how agents external to the Ethereum Blockchain.
+These functions define how agents external to the Ethereum Blockchain interact with the Fund.
 
 #### Administration Functions
 
-  - enableInvestment() - `Owner` is able to enable subscription with specified assets. When executed, the Melon Fund will allow subscription requests denominated in the assets specified.
+  - enableInvestment() - `Owner` is able to enable subscription with specified assets. When executed, the Melon Fund will allow investment requests denominated in the assets specified.
 
-  - disableInvestment)() - `Owner` is able to disable subscription with specified assets. When executed, the Melon Fund will reject subscription requests denominated in the assets specified.
+  - disableInvestment() - `Owner` is able to disable subscription with specified assets. When executed, the Melon Fund will reject investment requests denominated in the assets specified.
 
   - enableRedemption() -`Owner` is able to enable redemption in specified assets. When executed, the Melon Fund will allow redemption requests denominated in the assets specified.
 
@@ -124,17 +124,11 @@ These functions define how agents external to the Ethereum Blockchain.
 
   - cancelRequest() - Cancels any `Active` Request on the requests array.
 
-  - redeemAllOwnedAssets() - Wrapper function for emergencyRedeem(). Function operates independently from an active Price Feed.
+  - redeemAllOwnedAssets() - Wrapper function for emergencyRedeem() which attempts to redeem *all* assets in a slice. Function operates independently from an active Price Feed.
 
 #### Managing Function
 
   - callOnExchange() - `Owner` is able to invoke a specific function call outside of the fund smart contract to the DEX smart contract.
-
-Functions Owner or Fund:
-
-  - addOpenMakeOrder() - `Owner` or Fund itself `address(this)` adds a make order to the DEX'a order book and specifies it's expiration time.
-
-  - removeOpenMakeOrder() - `Owner` or Fund itself `address(this)` deletes a make order from the DEX'a order book.
 
 #### Public Functions
 
@@ -153,7 +147,7 @@ Functions Owner or Fund:
 
 #### Fees
 
-  - quantityHeldInCustodyOfExchange() - CHECK: not public. Function which calculates and returns the quantity of asset held in custody across exchanges.
+  - quantityHeldInCustodyOfExchange() - Function which calculates and returns the quantity of asset held in custody across exchanges.
 
 
 Functions View:
