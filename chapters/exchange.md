@@ -40,11 +40,11 @@ Currently, the Melon Protocol has adapters to integrate the following DEXs:
 - RadarRelay (0x-based)
 - ERCDex (0x-based)
 
-CHECK: Oasis DEX details
+Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
 
 #### 0x-based Exchange Details
 
-The `fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
+The `fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
 
 - `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed.
 
@@ -69,3 +69,5 @@ The following functions are public view functions:
 - `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
 
 - `getTimestamp()` - Constant view function which returns the timestamp of when a specific order on a specific exchange was made.
+
+Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar. 
