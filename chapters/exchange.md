@@ -33,8 +33,7 @@ Exchange Adapters are smart contracts which communicate directly and on-chain wi
 Currently, the Melon Protocol has adapters to integrate the following DEXs:
 
 - Oasis DEX
-- RadarRelay (0x-based)
-- ERCDex (0x-based)
+- 0x (enabling interaction with all 0x relayers)
 
 Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
 
