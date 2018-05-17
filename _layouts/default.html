@@ -33,7 +33,7 @@
             {% if node.name == "README.md" and node.dir != "/" %}
               {% assign packageDir = node.dir %}
               {% capture done %} {{ done }},{{ node.path }}{% endcapture %}
-            
+
               {% if site.submodules == "detailed" %}
                 {% capture submodules %}{{ submodules }}
                   {% include toc.html html=node.content url=node.url h_max=2 %}
