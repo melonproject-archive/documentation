@@ -1,7 +1,3 @@
----
-layout: page
-title: Fund
----
 # Fund
 
 The core functionality of the Melon Protocol is captured by the concept of a "fund". This functionality is specified in fund.sol.
@@ -17,12 +13,12 @@ The Melon Fund is responsible for, and performs:
 
 At fund instantiation, the fund creator (Investment Manager, "owner") may discretionarily elect to activate Compliance and/or Risk Engineering functionality. This enables the fund to constrain Investor or Investment Manager interaction in specific and configurable ways.
 
-#### Asset Custody
+## Asset Custody
 In the context of a Melon Fund, Assets are cryptographic Tokens [link] adhering to the ERC20 standard [link] on the Ethereum blockchain.  The Asset universe for Melon Funds necessarily requires a that a liquid market exists for the token on one or more decentralized exchanges [link] in order to facilitate price feed and trade execution functionality. The Technical Council [link] shall determine membership of specific Tokens in the Melon Asset universe.
 
 In the legacy financial system, assets are held by custodian banks.
 
-#### Structs
+## Structs
 The Melon Fund contract specifies the following types as structs:
 
 - Modules - Modules represent non-core fund functionality which implemented as separate contracts which adhere to a standardized interface.
@@ -99,81 +95,81 @@ The Melon Fund contract specifies the following types as structs:
 By default, solidity function types are `internal`
 
 
-#### Functions External
+## External Functions
 These functions define how agents external to the Ethereum Blockchain.
 
 #### Administration Functions
 
-  - enableInvestment() - `Owner` is able to enable subscription with specified assets. When executed, the Melon Fund will allow subscription requests denominated in the assets specified.
+  - `enableInvestment()` - `Owner` is able to enable subscription with specified assets. When executed, the Melon Fund will allow subscription requests denominated in the assets specified.
 
-  - disableInvestment)() - `Owner` is able to disable subscription with specified assets. When executed, the Melon Fund will reject subscription requests denominated in the assets specified.
+  - `disableInvestment)()` - `Owner` is able to disable subscription with specified assets. When executed, the Melon Fund will reject subscription requests denominated in the assets specified.
 
-  - enableRedemption() -`Owner` is able to enable redemption in specified assets. When executed, the Melon Fund will allow redemption requests denominated in the assets specified.
+  - `enableRedemption()` -`Owner` is able to enable redemption in specified assets. When executed, the Melon Fund will allow redemption requests denominated in the assets specified.
 
-  - disableRedemption() - `Owner` is able to disable redemption in specified assets. When executed, the Melon Fund will reject redemption requests denominated in the assets specified.
+  - `disableRedemption()` - `Owner` is able to disable redemption in specified assets. When executed, the Melon Fund will reject redemption requests denominated in the assets specified.
 
-  - shutDown() - `Owner` is able to shut the Melon Fund instance down.
+  - `shutDown()` - `Owner` is able to shut the Melon Fund instance down.
 
 #### Participation Functions
 
-  - requestInvestment() - Creates a subscription Request specifying the subscription asset, the subscription asset quantity and the quantity of shares to be received. The request is added to the requests array with a status of `Active`.
+  - `requestInvestment()` - Creates a subscription Request specifying the subscription asset, the subscription asset quantity and the quantity of shares to be received. The request is added to the requests array with a status of `Active`.
 
-  - requestRedemption() - Creates a redemption Request specifying the redemption asset, the redemption asset quantity and the quantity of shares to be redeemed. The request is added to the requests array with a status of `Active`.
+  - `requestRedemption()` - Creates a redemption Request specifying the redemption asset, the redemption asset quantity and the quantity of shares to be redeemed. The request is added to the requests array with a status of `Active`.
 
-  - executeRequest() - Executes a specific `Active` investment or redemption Request on the requests array in a way that minimizes potential information advantages of the Investor.
+  - `executeRequest()` - Executes a specific `Active` investment or redemption Request on the requests array in a way that minimizes potential information advantages of the Investor.
 
-  - cancelRequest() - Cancels any `Active` Request on the requests array.
+  - `cancelRequest()` - Cancels any `Active` Request on the requests array.
 
-  - redeemAllOwnedAssets() - Wrapper function for emergencyRedeem(). Function operates independently from an active Price Feed.
+  - `redeemAllOwnedAssets()` - Wrapper function for emergencyRedeem(). Function operates independently from an active Price Feed.
 
 #### Managing Function
 
-  - callOnExchange() - `Owner` is able to invoke a specific function call outside of the fund smart contract to the DEX smart contract.
+  - `callOnExchange()` - `Owner` is able to invoke a specific function call outside of the fund smart contract to the DEX smart contract.
 
 Functions Owner or Fund:
 
-  - addOpenMakeOrder() - `Owner` or Fund itself `address(this)` adds a make order to the DEX'a order book and specifies it's expiration time.
+  - `addOpenMakeOrder()` - `Owner` or Fund itself `address(this)` adds a make order to the DEX'a order book and specifies it's expiration time.
 
-  - removeOpenMakeOrder() - `Owner` or Fund itself `address(this)` deletes a make order from the DEX'a order book.
+  - `removeOpenMakeOrder()` - `Owner` or Fund itself `address(this)` deletes a make order from the DEX'a order book.
 
-#### Public Functions
+## Public Functions
 
-  - tokenFallback() - ERC223 functionality.
+  - `tokenFallback()` - ERC223 functionality.
 
-  - addAssetToOwnedAssets() - Public function where `Owner` or Fund itself `address(this)` can add an asset to the list of assets owned by the Melon Fund.
+  - `addAssetToOwnedAssets()` - Public function where `Owner` or Fund itself `address(this)` can add an asset to the list of assets owned by the Melon Fund.
 
 
 #### Accounting
 
-  - calcGav() - Public function which calculates Gross Asset Value (GAV) of the Melon Fund. GAV is is quoted in fund-specified Quote Asset terms. CHECK: Public?
+  - `calcGav()` - Public function which calculates Gross Asset Value (GAV) of the Melon Fund. GAV is is quoted in fund-specified Quote Asset terms. CHECK: Public?
 
-  - calcSharePriceAndAllocateFees() - Public function which calculates unclaimed fees of the manager in share terms and creates new shares adding the quantity to total share supply.
+  - `calcSharePriceAndAllocateFees()` - Public function which calculates unclaimed fees of the manager in share terms and creates new shares adding the quantity to total share supply.
 
-  - emergencyRedeem() - Public function which calculates the Investor's pro rata share of each Melon Fund holding and transfers that quantity of each asset to the Investor's address. Also known as a "slice redemption" or redemption-in-kind. Function then destroys the shares submitted for redemption, reducing the Melon Fund's total supply.
+  - `emergencyRedeem()` - Public function which calculates the Investor's pro rata share of each Melon Fund holding and transfers that quantity of each asset to the Investor's address. Also known as a "slice redemption" or redemption-in-kind. Function then destroys the shares submitted for redemption, reducing the Melon Fund's total supply.
 
 #### Fees
 
-  - quantityHeldInCustodyOfExchange() - CHECK: not public. Function which calculates and returns the quantity of asset held in custody across exchanges.
+  - `quantityHeldInCustodyOfExchange()` - CHECK: not public. Function which calculates and returns the quantity of asset held in custody across exchanges.
 
 
-Functions View:
+## View Functions
 
-  - calcUnclaimedFees() - View function which calculates and returns the accrued management fee, performance fee and total unclaimed fees due to the manager at the point in time of the function call.
+  - `calcUnclaimedFees()` - View function which calculates and returns the accrued management fee, performance fee and total unclaimed fees due to the manager at the point in time of the function call.
 
-  - calcNav() - View function which calculates and returns the Melon Fund's Net Asset Value (NAV). This is the GAV less unclaimed management- and performance fees due.
+  - `calcNav()` - View function which calculates and returns the Melon Fund's Net Asset Value (NAV). This is the GAV less unclaimed management- and performance fees due.
 
-  - calcValuePerShare() - View function which calculates and returns the Melon Fund's share price. CHECK: This is the (GAV - Mfee) / total number of Melon Fund shares.
+  - `calcValuePerShare()` - View function which calculates and returns the Melon Fund's share price. CHECK: This is the (GAV - Mfee) / total number of Melon Fund shares.
 
-  - performCalculations() - View function which calculates and returns the GAV, NAV, Management fee, performance fee, unclaimed fees, fees in share terms and the share price.
+  - `performCalculations()` - View function which calculates and returns the GAV, NAV, Management fee, performance fee, unclaimed fees, fees in share terms and the share price.
 
-  - calcSharePrice() - View function which calculates sharePrice denominated in the Melon Fund's base asset (CHECK: Quote Asset).
+  - `calcSharePrice()` - View function which calculates sharePrice denominated in the Melon Fund's base asset (CHECK: Quote Asset).
 
-  - getModules() - View function which returns the addresses of the Price Feed, Compliance and Risk Management module contracts.
+  - `getModules()` - View function which returns the addresses of the Price Feed, Compliance and Risk Management module contracts.
 
-  - getLastRequestId() - View functions which returns the Id of the last Request submitted.
+  - `getLastRequestId()` - View functions which returns the Id of the last Request submitted.
 
-  - getManager() - View function which returns the address of the Investment Manager, i.e. `Owner`.
+  - `getManager()` - View function which returns the address of the Investment Manager, i.e. `Owner`.
 
-  - getOwnedAssetsLength() - View function which returns the number of assets held by the Melon Fund.
+  - `getOwnedAssetsLength()` - View function which returns the number of assets held by the Melon Fund.
 
-  - orderExpired() - View function which returns a boolean indicating whether an order on a given exchange for a given asset has expired.
+  - `orderExpired()` - View function which returns a boolean indicating whether an order on a given exchange for a given asset has expired.

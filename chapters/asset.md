@@ -2,27 +2,17 @@
 
 A Fund is a structure which holds assets and seeks to fairly distribute ownership of the collective value of the assets.
 
-Assets are the underlying constituent members of a Melon Fund. Assets are exclusively Tokens on the Ethereum blockchain implementing the ERC20 standard token interface.
+Token assets are the underlying constituent members of a Melon Fund. These token assets are exclusively Ethereum blockchain tokens implementing the ERC20 standard token interface.
 
-The Technical Council determines the Asset universe for Melon Funds in that it periodically analyzes the eligibility for tokens given their exchange membership, liquidity and underlying use.
+## Asset Eligibility
+In its governance capacity, the Technical Council determines the Melon Fund asset universe, in that it periodically analyzes the broader Ethereum token universe, seeking eligible tokens given their exchange membership, liquidity and underlying use in the context of asset management.
 
-When an asset
+Technically, a Melon Fund can hold any ERC20 complaint token. However, not all ERC20 compliant tokens are appropriate for Melon Funds to hold due to lack of a market, current pricing, exchange listing, liquidity, etc.
 
+## ETH is not ERC20
+It should be noted the the Ethereum native asset, ETH, does *not* comply with the ERC20 token standard. For this reason, market observes may occasionally see "Wrapped ETH" or "WETH", where ETH is itself held in a ERC20 compliant wrapper contract, so as have the same behavior when participating in smart contract infrastructure expect the ERC20 interface. As such, the Melon Fund cannot hold native ETH, but can only hold WETH.  This has no impact on the valuation of ETH and will function and be valued like-for-like in the Melon Fund.  
 
-address breakIn; // Break in contract on destination chain
-address breakOut; // Break out contract on this chain; A way to leave
-bytes32 chainId; // On which chain this asset resides
-uint decimal; // Decimal, order of magnitude of precision, of the Asset as in ERC223 token standard
-bool exists; // Is this asset registered
-string ipfsHash; // Same as url but for ipfs
-bytes32 name; // Human-readable name of the Asset as in ERC223 token standard
-uint price; // Price of asset quoted against `QUOTE_ASSET` * 10 ** decimals
-bytes8 symbol; // Human-readable symbol of the Asset as in ERC223 token standard
-uint timestamp; // Timestamp of last price update of this asset
-string url; // URL for additional information of Asset
+## Note on Gas
+It should be understood that non-view function interaction with an Ethereum smart contract requires the payment of gas for processing capacity. Gas is priced (dynamically according to network load and capacity) in ETH, so some amount of ETH in a calling address is required. Depending on the complexity and computational intensity of a smart contract, it is possible that non-trivial amounts of ETH may be required.
 
-
-
-
-Note: ETH is not an ERC20
-GAS
+Please refer to the Asset Registrar for more details.

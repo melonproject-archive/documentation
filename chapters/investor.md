@@ -1,7 +1,3 @@
----
-layout: page
-title: Investor
----
 # Investors
 
 A Melon Fund is setup to serve Investors.  That is, an Investment Manager creates a Melon Fund in order to provide the service of managing capital on behalf of participating Investors.
@@ -10,10 +6,12 @@ Investors are individuals or institutions participating in the performance of Me
 
 In the context of the platform, the Investor is the Ethereum address from which the `requestInvestment()` was called and tokens sent (i.e. `msg.sender`).
 
+## Investor Address
 The individual Investor must retain the responsibility of secure custody of the Investor address's private key. The private key is required to sign valid Ethereum transactions which are ultimately responsible for calling specific functions and sending token amounts, covering the activities of investing, redeeming and redeeming by slice.
 
 WARNING: Loss or poor security of the Investor address's private key will result in the irreversible and permanent loss of all crypto asset tokens associated with that address.
 
+## Ethereum Addresses and Keys
 An Ethereum address takes the hexidecimal format of 20 bytes prefixed by "0x". Ethereum addresses are all lowercase, but may be mixed case if a checksum is implemented. The private key is 256 random bits.
 
 Example Ethereum Address:                
@@ -25,7 +23,7 @@ Example Ethereum Private Key:
 
 Investing addresses can interact with the Melon Fund through the following functions:
 
-#### External: Participation
+## External Functions: Participation
 
 #### `requestInvestment()`
 
@@ -64,8 +62,6 @@ Conditions for successful request execution:
 
 - The total quantity of shares in the Melon Fund is 0 (i.e. first investment) `totalSupply == 0` or, at least one price feed update time interval (in seconds) *and* two price feed updates have occurred.
 
-
-
 #### `cancelRequest()`
 
 Investors may cancel active investment/redemption requests by calling this function.
@@ -76,7 +72,6 @@ Conditions for successful request cancellation:
 
 - The caller is the request's original issuer or the fund is shut down: `requests[id].participant == msg.sender || isShutDown`
 
-
 #### `redeemAllOwnedAssets()`
 
 At their discretion, Investors may redeem their pro-rata share of the Melon Fund's underling individual positions. Investors will receive each individual token in the proportionate quantity. This is also called "redemption by Slice" or "redemption in kind". This action is an alternative to redeeming in the investment asset and can be used when the fund has been shut down, liquidity is low or when the underlying tokens themselves are desired.
@@ -85,13 +80,7 @@ Condition for successful Slice redemption:
 
 - The caller must own a quantity of Melon Fund shares greater or equal to the quantity requested for redemption: `balances[msg.sender] >= shareQuantity`
 
+## Notes
+NOTE: Investors are responsible for having sufficient quantities of ETH in their Investor address to successfully call invest or redeem functions!
 
-
-
-
-
-NOTE: Investors are responsible for having sufficient quantities of ETH in their Investor address to successfully call invest or redeem functions! (should we give indications/guidelines on gas requirements for specific functions?)
-
-
-Maybe put this in the fund.md:
 NOTE: Sending tokens directly to the address of the fund will cause spurious results in the calculation of the NAV and should be avoided.
