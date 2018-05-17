@@ -26,7 +26,7 @@ Subscriptions refers to an action taken by an Investor invoking the `requestInve
 The Emergency Redeem functionality truly embodies the idea that Investors have full, absolute control and custody of their asset tokens at all times.
 
 #### Trade
-Trade is an action that can be undertaken by the Investment Manager where a specific quantity of a given asset held by the Melon Fund is exchanged for another asset via an exchanged as specified by the Investment Manager at fund set up.
+Trade is an action that can be undertaken by the Investment Manager where a specific quantity of a given asset held by the Melon Fund is exchanged for another asset via an exchange as specified by the Investment Manager at fund set up.
 
 #### Version Shutdown
 A Version Shutdown is an action which allows anyone to shutdown any individual Melon Fund. All trading, investment/subscription and redemption in the specified redemption asset is disabled. Redemptions are fulfilled only by slice, with Investors receiving their pro-rata share of all underlying token assets in the Melon Fund. A redemption by slice on a shutdown Melon Fund remains the responsibility of the Investor. A Version Shutdown is a high-severity action which is only callable by the Melonport governance multi-signature wallet/Technical Council.
@@ -49,13 +49,13 @@ Please refer to the LINK: Exchange section of the documentation.
 Please refer to the LINK: Price Feed section of the documentation.
 
 #### Technical Council
-Technical Council refers to the Melon Protocol governance body which actions governance functions related to critical operational areas of Melon Protocol, such as Price Feed operations, Melon Universe/Asset Registrar maintenance and future protocol development direction. The Technical Council consists of elected MLN token holders. Please refer to the LINK: Governance section of the documentation.
+Technical Council refers to the Melon Protocol governance body which actions governance functions related to critical operational areas of Melon Protocol, such as Price Feed operations, Melon Universe/Asset Registrar maintenance and future protocol development direction. The Technical Council consists of individuals elected by MLN token holders. Please refer to the LINK: Governance section of the documentation.
 
 #### Slice
 A Slice represents a pro-rata share of all individual tokens held in the Melon Fund at the time of redemption request. The Investor will not receive the NAV value of their investment in the investment token, but will receive all individual tokens held by the Melon Fund at the time of redemption transferred to their Investor address.
 
 #### Shares
-An abstraction to facilitate the equitable distribution of ownership of assets in a co-mingled, collective investment fund. Ownership of fund assets is represented by shares in the Melon Fund. The Melon Fund's share price will fluctuate with the market price of the underlying asset tokens held. An Investor buying into the Melon Fund at a specific point in time buys shares at that share price, ensuring that an equitable amount of shares in the Melon Fund are granted. See also Open-Ended Fund structure.
+An abstraction to facilitate the equitable distribution of ownership of assets in a co-mingled, collective investment fund. Ownership of fund assets is represented by shares in the Melon Fund. The Melon Fund's share price will fluctuate with the market price of the underlying asset tokens held. An Investor buying into the Melon Fund at a specific point in time buys shares at that share price, ensuring that an equitable amount of shares in the Melon Fund are granted. See also: Open-Ended Fund structure.
 
 #### Melon Price Feed
 Please refer to the LINK: Price Feed section of the documentation.
@@ -67,7 +67,7 @@ Please refer to the LINK: Asset Registrar section of the documentation.
 Please refer to the LINK: Governance section of the documentation.
 
 #### Melon Risk Engineering
-Risk Engineering is a Melon Fund modular smart contract which facilitates the customization of Investment Manager interaction with the Melon Fund. Currently, the Risk Engineering module can verify if a Make Order or Take Order are permitted given the Order price and the Reference Price form the Price Feed. The Risk Engineering functionality will gain a much richer toolset in forthcoming releases, enabling the Investment Manager to demonstrably constrain Investment Manager actions, embedding an ex ante trade discipline and rigor within the Melon Fund's strategy. Please refer to the LINK: Risk Engineering section of the documentation.
+Risk Engineering is a Melon Fund modular smart contract which facilitates the customization of Investment Manager interaction with the Melon Fund. Currently, the Risk Engineering module can verify if a Make Order or Take Order are permitted given the Order price and the Reference Price from the Price Feed. The Risk Engineering functionality will gain a much richer toolset in forthcoming releases, enabling the Investment Manager to demonstrably constrain Investment Manager actions, embedding an ex ante trade discipline and rigor within the Melon Fund's strategy. Please refer to the LINK: Risk Engineering section of the documentation.
 
 #### Melon Compliance
 Compliance is a Melon Fund modular smart contract which facilitates the customization of Investor interaction with the Melon Fund. Currently, the Compliance module can make specific Investor addresses eligible or not eligible for investment, that is an address is either allowed or disallowed to issue an investment request. Redemptions are currently always allowed. For further information on the Compliance module, please refer to the LINK: Compliance section of the documentation.
@@ -94,7 +94,7 @@ In the Melon Fund context, these duties are carried out by transparent, immutabl
 
 
 #### Audit/Auditor
-Audit is a service normally provided to funds in the traditional investment management industry and is usually a legal requirement which an independent third party must fulfill. Auditors reconcile and compare books and accounts maintained by various counterparties to a fund such as the manager, custodian and administrator, ensuring a correct record-keeping between them. Auditors issue opinions with the weight of their reputation as to the correctness of a fund's state of affairs. In the traditional investment management environment today, a high level of certainty and comfort is provided by multiple independent inspections of fund operations; essentially counterparties monitoring each other. This operational overhead naturally incurs costs which are borne by fund performance. In the Melon Fund and blockchain context, much of this overhead is obviated in that calculations are deterministic and transparent, and the fact that the trade **_IS_** the transfer **_IS_** the settlement **_IS_** the record.  That is to say, there is only on canonical source of truth: the very sending of a transaction/transfer **_IS_** the recording of the transaction, rendering comparison and verification superfluous.
+Auditing is a service normally provided to funds in the traditional investment management industry, and is usually a legal requirement which an independent third party must fulfill. Auditors reconcile and compare books and accounts maintained by various counterparties to a fund such as the manager, custodian and administrator, ensuring correct record-keeping between them. Auditors issue opinions with the weight of their reputation as to the correctness of a fund's state of affairs. In the traditional investment management environment today, a high level of certainty and comfort is provided by multiple independent inspections of fund operations; essentially counterparties monitoring each other. This operational overhead naturally incurs costs which are borne by fund performance. In the Melon Fund and blockchain context, much of this overhead is obviated in that calculations are deterministic and transparent, and the fact that the trade **_IS_** the transfer **_IS_** the settlement **_IS_** the record.  That is to say, there is only on canonical source of truth: the very sending of a transaction/transfer **_IS_** the recording of the transaction, rendering comparison and verification superfluous.
 
 #### Transfer Agent
 The Transfer Agent in the traditional investment management industry is an institution which interacts closely with the Registrar in maintaining records and entries for the ownership of securities. Transfer Agents also ensure that interest- or dividend payments are made to the security owners on time. In the Melon Fund and blockchain context, this duty is inherently embedded in the smart contract/blockchain infrastructure of an asset token ledger, and is carried out as a matter of course.
@@ -106,7 +106,7 @@ The Registrar in the traditional investment management industry is an institutio
 An Order is a specification for a desired asset token trade. The specification of the trade enumerates the buy asset, sell asset, buy quantity and buy price.  Taken together, these things derive an implicit relative price of one asset in terms of the other. Active Orders explicitly created for- and issued to a specific exchange can be seen as a live instruction to transact the trade as specified.
 
 #### Make Order
-Make Orders are Orders for which no matching analog order exists. That is, Make Order provide liquidity to the market for the asset token specified.  Make Orders will not be executed immediately, but must wait for Investor to take the opposite side of the trade.
+Make Orders are Orders for which no matching analog order exists. That is, Make Orders provide liquidity to the market for the asset token specified.  Make Orders will not be executed immediately, but must wait for Investor to take the opposite side of the trade.
 
 #### Take Orders
 Take Orders are Orders which take the opposite side of a currently existing Make Order, agreeing to the specified asset tokens in the specified quantities. Take Orders remove liquidity to the market for the asset token specified.
@@ -142,7 +142,7 @@ Stake is a form of security deposit held by a smart contract and used to incenti
 An Open-Ended Fund is a fund structure which places no upper limit on the amount which can be invested. As capital enters the Open-Ended Fund, new shares are created commensurate with the current NAV of the fund and the amount of capital invested. As investment capital leaves the fund through redemptions, the representative shares are destroyed, commensurate with the redemption amount.
 
 #### Token
-A Token is a symbolic representation of a unitized measure in cryptographic decentralized ledger system. Token ownership (or control) resides exclusively with a cryptographic address and can only be transferred (or interacted with) by the use of the private key belonging to the holding address. The private key is used to create a cryptographically-signed transaction which is submitted to the blockchain network, which in turn executes the instructions specified therein.
+A Token is a symbolic representation of a unitized measure in a cryptographic decentralized ledger system. Token ownership (or control) resides exclusively with a cryptographic address and can only be transferred (or interacted with) by the use of the private key belonging to the holding address. The private key is used to create a cryptographically-signed transaction which is submitted to the blockchain network, which in turn executes the instructions specified therein.
 
 #### ERC20 Standard
 The ERC20 Standard is a standardized token interface which specifies certain functionsand events, which when implemented, allow a token to interact with other tokens and infrastructure smart contracts. See [ERC20 Token Standard](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md).

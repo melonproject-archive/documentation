@@ -8,17 +8,17 @@ Exchanges can be roughly classified as Centralized and Decentralized.
 
 Centralized Exchanges are the exchanges that have been in use since the beginning of asset trading. They are setup and run by third parties and offer the service of trading assets to individual clients. Centralized Exchanges manage accounts for individual investors and their assets, essentially providing a matchmaking and custody service.
 
-Investors must put their full faith and trust in the exchanges operators and the institutions that regulate them. Security considerations exist over the operators' willful mishandling of investor funds, innocent mistakes and poor security measures/procedures which malicious parties exploit as "hacks". Further these exchanges and their investors must also trust internal staff.
+Investors must put their full faith and trust in the exchange's operators and the institutions that regulate them. Security considerations exist over the operators' willful mishandling of investor funds, innocent mistakes and poor security measures/procedures which malicious parties exploit as "hacks". Further, these exchanges and their investors must also trust internal staff.
 
-Investor assets are often stored communally at known address, making them an attractive target for nefarious actors.
+Investor assets are often stored communally at known addresses, making them an attractive target for nefarious actors.
 
 ## Decentralized Exchanges
 
-Decentralized Exchanges (DEX) are an entirely new phenomenon and only exist due to blockchain and smart contract technology. They are characterized by having matching and custody functionality entirely on the blockchain. This means that the decentralized exchange's smart contract itself holds custody of investors' assets. Investors ultimately retain power over their assets, even if not their actual custody. Trades are executed as atomistic swaps, meaning that the two assets involved in the trade are transactionally transferred as a single unit of work, i.e. either both assets transfer successfully, or none.
+Decentralized Exchanges (DEX) are an entirely new phenomenon and only exist due to blockchain and smart contract technology. They are characterized by having matching and custody functionality entirely on the blockchain. This means that the decentralized exchange's smart contract itself holds custody of investors' assets. Investors ultimately retain power over their assets, even if not their actual custody. Trades are executed as atomic swaps, meaning that the two assets involved in the trade are transactionally transferred as a single unit of work, i.e. either both assets transfer successfully, or none.
 
-The DEX's security is only as good as it's smart contract integrity. However, the greater the value transacted over the DEX, the greater the confidence in the DEX's security becomes.
+The DEX's security is only as good as its smart contract's integrity. However, the greater the value transacted over the DEX, the greater the confidence in the DEX's security becomes.
 
-DEXs maintain their order books (list of live buy- and sell orders) either on-chain, off-chain or both as a hybrid. Off-chain order books boast speed and efficiency, while the on-chain variety are more secure.
+DEXs maintain their order books (list of live buy- and sell orders) either on-chain, off-chain, or both as a hybrid. Off-chain order books boast speed and efficiency, while the on-chain variety are more secure.
 
 The Melon Protocol will utilize DEXs for the actual trading infrastructure of Melon Funds. Retaining control of assets within Melon Funds is a defining characteristic of the platform and paramount to its success.
 
@@ -36,13 +36,13 @@ Currently, the Melon Protocol has adapters to integrate the following DEXs:
 - RadarRelay (0x-based)
 - ERCDex (0x-based)
 
-CHECK: Oasis DEX details
+Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
 
-## 0x-based Exchange Details
+## Adapter Function Details
 
-The `fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
+The `Fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
 
-- `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed.
+- `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed. Note that this function will not be implemented for the 0x adapter until 0x Version 2 is released.
 
 - `takeOrder()` Represents implicit agreement with a standing make order on the DEX's order book. The order will be immediately executed.
 
@@ -50,18 +50,12 @@ The `fund.sol` smart contract in the Melon Protocol (the blockchain fund instanc
 
 A single event is emitted by the Exchange Adapter:
 
-- `orderUpdated()` Event to inform other layers (e.g. web page) that the order has been updated in some way.
+- `OrderUpdated()` Event to inform other layers (e.g. web page) that the order has been updated in some way.
 
 The following functions are public view functions:
 
-- `isApproveOnly()` - Constant view function which returns a boolean indicating whether a specific DEX implementation requires asset approve instead of transfer on make orders.
-
 - `getLastOrderId()` - Constant view function which returns the last order Id on a specific exchange.
-
-- `isActive()` - Constant view function which returns a boolean indicating whether a specific order on a specific DEX is `active` at the time of function call.
-
-- `getOwner()` - Constant view function which returns the address of the `Owner` of a (CHECK) specific order on a specific exchange.
 
 - `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
 
-- `getTimestamp()` - Constant view function which returns the timestamp of when a specific order on a specific exchange was made.
+Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar.

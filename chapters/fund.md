@@ -21,9 +21,9 @@ In the legacy financial system, assets are held by custodian banks.
 ## Structs
 The Melon Fund contract specifies the following types as structs:
 
-- Modules - Modules represent non-core fund functionality which implemented as separate contracts which adhere to a standardized interface.
+- Modules - Modules represent non-core fund functionality which are implemented as separate contracts that adhere to a standardized interface.
 
- - Price Feed - Mandatory module which delivers real-time price information to be used internally by the Melon Fund for valuation- and performance calculation purposes.
+ - Price Feed - Mandatory module which delivers real-time price information to be used internally by the Melon Fund for valuation and performance calculation purposes, as well as conducting risk management.
 
  - Compliance - Discretionary module which can specify the Investor interaction with the Melon Fund.
 
@@ -46,7 +46,7 @@ The Melon Fund contract specifies the following types as structs:
 
   - Unclaimed Fees - That portion of accrued Management- and Performance Fees due to the Investment Manager, but not claimed. Unclaimed fees represent a liability which reduces the GAV of the Melon Fund. [Note: In subsequent versions, it may be interesting to implement this: As a condition to claiming fees, the Investment Manager must remedy all current, passive Risk Engineering breaches.]
 
-  - High-watermark - Indicates the highest performance level or NAV within a given period. If the NAV at the time of measurement is less than the previous High-watermark, then the previous High-watermark retains its status. In the current version, this is used to determine if positive fund performance has been achieved since the close previous performance period.
+  - High-watermark - Indicates the highest performance level or NAV within a given period. If the NAV at the time of measurement is less than the previous High-watermark, then the previous High-watermark retains its status. In the current version, this is used to determine if positive fund performance has been achieved since the end of the previous performance period.
 
     [Note:  In subsequent versions, because individual Investors can invest at different and arbitrary times, a blanket treatment of the highwatermark must be reworked so that the performance fee amount can be fairly calculated for each individual investment, depending on the time of subscription.]
 
@@ -92,11 +92,11 @@ The Melon Fund contract specifies the following types as structs:
 
   - expiredAt - Timestamp value determining when a specific order expires.
 
-By default, solidity function types are `internal`
+By default, solidity function types are `public`.
 
 
 ## External Functions
-These functions define how agents external to the Ethereum Blockchain.
+These functions define how agents external to the Ethereum Blockchain interact with the Fund.
 
 #### Administration Functions
 
@@ -120,7 +120,7 @@ These functions define how agents external to the Ethereum Blockchain.
 
   - `cancelRequest()` - Cancels any `Active` Request on the requests array.
 
-  - `redeemAllOwnedAssets()` - Wrapper function for emergencyRedeem(). Function operates independently from an active Price Feed.
+  - redeemAllOwnedAssets() - Wrapper function for emergencyRedeem() which attempts to redeem *all* assets in a slice. Function operates independently from an active Price Feed.
 
 #### Managing Function
 
@@ -149,7 +149,7 @@ Functions Owner or Fund:
 
 #### Fees
 
-  - `quantityHeldInCustodyOfExchange()` - CHECK: not public. Function which calculates and returns the quantity of asset held in custody across exchanges.
+  - quantityHeldInCustodyOfExchange() - Function which calculates and returns the quantity of asset held in custody across exchanges.
 
 
 ## View Functions
