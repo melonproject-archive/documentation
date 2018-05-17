@@ -1,6 +1,5 @@
 # Melon Protocol Reference
 
-## Introduction
 The Melon Protocol intends to present a decentralized, public, permissionless, robust infrastructure for the secure management of crypographic token assets on the Ethereum blockchain. It aims to be a viable, low-cost alternative to the current fund management ecosystem, which has evolved similarly across most legal jurisdictions.
 
 This Melon Protocol is a collection of smart contracts written in the Solidity programming language and deployed to the Ethereum blockchain. Supporting functionality allowing web browsers to freely interact with the protocol is provided by the javascript library, Melon.js.
