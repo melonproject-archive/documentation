@@ -162,7 +162,7 @@ Functions Owner or Fund:
 
   - `performCalculations()` - View function which calculates and returns the GAV, NAV, Management fee, performance fee, unclaimed fees, fees in share terms and the share price.
 
-  - `calcSharePrice()` - View function which calculates sharePrice denominated in the Melon Fund's base asset (CHECK: Quote Asset).
+  - `calcSharePrice()` - View function which calculates sharePrice denominated in the  Fund's quote asset.
 
   - `getModules()` - View function which returns the addresses of the Price Feed, Compliance and Risk Management module contracts.
 
