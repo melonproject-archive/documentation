@@ -6,10 +6,10 @@ However, precisely because such services are permissionless, they must be subjec
 
 Data which is exogenous to the blockchain must be actively provided by a third party. Asset price data is critical to fund management and Melon Funds. Current and accurate price data enables real-time valuation and indispensable context for investment management decisions.  As such, careful attention must be taken to *how* this exogenous data enters the Melon Fund platform.
 
-Independent parties wishing to provide the service of an asset price feed may do so by running software which gathers asset price data (corresponding to the Melon Asset Universe set forth in the Melon Asset Registrar) and reliably feeding this data in a specified format to the Melon Platform.
+Independent parties wishing to provide the service of an asset price feed may do so by running software which gathers asset price data (corresponding to the Melon Asset Universe set forth in the Melon Asset Registrar) and reliably feeding this data in a specified format to the Melon Smart Contracts.
 
 ## Operator Staking
-Prospective Price Feed Operators (candidates) must offer a deposit or "stake" in Melon Tokens (MLN). Individual Price Feed Operators are then "selected" by the Melon Platform solely on the level of their stake. The staked MLN is held securely in custody by a smart contract which also determines which of the candidates is actually feeding price data to the Melon Fund Platform.
+Prospective Price Feed Operators (candidates) must offer a deposit or "stake" in Melon Tokens (MLN). Individual Price Feed Operators are then "selected" by the Melon Smart Contracts solely on the level of their stake. The staked MLN is held securely in custody by a smart contract which also determines which of the candidates is actually feeding price data to the Melon Fund Platform.
 
 Price Feed Operator selection occurs solely on the basis of the relative amount of MLN staked, with the highest staking candidates awarded the ability to submit price data.
 
