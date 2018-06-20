@@ -15,7 +15,7 @@ Once the Melon Fund is set up, it will be open for investment from Investors. Wh
 The critical point about a Melon Fund is that Investors retain control of their investment in the fund, while delegating asset management activity to the Investment Manager, who has the fine-grained trade and asset management authority, but no ability to remove asset tokens from the segregated safety of the Melon Fund's smart contact custody.
 
 ## Fund Interaction
-The Investment Manager in the capacity of  `owner` of the Melon Fund smart contract can as the ability to interact with the following smart contract functions:
+The Investment Manager in the capacity of  `owner` of the Melon Fund smart contract can as the ability to interact with the following smart contract functions: 
 
 - `enableInvestment()`
 

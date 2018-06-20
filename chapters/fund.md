@@ -112,7 +112,7 @@ These functions define how agents external to the Ethereum Blockchain interact w
 
   - `executeRequest()` - Executes a specific `Active` investment or redemption Request on the requests array in a way that minimizes potential information advantages of the Investor.
 
-  - `cancelRequest()` - Cancels any `Active` Request on the requests array.
+  - `cancelRequest()` - Cancels any `Active` Request on the requests array. 
 
   - redeemAllOwnedAssets() - Wrapper function for emergencyRedeem() which attempts to redeem *all* assets in a slice. Function operates independently from an active Price Feed.
 
