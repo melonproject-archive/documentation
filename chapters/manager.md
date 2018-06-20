@@ -21,10 +21,6 @@ The Investment Manager in the capacity of  `owner` of the Melon Fund smart contr
 
 - `disableInvestment)()`
 
-- `enableRedemption()`
-
-- `disableRedemption()`
-
 - `shutDown()` - Fund shutdown
 
 - `callOnExchange()` - Make-, Take-, and Cancel Order

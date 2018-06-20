@@ -36,18 +36,6 @@ Conditions:
 - If Compliance criteria has been set with the Compliance Module by the Investment Manager, a check against these criteria is run to ensure that `isInvestmentPermitted() == true`.
 
 
-#### `requestRedemption()`
-
-Investors redeem assets from the Melon Fund by calling this function. Investors will redeem in the same asset with which was initially invested (ETH or MLN).
-
-Conditions for successful redemption:
-
--> shouldn't the very first thing we do be to check if msg.sender is actually a current investor????
-
-- The Melon Fund must not be in the state: `isShutDown == true`.
-- The asset in which the redemption request is being made is currently permitted: `isRedeemAllowed[redemptionAsset] == true`
-- If Compliance criteria has been set with the Compliance Module by the Investment Manager, a check against these criteria is run to ensure that `isRedemptionPermitted() == true`.
-
 #### `executeRequest()`
 
 This function is called to process an active request.  The function enforces conditions and delays such that no party can materially exploit asymmetric informational advantages inherent in transparent decentralized exchanges.
@@ -74,7 +62,7 @@ Conditions for successful request cancellation:
 
 #### `redeemAllOwnedAssets()`
 
-At their discretion, Investors may redeem their pro-rata share of the Melon Fund's underling individual positions. Investors will receive each individual token in the proportionate quantity. This is also called "redemption by Slice" or "redemption in kind". This action is an alternative to redeeming in the investment asset and can be used when the fund has been shut down, liquidity is low or when the underlying tokens themselves are desired.
+Investors may redeem their pro-rata share of the Melon Fund's underling individual positions. Investors will receive each individual token in the proportionate quantity. This is also called "redemption by Slice" or "redemption in kind". This action can also be used when the fund has been shut down, liquidity is low or when the underlying tokens themselves are desired.
 
 Condition for successful Slice redemption:
 

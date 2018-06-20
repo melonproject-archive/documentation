@@ -104,17 +104,11 @@ These functions define how agents external to the Ethereum Blockchain interact w
 
   - `disableInvestment)()` - `Owner` is able to disable subscription with specified assets. When executed, the Melon Fund will reject subscription requests denominated in the assets specified.
 
-  - `enableRedemption()` -`Owner` is able to enable redemption in specified assets. When executed, the Melon Fund will allow redemption requests denominated in the assets specified.
-
-  - `disableRedemption()` - `Owner` is able to disable redemption in specified assets. When executed, the Melon Fund will reject redemption requests denominated in the assets specified.
-
   - `shutDown()` - `Owner` is able to shut the Melon Fund instance down.
 
 #### Participation Functions
 
   - `requestInvestment()` - Creates a subscription Request specifying the subscription asset, the subscription asset quantity and the quantity of shares to be received. The request is added to the requests array with a status of `Active`.
-
-  - `requestRedemption()` - Creates a redemption Request specifying the redemption asset, the redemption asset quantity and the quantity of shares to be redeemed. The request is added to the requests array with a status of `Active`.
 
   - `executeRequest()` - Executes a specific `Active` investment or redemption Request on the requests array in a way that minimizes potential information advantages of the Investor.
 
