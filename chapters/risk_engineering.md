@@ -86,6 +86,81 @@ In relation to hedge funds, and in particular those that claim absolute return o
 [2]   ([**Drawdown**](https://www.investopedia.com/university/hedge-fund/risks.asp))
 Another measure of a fund's risk is maximum [drawdown](https://www.investopedia.com/terms/d/drawdown.asp). Maximum drawdown measures the percentage drop in cumulative return from a previously reached high. This metric is good for identifying funds that preserve wealth by minimizing drawdowns throughout up/down cycles, and gives an analyst a good indication of the possible losses that this fund can experience at any given point in time. Months to recover, on the other hand, gives a good indication of how quickly a fund can recuperate losses. Take the case where a hedge fund has a maximum drawdown of 4%, for example. If it took three months to reach that maximum drawdown, as investors, we would want to know if the returns could be recovered in three months or less. In some cases where the drawdown was sharp, it should take longer to recover. The key is to understand the speed and depth of a drawdown with the time it takes to recover these losses. Do they make sense given the strategy?
 
+
+## Policy Manager
+The Policy Manager is a separate smart contract intended to store and manage policies in a generalized way. A Policy represents some kind of constraint or restriction on a Melon Fund's ability to execute an action. Risk Engineering Policies restrict the fund's ability to submit new orders or take existing orders from exchanges based on the fulfillment of specified criteria. A Policy may not be restricted to the Risk domain, and may be applicable to other fund actions, such as subscriptions where investor compliance is concerned.
+
+The Melon Fund smart contract inherits from Policy Manager so each Fund is its own Policy Manager.
+
+The Policy Manager defines a struct, Entry, containing an array of pre- Policies and an array of post- Policies. The Policy Manager also contains a mapping, policies, which maps byte4 to Entry
+
+## Policies
+Polices are individual smart contracts which define rule or set of rules to be compared to the state of the Melon Fund. Policies simply assess the current state of the Melon Fund and resolve to a boolean decision, whether the action may be executed or not, returning TRUE for allowed actions and FALSE for disallowed actions. The Melon Fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the validity of the presented behavior or action.
+
+## Pre- and Post-Conditionality
+Policies are intended to be rules; they are intended to permit or prevent specific behavior or action depending on the *state* as compared to specified criteria.
+
+Some Policies, due to the nature of the data required, can be immediately resolved based on the *current* state. The resolution of the Policy result is trivial because all data needed is at hand and must nod be derived or calculated. Such Policies can be defined as "pre-condition" Policies.
+
+Other Policies may need to understand the consequence of the behavior or action before the logic can assess its validity relative to the defined rule. To do this, the result of the action must be derived or calculated, essentially asking, "What *will* the state be if this action is executed?" Such Policies can be defined as "post-condition" Policies.
+
+On the blockchain and in smart contracts, we can use a fortunate side-effect of the process of mining and block finalization to help determine the validity of post-condition Policies. With post-condition Policies, the action or behavior is executed with the smart contract logic and the changed (but not yet finalized or mined) state is assessed against the logic and defined parameters of the post-condition Policy. In the case where this new state complies with the logic and criteria of the Policy, the action is allowed, meaning the smart contract execution is allowed to run to completion, the block is eventually mined and this new compliant state is finalized in that mined block. In the case where the new state does not comply with the logic and criteria of the Policy, the action is disallowed and the revert() function is called, stopping execution and discarding (or rolling back) all state changes. In calling the revert() function, gas is consumed to arrive at the reference state, but any unused gas is returned to the caller as the reference state is discarded.
+
+### Policy Manager Functions
+
+`function register(bytes4 sign, address ofPolicy) public`
+
+
+
+- The `register()` function includes the Policy address and the function signature of the specific function call where the Policy will be evaluated. It pushes the Policy to the pre- or post- Policy array depending on the position (pre- or post-) defined by the Policy itself. See Pre- and Post-Conditionality above.
+
+`function PoliciesToAddresses(Policy[] storage _policies) internal view returns (address[])`
+
+  - The `PoliciesToAddresses()` function returns an array of addresses of all registered Policies. It is an internal helper function which returns only the addresses of Policy objects.
+
+`function getPoliciesBySig(bytes4 sig) public view returns (address[], address[])`
+
+- The getPoliciesBySig() function returns two arrays of Policy addresses (pre- and post- Policies, respectively) given a specific function signature.
+
+`function preValidate(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) view public`
+
+-  The function preValidate() calls the validate() function with a signature-filtered array of pre-Policies to be applied to the specific function call.
+
+`function postValidate(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) view public`
+
+-  The function postValidate() calls the validate() function with a signature-filtered array of post-Policies to be applied to the specific function call.
+
+`function validate(bytes4 sig, Policy[] storage aux, address[5] addresses, uint[3] values, bytes32 identifier) view internal`
+
+- The function validate() applies, for a specific function call, all Policies registered for that specific function call. Pre- or post- Polices are accommodated by the respective calling functions.
+
+### Currently Implemented Policies
+
+All Policies must implement `rule()` as defined by the signature:
+
+`function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
+
+
+
+Maximum Positions
+- On construction of the Policy, the maximum number of positions is defined for the Melon Fund. In counting the number of existing fund positions, open make orders for individual tokens are counted as a position.  The rationale is that the *intent* is to have token specified in the make order as a constituent position of the fund and that the order may be filled at any point in time until it is canceled. A canceled make order would decrement the position count, if that token is not otherwise held by the fund. Maximum Positions is a post-condition policy due to how the fund counts its own holdings internally, being able to consider open make orders. Rationale: to limit over-diversification in a fund.
+
+Maximum Concentration
+- On construction of the Policy, the maximum concentration percentage of individual positions is defined for the Melon Fund. Concentration percentage is the value-weighted (in fund base token terms) proportion of a token to the total value of the fund. Open make order positions should be included in the concentration calculation, as the intent is to build or add to such a position, even though the order is not currently fulfilled. Rationale: to limit fund exposure to any individual token.
+
+Asset Whitelist
+- Provides the ability to create an inclusive list of tokens (addresses) which are permitted to be held by the Melon Fund. Auxiliary functionality to set a maximum number of list members and to freeze the list is also provided. Rationale: to restrict investment to a defined universe of tokens, provable to investors, regulators, et.al.
+
+Asset Blacklist
+- Provides the ability to create an exclusive list of tokens (addresses) which are not permitted to be held by the Melon Fund. Auxiliary functionality to set a maximum number of list members and to freeze the list is also provided. Rationale: to restrict investment, excluding a defined universe of tokens, provable to investors, regulators, et.al.
+
+Price Tolerance
+- On construction of the Policy a percentage is set which is maximum tolerance that a take- or make-order can deviate (to the financial detriment of the investor) from the then current, valid (recent) market price as provided by the price feed. Rationale: to ensure fair asset price transactions for the investor(s) relative to the market price as determined by the price feed.
+
+
+
+
+
 ## Rule set identification and specification
 
 ### Ex ante risk engineering
