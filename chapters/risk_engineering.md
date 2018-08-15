@@ -295,18 +295,18 @@ This rule could be implemented by an Investment Manager to cap the overall AuM o
 
 This table summarizes the Risk Engineering rule set and their applicability to specific chain implementation. All Risk Engineering rules are implemented/configured at the discretion of the Investment Manager (IM) at the time of fund (smart contract) creation. The fund itself should be seen as the bare minimum functionality to support required fund, performance and share accounting functionality. Risk Engineering functionality should be viewed as optional plugins for the fund to provide simplified ability to steer the construction of the fund and its underlying holdings.
 
-| Risk Engineering Rule | Ethereum | MelonChain | Parameters | Mutable ex post|
-| -------- | -------- | -------- | -------- | -------- |
-| 1. Max Positions     |    ✓     |     ✓     | positions : integer (>0)| No
-| 2. Whitelist     |    ✓     |     ✓     | addr : address | Delete-only
-| 3. Blacklist     |    ✓     |     ✓     | addr : address | Append-only
-| 4. Max Concentration (%)     | ✓     | ✓     |percent : integer   ∈ [1,100]| No
-| 5. Lock Up     | ✓     | ✓     | blocks : integer |No
-| 6. Best Price Execution Tolerance (%)     | ✓     | ✓     | percent : integer ∈ [1,100]| No
-| 7. Turnover (# of trades)    |  ✓    | ✓     | trades : integer (>0), period : {hour, day, week, ?blocks}| No
-| 8. Turnover (volume of trades)     |  ✓    | ✓     | trade volume : integer (>0), period : {hour, day, week, ?blocks}| No
-| 9. Market Cap Range     | ✓     | ✓     |lower : integer (>0), upper : integer (>0) | No
-| 10. Asset Vola Threshold     | ✓     | ✓     |percent : integer ∈ [1,100]| No
-| 11. Portfolio Vola Threshold | ✓     | ✓     |percent : integer ∈ [1,100]| No
-| 12. Liquidity     | ✓     | ✓     |lower : integer (>0), upper : integer (>0) | Yes
-| 13. Asset <-> Portfolio Correlation     | ✓     | ✓     | integer ∈ [-1,1] | No
+| Risk Engineering Rule | Parameters | Mutable ex post|
+| -------- | -------- | -------- |
+| 1. Max Positions     | positions : integer (>0)| No
+| 2. Whitelist     | addr : address | Delete-only
+| 3. Blacklist     | addr : address | Append-only
+| 4. Max Concentration (%)     | percent : integer   ∈ [1,100]| No
+| 5. Lock Up     |  blocks : integer |No
+| 6. Best Price Execution Tolerance (%)     | percent : integer ∈ [1,100]| No
+| 7. Turnover (# of trades)    | trades : integer (>0), period : {hour, day, week, ?blocks}| No
+| 8. Turnover (volume of trades)     | trade volume : integer (>0), period : {hour, day, week, ?blocks}| No
+| 9. Market Cap Range     | lower : integer (>0), upper : integer (>0) | No
+| 10. Asset Vola Threshold     |percent : integer ∈ [1,100]| No
+| 11. Portfolio Vola Threshold |percent : integer ∈ [1,100]| No
+| 12. Liquidity     |lower : integer (>0), upper : integer (>0) | Yes
+| 13. Asset <-> Portfolio Correlation     | integer ∈ [-1,1] | No
