@@ -332,7 +332,7 @@ All Policies must implement `rule()` as defined by the signature:
 - Rationale: to limit fund exposure to any individual token.
 
 ### Asset Whitelist
-- Provides the ability to create an inclusive list of tokens (addresses) which are permitted to be held by the Melon Fund. Auxiliary functionality to set a maximum number of list members and to freeze the list is also provided.
+- Provides the ability to create an inclusive list of tokens (addresses) which are permitted to be held by the Melon Fund. The asset list is defined at the time of policy contract construction. Asset addresses can, however be subsequently removed from a whitelist by the contract owner.
 
 - Asset Whitelist is a pre-condition policy due to the fact that an asset's existence in the whitelist can be confirmed prior to any transaction and does not require post-transaction state comparison.
 
@@ -346,14 +346,6 @@ All Policies must implement `rule()` as defined by the signature:
 
     The list containing addresses of whitelisted assets.
 
-  - `bool private frozen`
-
-    A variable defining the state of the ability to whitelist new assets.
-
-  - `uint private cap`
-
-    A variable defining the maximum number of whitelisted assets.
-
 
 - The following functions are available on Asset Whitelist:
 
@@ -361,36 +353,31 @@ All Policies must implement `rule()` as defined by the signature:
 
     Adds the asset address as a member of the list. Can only be called by the contract owner, i.e. the fund manager.
 
-  - `function exists(address _asset) public view returns (bool)`
+  - `function isMember(address _asset) public view returns (bool)`
 
-    Checks whether an asset is a member of the list.
+    Verifies that an asset is a member of the list.
 
-  - `function freeze() external pre_cond(isOwner())`
+  - `function getMembers() external view returns (address[])`
 
-    Permanently freezes the list members. Can only be called by the contract owner, i.e. the fund manager.
+    Returns an array of all list member asset addresses.
 
-  - `function isFrozen() public view returns (bool)`
+  - `function getMemberCount() external view returns (uint)`
 
-    Returns the `frozen` state of the list.
+    Returns the current number of asset address list members.
 
-  - `function getList() external view returns (address[])`
+  - `function getAssetIndex(address _asset) public view returns (uint)`
 
-    Returns an array of all listed asset addresses.
+    Used by the policy as an auxiliary function to maintain the asset list pertaining to a removal from the list.
 
-  - `function getNumList() external view returns (uint)`
+  - `function removeFromWhitelist(address _asset) external pre_cond(isOwner())`
 
-    Returns the current number of assets specified on the list.
-
-  - `function getCap() external view returns (uint)`
-
-    Returns the set maximum number of assets for the fund's investment universe.
-
+    Removes the specified asset address from the list. Can only be called by the contract owner, i.e. the fund manager. This function is provided to give the ability to disallow a previously allowed asset, should the asset prove, ex post, unfit for investment by the fund due to technical, performance or other reasons. NOTE: An asset address cannot be added to this list, that is, the Melon Fund's investable universe cannot be expanded once defined.
 
 
 - Rationale: to restrict investment to a defined universe of tokens, provable to investors, regulators, et.al.
 
 ### Asset Blacklist
-- Provides the ability to create an exclusive list of tokens (addresses) which are not permitted to be held by the Melon Fund. Auxiliary functionality to set a maximum number of list members and to freeze the list is also provided.
+- Provides the ability to create an exclusive list of tokens (addresses) which are not permitted to be held by the Melon Fund. The asset list is defined at the time of policy contract construction. Asset addresses can, however be subsequently added to a blacklist by the contract owner.
 
 - Asset Blacklist is a pre-condition policy due to the fact that an asset's existence in the blacklist can be confirmed prior to any transaction and does not require post-transaction state comparison.
 
@@ -404,14 +391,6 @@ All Policies must implement `rule()` as defined by the signature:
 
     The list containing addresses of blacklisted assets.
 
-  - `bool private frozen`
-
-    A variable defining the state of the ability to blacklist new assets.
-
-  - `uint private cap`
-
-    A variable defining the maximum number of blacklisted assets.
-
 
 - The following functions are available on Asset Blacklist:
 
@@ -419,29 +398,22 @@ All Policies must implement `rule()` as defined by the signature:
 
     Adds the asset address as a member of the list. Can only be called by the contract owner, i.e. the fund manager.
 
-  - `function exists(address _asset) public view returns (bool)`
+  - `function isMember(address _asset) public view returns (bool)`
 
-    Checks whether an asset is a member of the list.
+    Verifies that an asset is a member of the list.
 
-  - `function freeze() external pre_cond(isOwner())`
+  - `function getMembers() external view returns (address[])`
 
-    Permanently freezes the list members. Can only be called by the contract owner, i.e. the fund manager.
+    Returns an array of all list member asset addresses.
 
-  - `function isFrozen() public view returns (bool)`
+  - `function getMemberCount() external view returns (uint)`
 
-    Returns the `frozen` state of the list.
+    Returns the current number of asset address list members.
 
-  - `function getList() external view returns (address[])`
+  - `function addToBlacklist(address _asset) external pre_cond(isOwner())`
 
-    Returns an array of all listed asset addresses.
+    Adds the specified asset address to the list. Can only be called by the contract owner, i.e. the fund manager. This function is provided to give the ability to explicitly disallow investment in an asset, should the asset prove, ex post, unfit for investment by the fund due to technical, performance or other reasons. NOTE: An asset address cannot be removed from this list, that is, the Melon Fund's universe of non-investable assets cannot be reduced once defined.
 
-  - `function getNumList() external view returns (uint)`
-
-    Returns the current number of assets specified on the list.
-
-  - `function getCap() external view returns (uint)`
-
-    Returns the set maximum number of assets for the fund's excluded investment universe.
 
 - Rationale: to restrict investment, excluding a defined set of tokens, provable to investors, regulators, et.al.
 
