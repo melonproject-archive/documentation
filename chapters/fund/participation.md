@@ -1,6 +1,6 @@
 # Participation
 
-## participation.sol
+## Participation.sol
 
 Description
 
@@ -28,11 +28,17 @@ Structs
 Enums
 None.
 
+
 Public State Variables
 
 `mapping (address => Request) public requests`
 
+A mapping which assigns an investor's address to a `Request` struct.
+
+
 `uint public SHARES_DECIMALS`
+
+An integer which specifies the number of decimals or divisibility of a single share.
 
 
 
@@ -40,157 +46,53 @@ Public Functions
 
 `function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external`
 
+This function ensures that the fund is not shutdown, then populates the `Request` struct and adds this to the `requests` mapping corresponding to the `msg.sender`.  This function also sets `SHARE_DECIMALS` to 18.
 
-// TODO: implement and use below modifiers
-// pre_cond(compliance.isInvestmentPermitted(msg.sender, giveQuantity, shareQuantity))    
-// Compliance Module: Investment permitted
-{
-    require(!hub.isShutDown());
-    requests[msg.sender] = Request({
-        investmentAsset: investmentAsset,
-        investmentAmount: investmentAmount,
-        requestedShares: requestedShares,
-        timestamp: block.timestamp,
-        atUpdateId: CanonicalPriceFeed(routes.priceSource).updateId() // TODO: can this be abstracted away?
-    });
-    SHARES_DECIMALS = 18;
-}
 
 `function cancelRequest() external`  
 
-{
-    delete requests[msg.sender];
-}
+This function removes the request from the `requests` mapping.
+
 
 `function executeRequest() public`  
 
-{
-        executeRequestFor(msg.sender);
-    }
+This function calls `executeRequestFor()` on behalf of `msg.sender`.
+
 
 `function executeRequestFor(address requestOwner) public`
-        // TODO: implement and use below modifiers
-        // pre_cond(
-        //     Shares(routes.shares).totalSupply() == 0 ||
-        //     (
-        //         now >= add(requests[id].timestamp, priceSource.getInterval()) &&
-        //         priceSource.updateId() >= add(requests[id].atUpdateId, 2)
-        //     )
-        // )
-    {
-        require(!hub.isShutDown());
-        PolicyManager(routes.policyManager).preValidate(bytes4(sha3("executeRequestFor(address)")), [requestOwner, address(0), address(0), address(0), address(0)], [uint(0), uint(0), uint(0)], "0x0");
-        Request memory request = requests[requestOwner];
-        require(request.requestedShares > 0);
-        bool isRecent;
-        (isRecent, , ) = CanonicalPriceFeed(routes.priceSource).getPriceInfo(address(request.investmentAsset));
-        require(isRecent);
 
-        // sharePrice quoted in QUOTE_ASSET and multiplied by 10 ** fundDecimals
-        uint costQuantity; // TODO: better naming after refactor (this variable is how much the shares wanted cost in total, in the desired payment token)
-        costQuantity = mul(request.requestedShares, Accounting(routes.accounting).calcSharePriceAndAllocateFees()) / 10 ** SHARES_DECIMALS; // By definition quoteDecimals == fundDecimals
-        // TODO: maybe allocate fees in a separate step (to come later)
-        if(request.investmentAsset != address(Accounting(routes.accounting).QUOTE_ASSET())) {
-            bool isPriceRecent;
-            uint invertedInvestmentAssetPrice;
-            uint investmentAssetDecimal;
-            (isPriceRecent, invertedInvestmentAssetPrice, investmentAssetDecimal) = CanonicalPriceFeed(routes.priceSource).getInvertedPriceInfo(request.investmentAsset);
-            // TODO: is below check needed, given the recency check a few lines above?
-            require(isPriceRecent);
-            costQuantity = mul(costQuantity, invertedInvestmentAssetPrice) / 10 ** investmentAssetDecimal;
-        }
-
-        if (
-            // isInvestAllowed[request.investmentAsset] &&
-            costQuantity <= request.investmentAmount
-        ) {
-            delete requests[requestOwner];
-            require(ERC20(request.investmentAsset).transferFrom(requestOwner, address(routes.vault), costQuantity));
-            // Allocate Value
-            Shares(routes.shares).createFor(requestOwner, request.requestedShares);
-            // // TODO: this should be done somewhere else
-            if (!Accounting(routes.accounting).isInAssetList(request.investmentAsset)) {
-                Accounting(routes.accounting).addAssetToOwnedAssets(request.investmentAsset);
-            }
-        } else {
-            revert(); // Invalid Request or invalid giveQuantity / receiveQuantity
-        }
-    }
-
-    /// @dev "Happy path" (no asset throws & quantity available)
-    /// @notice Redeem all shares and across all assets
-    `function redeem() public`
-
-    {
-        uint ownedShares = Shares(routes.shares).balanceOf(msg.sender);
-        redeemQuantity(ownedShares);
-    }
-
-    /// @notice Redeem shareQuantity across all assets
-    `function redeemQuantity(uint shareQuantity) public`
+This function:
+  ensures that the fund is not shutDown,
+  ensures that the investor address is permitted to carry out the action,
+  ensures the quantity of requested shares is greater than zero,
+  calculates the cost of the share quantity requested (in quote asset terms),
+  ensures that the cost of the share quantity does not exceed the requested share quantity,
+  maintains the `requests` mapping by removing the current `Request`,
+  transfers the subscription tokens to the fund's vault,
+  creates and transfers/allocates the commensurate number of shares for the subscription to the investor,
+  determines if the asset is currently held by the fund; if not, the asset is added to the fund's owned assets,
+  reverts all work if any permission, quantity, asset or address are determined to be invalid.
 
 
-    {
-        address[] memory assetList;
-        (, assetList) = Accounting(routes.accounting).getFundHoldings();
-        require(redeemWithConstraints(shareQuantity, assetList)); //TODO: assetList from another module
-    }
+`function redeem() public`
 
-    // NB1: reconsider the scenario where the user has enough funds to force shutdown on a large trade (any way around this?)
-    // TODO: readjust with calls and changed variable names where needed
-    // @dev Redeem only selected assets (used only when an asset throws)
-    `function redeemWithConstraints(uint shareQuantity, address[] requestedAssets) public returns (bool)`
+This function determines the quantity of shares owned by `msg.sender` and calls `redeemQuantity()`. A share-commensurate quantity of all token assets in the fund are transferred to `msg.sender`, i.e. the investor.
 
 
-    {
-        Accounting accounting = Accounting(routes.accounting);
-        Shares shares = Shares(routes.shares);
-        Vault vault = Vault(routes.vault);
-        require(shares.balanceOf(msg.sender) >= shareQuantity);
-        address ofAsset;
-        uint[] memory ownershipQuantities = new uint[](requestedAssets.length);
-        address[] memory redeemedAssets = new address[](requestedAssets.length);
+`function redeemQuantity(uint shareQuantity) public`
 
-        // Check whether enough assets held by fund
-        for (uint i = 0; i < requestedAssets.length; ++i) {
-            ofAsset = requestedAssets[i];
-            require(accounting.isInAssetList(ofAsset));
-            for (uint j = 0; j < redeemedAssets.length; j++) {
-                if (ofAsset == redeemedAssets[j]) {
-                    revert();
-                }
-            }
-            redeemedAssets[i] = ofAsset;
-            uint quantityHeld = accounting.assetHoldings(ofAsset);
-            if (quantityHeld == 0) continue;
+This function allows the investor to redeem a specific quantity of shares held by the investor.
 
-            // participant's ownership percentage of asset holdings
-            ownershipQuantities[i] = mul(quantityHeld, shareQuantity) / shares.totalSupply();
 
-            // TODO: do we want to represent this as an error and shutdown, or do something else? See NB1 scenario above
-            // CRITICAL ERR: Not enough fund asset balance for owed ownershipQuantitiy, eg in case of unreturned asset quantity at address(exchanges[i].exchange) address
-            // if (uint(ERC20(ofAsset).balanceOf(address(vault))) < ownershipQuantities[i]) {
-            //     isShutDown = true; // TODO: external call most likely
-            //     // emit ErrorMessage("CRITICAL ERR: Not enough quantityHeld for owed ownershipQuantitiy");
-            //     return false;
-            // }
-        }
+`function redeemWithConstraints(uint shareQuantity, address[] requestedAssets) public returns (bool)`
 
-        shares.destroyFor(msg.sender, shareQuantity);
-
-        // Transfer owned assets
-        for (uint k = 0; k < requestedAssets.length; ++k) {
-            ofAsset = requestedAssets[k];
-            if (ownershipQuantities[k] == 0) {
-                continue;
-            } else {
-                vault.withdraw(ofAsset, ownershipQuantities[k]);
-                require(ERC20(ofAsset).transfer(msg.sender, ownershipQuantities[k]));
-            }
-        }
-        return true;
-    }
-}
+This function:
+  ensures that the requested redemption share quantity is less than or equal to the share quantity owned by the investor (`msg.sender`),
+  ensures that individual asset tokens are only redeemed once,
+  maintains parity between `requestedAssets[]` array and the `redeemedAssets[]` array,
+  calculates the proportionate quantity of each token asset owned by the investor (`msg.sender`) based on share quantity,
+  destroys the investor's shares,
+  safely transfers all token assets in the correct quantities to the investor's address.
 
 
 Document factory?
