@@ -1,6 +1,6 @@
 # Fees
 
-##### General
+### General
 
 Fees are charges levied against a Melon fund's assets for:
   - management services rendered in the form of a Management Fees
@@ -22,26 +22,30 @@ The Management Fee calculation business logic is fully encapsulated by the Manag
 
 First, the time-weighted, pre-dilution share quantity is calculated:
 
+&nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PD_{f}$ = ($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$ = ($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)" />
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SMF_{e} =\frac{(PD_{f})(S_{e-1})}{S_{e-1}-PD_{f}}$
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e} =\frac{(PD_{f})(S_{e-1})}{S_{e-1}-PD_{f}}$"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PD_{f}$ = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SMF_{e}$ = number shares to create to compensate Management Fees earned during the conversion period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$S_{e-1}$ = shares outstanding at the beginning of the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$t_{e}$ = number of seconds elapsed since previous conversion event
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{e-1}$"/> = shares outstanding at the beginning of the conversion period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$t_{y}$ = number of seconds in a year ( = 60 * 60 * 24 * 365)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$f_{m}$ = Management Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 * 60 * 24 * 365)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
 
 
 ##### Performance Fees
@@ -60,44 +64,46 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$HWM_{MP}$ = $GAV_{MF}$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;$GAV_{MF}$ > $HWM_{MP-1}$
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= $HWM_{MP-1}$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;$GAV_{MF}$ ≤ $HWM_{MP-1}$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}
+GAV_{MF}, & GAV_{MF} >  HWM_{MP-1}\\
+HWM_{MP-1}, & GAV_{MF} \leq  HWM_{MP-1}
+\end{cases}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$P_{MP}$ = $GAV_{MF}$ - $HWM_{MP-1}$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp; $GAV_{MF}$ > $HWM_{MP-1}$
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if $GAV_{MF}$ ≤ $HWM_{MP-1}$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}
+GAV_{MF}-HWM_{MP-1}, & GAV_{MF} >  HWM_{MP-1}\\
+0, & GAV_{MF} \leq  HWM_{MP-1}
+\end{cases}"/>
 
 &nbsp;
 
-
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PD_{f} =\frac{(P_{MP})(S_{e-1} + SMF_{e})^2 (f_{p})}{GAV}$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f} =\frac{(P_{MP})(S_{e-1} + SMF_{e})^2 (f_{p})}{GAV}$"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SPF_{e} =\frac{(PD_{f})(S_{e-1} + SMF_{e})}{(S_{e-1} + SMF_{e})-PD_{f}}$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e} =\frac{(PD_{f})(S_{e-1} + SMF_{e})}{(S_{e-1} + SMF_{e})-PD_{f}}$"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PD_{f}$ = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$P_{MP}$ = performance for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$HWM_{MP}$ = high-water mark for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$GAV$ = current Gross Asset Value per share
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current Gross Asset Value per share
 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$GAV_{MF}$ = current Gross Asset Value per share  net of Management Fee
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{MF}$"/> = current Gross Asset Value per share  net of Management Fee
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$f_{p}$ = Performance Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$S_{e-1}$ = shares outstanding after adding Management Fee shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{e-1}$"/> = shares outstanding after adding Management Fee shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$SMF_{e}$ = number shares to create to compensate Management Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
 
-&nbsp;&nbsp;&nbsp;&nbsp;$SPF_{e}$ = number shares to create to compensate Performance Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
 
 
 While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current accrued performance fees prior to redemption.
