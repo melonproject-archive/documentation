@@ -24,7 +24,7 @@ First, the time-weighted, pre-dilution share quantity is calculated:
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$ = ($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)" />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$ = ($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/> 
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 
