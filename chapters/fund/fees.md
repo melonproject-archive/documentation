@@ -3,20 +3,28 @@
 ### General
 
 Fees are charges levied against a Melon fund's assets for:
-  - management services rendered in the form of a Management Fees
-  - fund performance achieved in the form of Performance Fees.
+  - management services rendered, in the form of Management Fees
+  - fund performance achieved, in the form of Performance Fees.
 
-The Management Fee and Performance Fee are each represented by an individual contract. The business logic and functionality of each fee is defined within the respective contract. The contract will interact with the various components of the fund to calculate and return the quantity of shares to create.  This quantity is then added to the Manager address balance and to the total supply balance.  
+Legacy investment funds are typically run as legal vehicle; a business with income and expenses. As a traditional fund incurs expenses (not only those listed above, but others like administration-, custody-, directors-, audit fess), traditional funds must liquidate assets to cash or pay the expenses out of cash held by the fund. This necessarily reduces the assets of the fund and incurs further trading costs.
 
-The Fee Manager is a spoke managing the individual fee contracts which have been configured for the Melon fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
+Melon funds employ a novel and elegant solution: Instead of using cash, or liquidating positions to pay fees, the Melon fund smart contract itself calculates and creates new shares (or share fractions), allocating them to the investment manager's own account holdings within the fund as payment.
 
-Fees are calculated and allocated when fund actions such as subscribe, redeem or claim fees are executed by a participant. Calling rewardAllFees() will iterate over the array of registered fees in the fee manager, calling each fee's fee-calculation business logic to get the quantity of shares, which are then also created and allocated to the manager's balance, as well as increasing the total supply of fund shares.
+At that point, the investment manager can continue holding an increased number of shares in their own fund, or redeem the shares to pay their own operating costs, expand their research activities or whatever else they deem appropriate. The Melon Fund smart contract autonomously and verifiably maintains the shareholder accounting impact in a truly reliable and transparent manner.
+
+Paying fees in this manner has a few interesting side-effects: Assets do not leave the fund, as would a cash payment. There are no unnecessary trading or cash management transactions. Investors and managers have access to real-time fee accrual metrics. Finally, the incentives to the manager are reinforced beyond a cash performance fee by being paid in the currency that is their own product.
+
+The Management Fee and Performance Fee are each represented by an individual contract. The business logic and functionality of each fee is defined within the respective contract. The contract will interact with the various components of the fund to calculate and return the quantity of shares to create. This quantity is then added to the Manager address balance and to the total supply balance.  
+
+The Fee Manager component manages the individual fee contracts which have been configured for the Melon fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
+
+Fees are calculated and allocated when fund actions such as subscribe, redeem or claim fees are executed by a participant. Calling `rewardAllFees()` will iterate over the array of registered fees in the fee manager, calling each fee's calculation logic. This returns the quantity of shares to create and allocate to the manager.
 
 It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the Melon fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
 
 ##### Management Fees
 
-Management Fees are earned with the passage of time irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
+Management Fees are earned with the passage of time, irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
 
 The Management Fee calculation business logic is fully encapsulated by the Management Fee contract. This logic can be represented as follows.
 
@@ -24,29 +32,33 @@ First, the time-weighted, pre-dilution share quantity is calculated:
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{(PD_{f})(S_{e-1})}{S_{e-1}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
 
 
 where,
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;S_{e-1}$"/> = shares outstanding at the beginning of the conversion period
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 * 60 * 24 * 365)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 * 60 * 24 * 365 )
+
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
+
+&nbsp;
 
 ##### Performance Fees
 
@@ -64,48 +76,49 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}GAV_{MF},&GAV_{MF}>HWM_{MP-1}\\HWM_{MP-1},&GAV_{MF}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{MF}-HWM_{MP-1},&GAV_{MF}>HWM_{MP-1}\\0,&GAV_{MF}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}S_{n}-HWM_{MP-1},&S_{n}>HWM_{MP-1}\\0,&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
 
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{(P_{MP})(S_{e-1}+SMF_{e})^2(f_{p})}{GAV}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
 
-&nbsp; 
+&nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{(PD_{f})(S_{e-1}+SMF_{e})}{(S_{e-1}+SMF_{e})-PD_{f}}$"/>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current Gross Asset Value per share
 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{MF}$"/> = current Gross Asset Value per share  net of Management Fee
-
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{e-1}$"/> = shares outstanding after adding Management Fee shares
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
 
 &nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
 
+&nbsp;
 
-While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current accrued performance fees prior to redemption.
+While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
 
 In the case where an investor redeems prior to the current Measurement Period's end and where the current share price exceeds the fund HWM, a Performance Fee is due. The Redemption business logic calculates the accrued Performance Fee for the entire fund at the time of redemption and weights this by the redemption share quantity's proportion to the fund's total share quantity. The resulting percentage is the proportion of the redemption share quantity due as the redeeming investor's Performance Fee payment. This quantity is deducted from the redeeming share quantity and credited to the manager's share account balance. The remaining redeeming share quantity is destroyed as the proportionate individual token assets are transferred out of the fund and the fund's total share quantity and the investor's share quantity is reduced by this net redeeming share quantity.
 
+**Note on Fee Share Allocation**
 
+The intended behavior is for the Manager to immediately redeem fee shares as they are created.  This will ensure a fair and precise share allocation. The implemented code that represents the fee calculations above contain smart contract optimizations for state variable storage. By not immediately redeeming fee shares, a negligible deviation to the manager fee payout will arise due to this optimization.
 
 
 ### FeeManager.sol
@@ -208,12 +221,12 @@ An integer defining the block time in UNIX epoch seconds when the previous fee p
 
 ##### Public Functions
 
-`function amountFor(address hub) public view returns (uint feeInShares)`
+`function feeAmount(address hub) public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the amount of time since the previous fee payment, asset value and the defined management fee rate.
 
 
-`function updateFor(address hub) external`
+`function updateState(address hub) external`
 
 This function sets `lastPayoutTime` to the current block timestamp.
 
@@ -259,11 +272,11 @@ An integer defining the block time in UNIX epoch seconds when the previous fee p
 
 ##### Public Functions
 
-`function amountFor(address hub) public view returns (uint feeInShares)`
+`function feeAmount(address hub) public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
 
 
-`function updateFor(address hub) external`
+`function updateState(address hub) external`
 
 This function sets the `highwatermark` and `lastPayoutTime` if applicable.
