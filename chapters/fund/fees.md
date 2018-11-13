@@ -24,19 +24,18 @@ First, the time-weighted, pre-dilution share quantity is calculated:
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/gif.latex?\Large&space;PD_{f}$ = ($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($S_{e-1}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/gif.latex?\Large&space;SMF_{e} =\frac{(PD_{f})(S_{e-1})}{S_{e-1}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{(PD_{f})(S_{e-1})}{S_{e-1}-PD_{f}}$"/>
 
 
 where,
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
-
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
 
@@ -65,25 +64,20 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}
-GAV_{MF}, & GAV_{MF} >  HWM_{MP-1}\\
-HWM_{MP-1}, & GAV_{MF} \leq  HWM_{MP-1}
-\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}GAV_{MF},&GAV_{MF}>HWM_{MP-1}\\HWM_{MP-1},&GAV_{MF}\leq{HWM_{MP-1}}\end{cases}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}
-GAV_{MF}-HWM_{MP-1}, & GAV_{MF} >  HWM_{MP-1}\\
-0, & GAV_{MF} \leq  HWM_{MP-1}
-\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{MF}-HWM_{MP-1},&GAV_{MF}>HWM_{MP-1}\\0,&GAV_{MF}\leq{HWM_{MP-1}}\end{cases}"/>
+
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f} =\frac{(P_{MP})(S_{e-1} + SMF_{e})^2 (f_{p})}{GAV}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{(P_{MP})(S_{e-1}+SMF_{e})^2(f_{p})}{GAV}$"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e} =\frac{(PD_{f})(S_{e-1} + SMF_{e})}{(S_{e-1} + SMF_{e})-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{(PD_{f})(S_{e-1}+SMF_{e})}{(S_{e-1}+SMF_{e})-PD_{f}}$"/>
 
 where,
 
