@@ -75,7 +75,7 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{(P_{MP})(S_{e-1}+SMF_{e})^2(f_{p})}{GAV}$"/>
 
-&nbsp;
+&nbsp; 
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{(PD_{f})(S_{e-1}+SMF_{e})}{(S_{e-1}+SMF_{e})-PD_{f}}$"/>
 
