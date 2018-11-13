@@ -75,11 +75,11 @@ Putting users first. It should be clear that the goal is to provide a best-in-cl
 
 Any decisions taken in the future should be in line with the following long term goals:
 
-# 1 Preserving the integrity of the network
+- 1 Preserving the integrity of the network
 
-# 2 Maximizing user adoption
+- 2 Maximizing user adoption
 
-# 3 Fostering innovation and increasing network attractiveness
+- 3 Fostering innovation and increasing network attractiveness
 
 Ultimately, those three goals should have a long-term positive effect on the value of the MLN token.
 
