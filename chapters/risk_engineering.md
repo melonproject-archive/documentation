@@ -302,7 +302,7 @@ All Policies must implement `rule()` as defined by the signature:
 - Rationale: to limit over-diversification in a fund.
 
 ### Maximum Concentration
-- On construction of the Policy, the maximum concentration percentage of individual positions must be specified for the Melon Fund. The parameter provided to the constructor must be greater than 0 and less than 100000000000000000, as the contract works with 18 decimal (WEI) precision. For example, a maxConcentration parameter specified as `100000000000000000` sets the maximum concentration of any non-quote asset receiving asset to be 10%.
+- On construction of the Policy, the maximum concentration percentage of individual positions must be specified for the Melon Fund. The parameter provided to the constructor must be greater than 0 and less than 100. For example, a maxConcentration parameter specified as `10` sets the maximum concentration of any non-quote asset receiving asset to be 10%.
 
 - The following state variables are defined at the policy contract level:
 
@@ -313,7 +313,7 @@ All Policies must implement `rule()` as defined by the signature:
 
   - `function getMaxConcentration() external view returns (uint256)`
 
-    Returns the defined maximum concentration as specified at contract creation as an integer using 18 decimal (WEI) precision. A return value of `100000000000000000` represents a 10% maximum allowed concentration of fund value.
+    Returns the defined maximum concentration as specified at contract creation as an integer. A return value of 10 represents a 10% maximum allowed concentration of fund value.
 
   - `function getQuoteToken() public view returns (address)`
 
@@ -418,7 +418,7 @@ All Policies must implement `rule()` as defined by the signature:
 - Rationale: to restrict investment, excluding a defined set of tokens, provable to investors, regulators, et.al.
 
 ### Price Tolerance
-- On construction of the Policy a percentage is set which is maximum tolerance that a take- or make-order can deviate (to the financial detriment of the investor) from the then current, valid (recent) market price as provided by the price feed. The parameter provided to the constructor must be greater than 0 and less than 100000000000000000, as the contract works with 18 decimal (WEI) precision. For example, a  `tolerance` parameter specified as `100000000000000000` sets the maximum deviation from the price feed provided asset price to be 10%.
+- On construction of the Policy a percentage is set which is maximum tolerance that a take- or make-order can deviate (to the financial detriment of the investor) from the then current, valid (recent) market price as provided by the price feed.
 
 - Price Tolerance is a pre-condition policy due to the fact that compliance with the policy can be confirmed prior to any transaction and does not require post-transaction state comparison.
 
@@ -430,14 +430,14 @@ All Policies must implement `rule()` as defined by the signature:
 
   - `uint256 private tolerance`
 
-    `tolerance` is conceptually a percentage value, is however specified as an integer using 18 decimal (WEI) precision, e.g. `tolerance` == `100000000000000000` means a 10% price tolerance is defined.
+    `tolerance` is conceptually a percentage value, is however specified as an integer, e.g. `tolerance` == 10 means a 10% price tolerance is defined.
 
 
 - The following functions are available on the Price Tolerance policy:
 
   - `function getPriceTolerance() external view returns (uint256)`
 
-    Returns the defined maximum price tolerance, as set in the contract, relative to the current price as provided by the price feed. The value is returned as an integer using 18 decimal (WEI) precision. Trades which imply a price exceeding the tolerance to the detriment of fund value are disallowed by the policy.
+    Returns the defined maximum price tolerance as a percentage of a specific trade relative to the current price as supplied by the price feed. The value is returned as an integer. Trades which imply a price exceeding the tolerance to the detriment of fund value are disallowed by the policy.
 
 - Rationale: to ensure fair asset price transactions for the investor(s) relative to the market price as determined by the price feed.
 
