@@ -64,9 +64,9 @@ where,
 
 Performance Fees accrue over time with performance, but can only be harvested after regular, pre-determined points in time. This period is referred to as the Measurement Period and is decided by the fund manager and configured at fund set up.
 
-Performance is assessed at the end of the Measurement Period by comparing the fund's Net Asset Value (NAV) to the fund's current high-water mark (HWM).
+Performance is assessed at the end of the Measurement Period by comparing the fund's current share price net of Management Fees to the fund's current high-water mark (HWM).
 
-The HWM represents the highest share NAV which the Melon fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share NAV of all Measurement Period end snapshots.
+The HWM represents the highest share valuation which the Melon fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share valuation of all Measurement Period-end snapshot valuations.
 
 If the difference to the HWM is positive, performance has been achieved and a Performance Fee is due to the fund manager. This calculation is straightforward and is the aforementioned difference multiplied by the Performance Fee rate. The Performance Fee is _not_ an annualized fee rate.
 
@@ -80,7 +80,7 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}S_{n}-HWM_{MP-1},&S_{n}>HWM_{MP-1}\\0,&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
 
 
 &nbsp;
@@ -98,13 +98,16 @@ where,
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
+
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current Gross Asset Value per share
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
 
