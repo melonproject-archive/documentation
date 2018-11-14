@@ -2,62 +2,97 @@
 
 ## Trading.sol
 
-inherits Spoke (link)
-contract Trading is DSMath, Spoke, TradingInterface {
+Description
+...
 
-Structures
+Inherits from Spoke, DSMath, TradingInterface (link)
+
+On Construction
+
+The contract requires the hug address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
 
 
-    struct Exchange {
-        address exchange;
-        address adapter;
-        bool takesCustody;
-    }
+
+Structs
+
+`Exchange`
+  Member Variables
+
+  `address exchange` - The address of the decentralized exchange smart contact.
+
+  `address adapter` - The address of the corresponding adapter smart contract.
+
+  `bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
+
+`Order`
+  Member Variables
+
+  `address exchangeAddress` - The address of the decentralized exchange smart contact.
+
+  `bytes32 orderId` - A unique identifier for a specific order on the specific exchange.
+
+  `UpdateType updateType` - A struct indicating the update behavior/action of the order. Permitted values are `make`, `take` and `cancel`.
+
+  `address makerAsset` - The address of the asset token owned and provided in exchange.
+
+  `address takerAsset` - The address of the asset token to be received in exchange.
+
+  `uint makerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+
+  `uint takerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+
+  `uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
+
+  `uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
+
+`OpenMakeOrder`
+  Member Variables
+
+    `uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
+
+    `uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract. CHECK
 
 Enums
-    enum UpdateType { make, take, cancel }
 
-    struct Order {
-        address exchangeAddress;
-        bytes32 orderId;
-        UpdateType updateType;
-        address makerAsset;
-        address takerAsset;
-        uint makerQuantity;
-        uint takerQuantity;
-        uint timestamp;
-        uint fillTakerQuantity;
-    }
+`UpdateType` - An enum which characterizes the type of update to the order.
 
-    struct OpenMakeOrder {
-        uint id; // Order Id from exchange
-        uint expiresAt; // Timestamp when the order expires
-    }
+  Member Types
+
+  `make` - Indicates a make order type, where a quantity of a specific asset is offered at a specified price.
+
+  `take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
+
+  `cancel` - A type indicating that the update performed will cancel the order.
+
 
 Public State variables
 
-    Exchange[] public exchanges;
-    Order[] public orders;
-    mapping (address => bool) public exchangeIsAdded;
-    mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders;
+    `Exchange[] public exchanges`
+
+    A public array of `Exchange` structs which stores all exchanges with which the fund has been initialized.
+
+
+    `Order[] public orders`
+
+    A public array of `Order` structs which stores all active orders [CHECK] on the  
+
+
+    `mapping (address => bool) public exchangeIsAdded`
+
+    A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
+
+
+    `mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
+
+    A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
+
     mapping (address => bool) public isInOpenMakeOrder;
 
     uint public constant ORDER_LIFESPAN = 1 days;
 
 Public functions
 
-    constructor(
-        address _hub,
-        address[] _exchanges,
-        address[] _adapters,
-        bool[] _takesCustody
-    ) Spoke(_hub) {
-        require(_exchanges.length == _adapters.length);
-        require(_exchanges.length == _takesCustody.length);
-        for (uint i = 0; i < _exchanges.length; i++) {
-            addExchange(_exchanges[i], _adapters[i], _takesCustody[i]);
-        }
-    }
+
 
     // TODO: who can add exchanges? should they just be set at creation?
     function addExchange(address _exchange, address _adapter, bool _takesCustody) internal {

@@ -26,11 +26,11 @@ Public Functions
 
 `function createFor(address who, uint amount) auth`
 
-function calls internal function mint
+This function calls internal function \_mint, which increases both `totalSupply` and the `balance` of the address by the same quantity.
 
 `function destroyFor(address who, uint amount) auth`
 
-function calls internal function burn
+function calls internal function \_burn, which decreases both `totalSupply` and the `balance` of the address by the same quantity.
 
 `function transfer(address to, uint amount) public returns (bool)`
 
