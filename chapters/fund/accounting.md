@@ -1,36 +1,46 @@
 # Accounting
 
-## `Accounting.sol`
+### General
 
-Description
+### Accounting.sol
 
-Contract that defines the accounting rules implemented by the fund.
+#### Description
 
-Inherits from Spoke, DSMath (links)
+The Accounting contract defines the accounting rules implemented by the fund. All operations concerning the underlying fund positions, fund position maintenance, asset token pricing, fees, Gross- and Net Asset value calculations and per-share calculations come together in this contract's business logic.
 
-On Construction
+#### Inherits from
+Spoke, DSMath (links)
+
+#### On Construction
 
 The contract requires the hub address, the quote asset address and an array of default asset addresses. These inputs set the accounting spoke's quote asset, share decimals (18), the default share price (1.0 in quote asset terms) and add all default assets passed in to the `ownedAssets` array state variable.
 
+The Accounting contract is created from the AccountingFactory contract, which creates a new instance of `Accounting` given the `hub` address, registering the address of the newly created Accounting contract as a child of the AccountingFactory.
 
-Structs
+
+#### Structs
 
 `Calculations`
 
-    Member Variables
+  Member Variables:
 
-    `uint gav` - The Gross Asset Value of all fund positions  
-    `uint nav` - The Net Asset Value of all fund positions  
-    `uint allocatedFees`  
-    `uint totalSupply` - The quantity of fund shares  
-    `uint timestamp` - The timestamp
+  `uint gav` - The Gross Asset Value of all fund positions  
+  `uint nav` - The Net Asset Value of all fund positions  
+  `uint allocatedFees` - Fee shares accrued since the previous fee calculation about to be allocated
+  `uint totalSupply` - The quantity of fund shares  
+  `uint timestamp` - The timestamp of the current transactions block
 
 
-Enums
+#### Enums
+
+None.
+
+#### Modifiers
+
 None.
 
 
-Public State Variables
+#### Public State Variables
 
 `address[] public ownedAssets`
 
@@ -54,49 +64,49 @@ An integer determining the initial "sizing" of one share in the fund relative to
 
 `uint public SHARES_DECIMALS`
 
-An integer determining the number of decimals, or the degree of divisibility, of a fund share. This value is set to 18, which is congruent with the divisibility of ETH and many other tokens.
+An integer determining the number of decimals, or the degree of divisibility, of a fund share. This value is set to 18, which is congruent with the divisibility of ETH and many other tokens. [CHECK Also stored in shares.sol]
 
 
 `Calculations public atLastAllocation`
 
-A Calculations structure holding the latest state of the member fund calculations described above.
+A `Calculations` structure holding the latest state of the member fund calculations described above.
 
 
-Public functions
+#### Public functions
 
 `function getFundHoldings() returns (uint[], address[])`
 
-This function returns the current quantities and corresponding addresses of the funds token positions.
+This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
 
 
 `function getFundHoldingsLength() view returns (uint)`
 
-This function returns the number of distinct token assets held by the fund.
+This view function returns the number of distinct token assets held by the fund.
 
 
 `function calcAssetGAV(address ofAsset) returns (uint)`
 
-This function calculates the current GAV (in quote asset terms) of the asset token as specified by the address.
+This function calculates and returns the current fund position GAV (in quote asset terms) of the individual asset token as specified by the address provided.
 
 
 `function assetHoldings(address _asset) public returns (uint)`
 
-This function returns the quantity of the asset token as specified by the address.
+This function returns the fund position quantity of the asset token as specified by the address provided.
 
 
 `function calcGav() public returns (uint gav)`
 
-This function calculates and returns the current Gross Asset Value (GAV) of the fund in quote asset terms.
+This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in quote asset terms.
 
 
 `function calcUnclaimedFees(uint gav) view returns (uint)`
 
-This function calculates and returns fees due to the manager (in share terms) given the fund Gross Asset Value (GAV).
+This function calculates and returns all fees due to the manager (in share terms) at the time of execution given the fund Gross Asset Value (GAV).
 
 
 `function calcNav(uint gav, uint unclaimedFees) pure returns (uint)`
 
-This function calculates and returns the Net Asset Value (NAV) given the GAV and currently unclaimed fees.
+This function calculates and returns the fund's Net Asset Value (NAV) given the provided fund GAV and current quantity of unclaimed fee shares.
 
 
 `function calcValuePerShare(uint totalValue, uint numShares) view returns (uint)`
@@ -107,7 +117,7 @@ This function calculates and returns the value (in quote asset terms) of a singl
 `function performCalculations() view
 returns (uint gav, uint unclaimedFees, uint feesShareQuantity, uint nav, uint sharePrice)`
 
-This function bundles and returns calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in quote asset terms).
+This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in quote asset terms).
 
 
 `function calcSharePrice() view returns (uint sharePrice)`
@@ -127,12 +137,9 @@ This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping
 
 `function addAssetToOwnedAssets(address _asset) public auth`
 
-This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
+This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
 
 
 `function removeFromOwnedAssets(address _asset) public auth`
 
-This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
-
-
-Document what auth is...
+This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
