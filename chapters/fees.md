@@ -23,7 +23,7 @@ Fees are calculated and allocated when fund actions such as subscribe, redeem or
 
 It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the Melon fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
 
-##### Management Fees
+#### Management Fees
 
 Management Fees are earned with the passage of time, irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
 
@@ -57,7 +57,7 @@ where,
 
 &nbsp;
 
-##### Performance Fees
+#### Performance Fees
 
 Performance Fees accrue over time with performance, but can only be harvested after regular, pre-determined points in time. This period is referred to as the Measurement Period and is decided by the fund manager and configured at fund set up.
 
