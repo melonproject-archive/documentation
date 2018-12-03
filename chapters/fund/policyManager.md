@@ -9,7 +9,7 @@ The policyManager contract is the core of risk management and compliance policie
 The policyManager is embedded into specific function calls in other Spokes of the Melon fund as required through the modifiers described below.
 &nbsp;
 
-## policyManager.sol
+## PolicyManager.sol
 
 #### Description
 
