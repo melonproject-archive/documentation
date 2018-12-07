@@ -1,111 +1,38 @@
-
-
-# Policies
+# Risk Policies
 
 ## General
 
-Polices are individual smart contracts which define rule or set of rules to be compared to the state of the Melon fund. Policies simply assess the current state of the Melon fund and resolve to a boolean decision, whether the action may be executed or not, returning `true` for allowed actions and `false` for disallowed actions. The Melon fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the permissibility of the action.
+## Risk Management vs Risk Engineering
 
-#### Pre- and Post-Conditionality
-Policies are intended to be rules; they are intended to permit or prevent specific behavior or action depending on the *state* as compared to specified criteria.
+*Risk* is the effect of uncertainty on objectives; the risk is the possibility that an event will occur and adversely affect the achievement of an objective.
 
-Some Policies, due to the nature of the data required, can be immediately resolved based on the *current* state. The resolution of the Policy result is trivial because all data needed is at hand and must nod be derived or calculated. Such Policies can be defined as "pre-condition" Policies.
+Risk is uncertainty with implicit consequences. In general, the investor cares about two types of risk: 1) those for which she receives compensation in return for bearing, and 2) those for which no compensation is received.  It is obvious that the latter must be eliminated to the extent possible.
 
-Other Policies may need to assess the consequence of the behavior or action before the logic can assess its permissibility relative to the defined rule. To do this, the result of the action must be derived or calculated, essentially asking, "What *will* the state be if this action is executed?" Such Policies can be defined as "post-condition" Policies.
+For example, the following shows risk dissected into systematic risk and unsystematic risk:
 
-On the blockchain and in smart contracts, we can use a fortunate side-effect of the process of mining and block finalization to help determine the validity of post-condition Policies. With post-condition Policies, the action or behavior is executed with the smart contract logic and the changed (but not yet finalized or mined) state is assessed against the logic and defined parameters of the post-condition Policy. In the case where this new state complies with the logic and criteria of the Policy, the action is allowed, meaning the smart contract execution is allowed to run to completion, the block is eventually mined and this new compliant state is finalized in that mined block. In the case where the new state does not comply with the logic and criteria of the Policy, the action is disallowed and the revert() function is called, stopping execution and discarding (or rolling back) all state changes. In calling the revert() function, gas is consumed to arrive at the reference state, but any unused gas is returned to the caller as the reference state is discarded.
-&nbsp;
+![Related image](https://www.tytoncapital.com/wp-content/uploads/2016/05/types-of-risk.gif)
 
+We can observe that unsystematic risk can be *completely* eliminated from the portfolio by sufficiently diversifying or simply having a sufficient number of assets in the portfolio. Of course, these assets must be reasonably uncorrelated with each other.
 
-## Policy.sol
+Critically, an investor is NOT compensated for bearing  unsystematic risk, and this would be detrimental to the portfolio's return (and the investor's wealth) over time.
 
-#### Description
+## Ex Post -> "Management"
+Risks which have materialized should be managed to the extent possible. Examples:
+- A position in the portfolio experiences positive returns to the point that the allocation breaches a concentration guideline. Managing this concentration risk means liquidating a portion of the position to return the position to a tolerable percentage of the portfolio. The proceeds are then allocated to other existing or new positions at the discretion of the investment manager.
+- A position's price volatility increases to the point that it becomes too "risky" for the portfolio. This could be regarding the allocation or in general. In the former case, the position would be reduced so that the asset-weighted volatility of the portfolio returns to tolerable levels
 
-The Policy contract is inherited by implemented Policies. This contract will be changed to an interface when upgraded to Solidity 0.5, as enums and structs are allowed to be defined in interfaces in that version.
-&nbsp;
+## Ex Ante -> "Engineering"
+There are potential risks that we can explicitly prohibit with blockchain tooling. This is where we want to shine.
 
-#### Inherits from
+Portfolio guidelines are rules which are laid out in a legal document (Offering Memorandum or Prospectus) prior to fund inception. Here, the parties agree on the types of instruments to be invested, strategy, rules about concentration and other rule-based metrics.
 
-None.
+All institutional fund managers use software to help them manage portfolios.  They will say, "Our software will not allow a trade which conflicts with the guidelines", or they will have a process in place which has a name like "pre-trade clearance" or "hypothetical trading". These methods have served the industry to a satisfactory level, but non-compliant trades do find their way into a portfolio.
 
-&nbsp;
+Melon funds approach risk differently. Melon fund currently implement *risk engineering* i.e. anticipating a specific risk and handling it in the code of the smart contract. Essentially, this is a proactive posture, as opposed to a reactive posture.
 
-#### On Construction
+*Risk engineering* is the anticipation and identification of different risks, and the action of preventing their occurrence through code. Rules coded into smart contracts that are meant to ensure that something **cannot not** happen in the structure of a Melon fund.
 
-None.
-
-&nbsp;
-
-#### Structs
-
-None.
-
-&nbsp;
-
-#### Enums
-
-`Applied` - An enum which characterizes the conditionality type of the Policy.
-
-  Member Types
-
-  `pre` - Indicates that the Policy will be evaluated prior to the corresponding function's execution.
-
-  `post` - Indicates that the Policy will be evaluated after the corresponding function's execution.
-&nbsp;
-
-#### Modifiers
-
-None.
-
-&nbsp;
-
-#### Events
-
-None.
-
-&nbsp;
-
-#### Public State Variables
-
-None.
-
-&nbsp;
-
-#### Public Functions
-
-`function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
-
-This view function is called by the PolicyManager to ensure that specific registered function calls are validated by their respective registered Policy validation logic. The function returns `true` when conditions defined in the Policy are met and execution continues to successful completion. If conditions defined in the Policy are no met, the function returns `false`, all execution up to that point is reverted and execution cannot complete, returning all remaining gas.
-
-The `rule()` function takes a function signature hash `sig`, an array of address `addresses`, an array of uint `values` and an `identifier` are passed as parameters. For the arrays, the order of the address or value in the array is semantically significant. The individual array positions, [n], are defined as follows:
-
-`address[5] addresses`:
-
-[0] order maker - the address initiating or offering the trade
-[1] order taker - the address filling or partially filling the offered trade
-[2] maker asset - the token address of the asset token intended by the order maker to exchange for another token asset, i.e. the taker asset
-[3] taker asset - the token address of the asset token to be received by the offer maker in exchange for the maker asset
-[4] exchange address - address of the exchange contract on which the order is to be placed
-
-`uint[3] values`:
-
-[0] maker token quantity - the maximum quantity of the maker asset token to be given by the order maker in exchange for the specified taker asset token
-[1] taker token quantity - the maximum quantity of the taker asset token to be received by the order maker in exchange for the specified maker asset token
-[2] Fill amount - the quantity of the taker token exchanged in the transaction. Must be less than or equal to the taker token quantity [1]
-
-Finally, `identifier` and `sig` parameters are described below:
-
-`bytes32 identifier` - order id for exchanges utilizing a unique, exchange-specific order identifier
-
-`bytes4 sig` - the keccak256 hash of the plain text function signature of the function which triggers the specific policy validation.
-
-&nbsp;
-
-`function position() external view returns (Applied)`
-
-This view function returns the enum `Applied` which is defined for each specific Policy contract. The `Applied` enum indicates whether the Policy logic is applied prior to, or after the corresponding function's execution. This function is called when the Policy contract is registered with the PolicyManager contract.
-
-## Implemented Policies
+# Implemented Risk Policies
 
 ## AssetBlacklist.sol
 
