@@ -1,4 +1,4 @@
-# trading
+# Trading
 
 
 ## Trading.sol
