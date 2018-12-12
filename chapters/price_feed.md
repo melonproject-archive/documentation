@@ -1,19 +1,19 @@
 # Price Feed
 
-In true decentralized fashion, the ability to provide services to the Melon Protocol platform is permissionless and open to parties willing and capable to reliably provide such services.
+In true decentralized fashion, the ability to provide services to the Melon Protocol is permissionless and open to parties willing and capable to reliably provide such services.
 
-However, precisely because such services are permissionless, they must be subject to review by the platform community and stakeholders. These parties must have tools at their disposal to take corrective action should malicious or negligent behavior be detected.
+However, precisely because such services are permissionless, they must be subject to review by the community and stakeholders. These parties must have tools at their disposal to take corrective action should malicious or negligent behavior be detected.
 
-Data which is exogenous to the blockchain must be actively provided by a third party. Asset price data is critical to fund management and Melon Funds. Current and accurate price data enables real-time valuation and indispensable context for investment management decisions.  As such, careful attention must be taken to *how* this exogenous data enters the Melon Fund platform.
+Data which is exogenous to the blockchain must be actively provided by a third party. Asset price data is critical to fund management and Melon Funds. Current and accurate price data enables real-time valuation and indispensable context for investment management decisions.  As such, careful attention must be taken to *how* this exogenous data enters the Melon Smart Contracts.
 
-Independent parties wishing to provide the service of an asset price feed may do so by running software which gathers asset price data (corresponding to the Melon Asset Universe set forth in the Melon Asset Registrar) and reliably feeding this data in a specified format to the Melon Platform.
+Independent parties wishing to provide the service of an asset price feed may do so by running software which gathers asset price data (corresponding to the Melon Asset Universe set forth in the Melon Asset Registrar) and reliably feeding this data in a specified format to the Melon Smart Contracts.
 
 ## Operator Staking
-Prospective Price Feed Operators (candidates) must offer a deposit or "stake" in Melon Tokens (MLN). Individual Price Feed Operators are then "selected" by the Melon Platform solely on the level of their stake. The staked MLN is held securely in custody by a smart contract which also determines which of the candidates is actually feeding price data to the Melon Fund Platform.
+Prospective Price Feed Operators (candidates) must offer a deposit or "stake" in Melon Tokens (MLN). Individual Price Feed Operators are then "selected" by the Melon Smart Contracts solely on the level of their stake. The staked MLN is held securely in custody by a smart contract which also determines which of the candidates is actually feeding price data to the Melon ecosystem.
 
 Price Feed Operator selection occurs solely on the basis of the relative amount of MLN staked, with the highest staking candidates awarded the ability to submit price data.
 
-As previously stated, high-quality and reliable price data is crucial to the operation of the Melon Fund Platform. To mitigate the risk that corrupt or irregular data (be the data malicious or negligent) enters the Melon Fund Platform's context, price feed operation has been designed to sample price data across multiple price feed operators. The Melon Protocol specifies a minimum- and maximum number of Price Feed Operators. In this way, candidate Price Feed Operators can "self-select" by staking the requisite amount of MLN Tokens which ranks them among the top *n* MLN stakers as specified by the maximum number of Price Feed Operators. This ranking may change at each block depending on how each Price Feed Operator changes their staked amount of MLN Tokens.
+As previously stated, high-quality and reliable price data is crucial to the operation of the Melon ecosystem. To mitigate the risk that corrupt or irregular data (be the data malicious or negligent) enters the Melon environment, price feed operation has been designed to sample price data across multiple price feed operators. The Melon Protocol specifies a minimum- and maximum number of Price Feed Operators. In this way, candidate Price Feed Operators can "self-select" by staking the requisite amount of MLN Tokens which ranks them among the top *n* MLN stakers as specified by the maximum number of Price Feed Operators. This ranking may change at each block depending on how each Price Feed Operator changes their staked amount of MLN Tokens.
 
 It should be explicitly stated that once a candidate ranks as a Price Feed Operator, the magnitude of their amount has no impact on whether their price data point is selected to canonically represent the specific asset's market price at that point in time. That is to say, Price Feed Operators cannot influence the selection of the price data point, but only their ability to *be* an active Price Feed Operator.
 
