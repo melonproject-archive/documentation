@@ -705,7 +705,7 @@ Other Policies may need to assess the consequence of the behavior or action befo
 On the blockchain and in smart contracts, we can use a fortunate side-effect of the process of mining and block finalization to help determine the validity of post-condition Policies. With post-condition Policies, the action or behavior is executed with the smart contract logic and the changed (but not yet finalized or mined) state is assessed against the logic and defined parameters of the post-condition Policy. In the case where this new state complies with the logic and criteria of the Policy, the action is allowed, meaning the smart contract execution is allowed to run to completion, the block is eventually mined and this new compliant state is finalized in that mined block. In the case where the new state does not comply with the logic and criteria of the Policy, the action is disallowed and the revert() function is called, stopping execution and discarding (or rolling back) all state changes. In calling the revert() function, gas is consumed to arrive at the reference state, but any unused gas is returned to the caller as the reference state is discarded.
 &nbsp;
 
-## Policy.sol
+### Policy.sol
 
 #### Description
 
@@ -945,7 +945,7 @@ This function is called by the Policy Manager to determine whether the policy sh
 
 ---
 
-## Risk Policies
+## Risk Engineering Policies
 
 ### General
 
@@ -1165,7 +1165,7 @@ This rule could be implemented by an Investment Manager to cap the overall AuM o
 
 This rule could be implemented by an Investment Manager to enforce fund audits by a pre-determined auditor at defined time intervals. Funds implementing this rule would be restricted from trading (except into the quote asset) when an audit has not been performed within the defined time interval.
 
-## Implemented Risk Policies
+### Implemented Risk Policies
 
 ### AssetBlacklist.sol
 
@@ -1299,7 +1299,7 @@ This view function returns `true` if the taker asset address (position [3] in th
 This view function returns the enum `pre`, indicating the the Policy logic be evaluated prior to execution of the Policy's corresponding registered function call.
 &nbsp;
 
-## MaxConcentration.sol
+### MaxConcentration.sol
 
 #### Description
 
@@ -1360,7 +1360,7 @@ This view function returns `true` if Melon fund's quote asset is the taker asset
 This view function returns the enum `post`, indicating the the Policy logic be evaluated after execution of the Policy's corresponding registered function call.
 &nbsp;
 
-## MaxPositions.sol
+### MaxPositions.sol
 
 #### Description
 
@@ -1427,7 +1427,7 @@ accounting.getFundHoldingsLength()-1 <= maxPositions;
 This view function returns the enum `post`, indicating the the Policy logic be evaluated after execution of the Policy's corresponding registered function call.
 &nbsp;
 
-## PriceTolerance.sol
+### PriceTolerance.sol
 
 #### Description
 
