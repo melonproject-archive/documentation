@@ -561,7 +561,7 @@ This function requires that the caller is the `owner` or the current contract, a
 ---
 
 
-## Policy
+## Fund Policy
 
 ### Policy Manager
 
