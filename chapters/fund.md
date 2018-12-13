@@ -560,6 +560,625 @@ This function requires that the caller is the `owner` or the current contract, a
 
 ---
 
+## Accounting
+
+### General
+
+### Accounting.sol
+
+#### Description
+
+The Accounting contract defines the accounting rules implemented by the fund. All operations concerning the underlying fund positions, fund position maintenance, asset token pricing, fees, Gross- and Net Asset value calculations and per-share calculations come together in this contract's business logic.
+
+#### Inherits from
+
+Spoke, DSMath (links)
+
+#### On Construction
+
+The contract requires the hub address, the quote asset address and an array of default asset addresses. These inputs set the accounting spoke's quote asset, share decimals (18), the default share price (1.0 in quote asset terms) and add all default assets passed in to the `ownedAssets` array state variable.
+
+The Accounting contract is created from the AccountingFactory contract, which creates a new instance of `Accounting` given the `hub` address, registering the address of the newly created Accounting contract as a child of the AccountingFactory.
+
+#### Structs
+
+`Calculations`
+
+Member Variables:
+
+`uint gav` - The Gross Asset Value of all fund positions  
+ `uint nav` - The Net Asset Value of all fund positions  
+ `uint allocatedFees` - Fee shares accrued since the previous fee calculation about to be allocated
+`uint totalSupply` - The quantity of fund shares  
+ `uint timestamp` - The timestamp of the current transactions block
+
+#### Enums
+
+None.
+
+#### Modifiers
+
+None.
+
+#### Public State Variables
+
+`address[] public ownedAssets`
+
+A pubic array containing the addresses of tokens currently held by the fund.
+
+`mapping (address => bool) public isInAssetList`
+
+A mapping defining the status of an asset's membership in the `ownedAssets` array.
+
+`address public QUOTE_ASSET`
+
+The address of the token defined to be the quote asset, or base currency of the fund. NAV, performance and all fund-level metrics will be denominated in this asset. One unit of the quote asset.
+
+`uint public DEFAULT_SHARE_PRICE`
+
+An integer determining the initial "sizing" of one share in the fund relative to the quote asset. The share price at fund inception will always be one unit of the quote asset. _rename to INCEPTION_SHARE_PRICE_, _should this be configureable?_
+
+`uint public SHARES_DECIMALS`
+
+An integer determining the number of decimals, or the degree of divisibility, of a fund share. This value is set to 18, which is congruent with the divisibility of ETH and many other tokens. [CHECK Also stored in shares.sol]
+
+`Calculations public atLastAllocation`
+
+A `Calculations` structure holding the latest state of the member fund calculations described above.
+
+#### Public functions
+
+`function getFundHoldings() returns (uint[], address[])`
+
+This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
+
+`function getFundHoldingsLength() view returns (uint)`
+
+This view function returns the number of distinct token assets held by the fund.
+
+`function calcAssetGAV(address ofAsset) returns (uint)`
+
+This function calculates and returns the current fund position GAV (in quote asset terms) of the individual asset token as specified by the address provided.
+
+`function assetHoldings(address _asset) public returns (uint)`
+
+This function returns the fund position quantity of the asset token as specified by the address provided.
+
+`function calcGav() public returns (uint gav)`
+
+This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in quote asset terms.
+
+`function calcUnclaimedFees(uint gav) view returns (uint)`
+
+This function calculates and returns all fees due to the manager (in share terms) at the time of execution given the fund Gross Asset Value (GAV).
+
+`function calcNav(uint gav, uint unclaimedFees) pure returns (uint)`
+
+This function calculates and returns the fund's Net Asset Value (NAV) given the provided fund GAV and current quantity of unclaimed fee shares.
+
+`function calcValuePerShare(uint totalValue, uint numShares) view returns (uint)`
+
+This function calculates and returns the value (in quote asset terms) of a single share in the fund given the fund total value and the total number of shares.
+
+`function performCalculations() view returns (uint gav, uint unclaimedFees, uint feesShareQuantity, uint nav, uint sharePrice)`
+
+This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in quote asset terms).
+
+`function calcSharePrice() view returns (uint sharePrice)`
+
+This function calculates and returns the current price (in quote asset terms) of a single share in the fund.
+
+`function calcSharePriceAndAllocateFees() public returns (uint)`
+
+This function calculates and returns the price of a single share (in quote asset terms) as well as performing the fee share calculation and allocation.
+
+`function updateOwnedAssets() public`
+
+This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing or adding asset addresses as the fund holdings composition changes.
+
+`function addAssetToOwnedAssets(address _asset) public auth`
+
+This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
+
+`function removeFromOwnedAssets(address _asset) public auth`
+
+This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
+
+---
+
+## Fees
+
+### General
+
+Fees are charges levied against a Melon fund's assets for:
+
+- management services rendered, in the form of Management Fees
+- fund performance achieved, in the form of Performance Fees.
+
+Legacy investment funds are typically run as legal vehicle; a business with income and expenses. As a traditional fund incurs expenses (not only those listed above, but others like administration-, custody-, directors-, audit fess), traditional funds must liquidate assets to cash or pay the expenses out of cash held by the fund. This necessarily reduces the assets of the fund and incurs further trading costs.
+
+Melon funds employ a novel and elegant solution: Instead of using cash, or liquidating positions to pay fees, the Melon fund smart contract itself calculates and creates new shares (or share fractions), allocating them to the investment manager's own account holdings within the fund as payment.
+
+At that point, the investment manager can continue holding an increased number of shares in their own fund, or redeem the shares to pay their own operating costs, expand their research activities or whatever else they deem appropriate. The Melon Fund smart contract autonomously and verifiably maintains the shareholder accounting impact in a truly reliable and transparent manner.
+
+Paying fees in this manner has a few interesting side-effects: Assets do not leave the fund, as would a cash payment. There are no unnecessary trading or cash management transactions. Investors and managers have access to real-time fee accrual metrics. Finally, the incentives to the manager are reinforced beyond a cash performance fee by being paid in the currency that is their own product.
+
+The Management Fee and Performance Fee are each represented by an individual contract. The business logic and functionality of each fee is defined within the respective contract. The contract will interact with the various components of the fund to calculate and return the quantity of shares to create. This quantity is then added to the Manager address balance and to the total supply balance.
+
+The Fee Manager component manages the individual fee contracts which have been configured for the Melon fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
+
+Fees are calculated and allocated when fund actions such as subscribe, redeem or claim fees are executed by a participant. Calling `rewardAllFees()` will iterate over the array of registered fees in the fee manager, calling each fee's calculation logic. This returns the quantity of shares to create and allocate to the manager.
+
+It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the Melon fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
+
+### Management Fees
+
+Management Fees are earned with the passage of time, irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
+
+The Management Fee calculation business logic is fully encapsulated by the Management Fee contract. This logic can be represented as follows.
+
+First, the time-weighted, pre-dilution share quantity is calculated:
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
+
+then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+
+where,
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
+
+&nbsp;
+
+### Performance Fees
+
+Performance Fees accrue over time with performance, but can only be harvested after regular, pre-determined points in time. This period is referred to as the Measurement Period and is decided by the fund manager and configured at fund set up.
+
+Performance is assessed at the end of the Measurement Period by comparing the fund's current share price net of Management Fees to the fund's current high-water mark (HWM).
+
+The HWM represents the highest share valuation which the Melon fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share valuation of all Measurement Period-end snapshot valuations.
+
+If the difference to the HWM is positive, performance has been achieved and a Performance Fee is due to the fund manager. This calculation is straightforward and is the aforementioned difference multiplied by the Performance Fee rate. The Performance Fee is _not_ an annualized fee rate.
+
+The calculation of the Performance Fee requires that, at that moment, no Management Fees are due. This will be true as the code structure always invokes the Management Fee calculation and allocation immediately preceding, and in the same transaction, the Performance Fee calculation.
+
+The Performance Fee calculation business logic is fully encapsulated by the Performance Fee contract. This logic can be represented as follows.
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
+
+&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+
+where,
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
+
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
+
+&nbsp;
+
+While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
+
+In the case where an investor redeems prior to the current Measurement Period's end and where the current share price exceeds the fund HWM, a Performance Fee is due. The Redemption business logic calculates the accrued Performance Fee for the entire fund at the time of redemption and weights this by the redemption share quantity's proportion to the fund's total share quantity. The resulting percentage is the proportion of the redemption share quantity due as the redeeming investor's Performance Fee payment. This quantity is deducted from the redeeming share quantity and credited to the manager's share account balance. The remaining redeeming share quantity is destroyed as the proportionate individual token assets are transferred out of the fund and the fund's total share quantity and the investor's share quantity is reduced by this net redeeming share quantity.
+
+**Note on Fee Share Allocation**
+
+The intended behavior is for the Manager to immediately redeem fee shares as they are created. This will ensure a fair and precise share allocation. The implemented code that represents the fee calculations above contain smart contract optimizations for state variable storage. By not immediately redeeming fee shares, a negligible deviation to the manager fee payout will arise due to this optimization.
+
+### FeeManager.sol
+
+##### Description
+
+The Fee Manager is a spoke which is initialized and permissioned in the same manner as all other spokes. The Fee Manager registers and administers the execution order of the individual fee contracts.
+
+##### Inherits from
+
+Spoke, DSMath (link)
+
+##### On Construction
+
+Sets the hub of the spoke.
+
+##### Structs
+
+None.
+
+##### Enums
+
+None.
+
+##### Public State Variables
+
+`Fee[] public fees`
+
+An array of type fees storing the defined fees.
+
+`mapping (address => bool) public feeIsRegistered`
+
+A mapping storing the registration status of a fee address.
+
+##### Public Functions
+
+`function register(address feeAddress) public`
+
+This function adds the feeAddress provided to the `Fee[]` array and sets the `feeIsRegistered` mapping for that address to `true`.
+
+`function batchRegister(address[] feeAddresses) public`
+
+This function adds an array of fee addresses provided to the `Fee[]` array and sets the `feeIsRegistered` mappings for those addresses to `true`.
+
+`function totalFeeAmount() public view returns (uint total)`
+
+This function returns the total amount of fees incurred for the hub.
+
+`function rewardFee(Fee fee) public`
+
+This function creates shares commensurate with the fee provided.
+
+`function rewardAllFees() public`
+
+This function creates shares commensurate with all fees stored in the `Fee[]` state variable array.
+
+### FixedManagementFee.sol
+
+##### Description
+
+The FixedManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
+
+##### Inherits from
+
+Fee and DSMath (link)
+
+##### On Construction
+
+No specified behavior.
+
+##### Structs
+
+None.
+
+##### Enums
+
+None.
+
+##### Public State Variables
+
+`uint public PAYMENT_TERM`
+
+An integer defining the measurement period in seconds.
+
+`uint public MANAGEMENT_FEE_RATE`
+
+An integer defining the management fee percentage rate.
+
+`uint public DIVISOR`
+
+An integer defining the standard divisor.
+
+`uint public lastPayoutTime`
+
+An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+
+##### Public Functions
+
+`function feeAmount(address hub) public view returns (uint feeInShares)`
+
+This function calculates and returns the number of shares to be created given the amount of time since the previous fee payment, asset value and the defined management fee rate.
+
+`function updateState(address hub) external`
+
+This function sets `lastPayoutTime` to the current block timestamp.
+
+### FixedPerformanceFee.sol
+
+##### Description
+
+The FixedPerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
+
+Inherits from Fee and DSMath (link)
+
+##### On Construction
+
+No specified behavior.
+
+##### Structs
+
+None.
+
+##### Enums
+
+None.
+
+##### Public State Variables
+
+`uint public PERFORMANCE_FEE_RATE`
+
+An integer defining the performance fee percentage rate.
+
+`uint public DIVISOR`
+
+An integer defining the standard divisor.
+
+`uint public highWaterMark`
+
+An integer defining the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
+
+`uint public lastPayoutTime`
+
+An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+
+##### Public Functions
+
+`function feeAmount(address hub) public view returns (uint feeInShares)`
+
+This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
+
+`function updateState(address hub) external`
+
+This function sets the `highwatermark` and `lastPayoutTime` if applicable.
+
+***
+
+## Trading
+
+The Melon Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a Melon Fund. This means that a Melon Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
+
+### Trading.sol
+
+Description
+
+The Trading contract is created by the tradingFactory, which holds a queryable array of all created Trading contracts and emits the `instanceCreated` event along with the trading contract's address.
+
+The trading contract:
+
+-manages the set up of the interface infrastructure to the various selected exchanges.
+
+-manages open make orders that the fund has submitted to the various registered exchanges.
+
+-houses the common function for calling specific exchange functions through each exchange's respective exchange adapters. Note that each exchange will have their own unique interface and required parameters, which the adapters accommodate.
+
+-provides a public function to transfer an array of token assets to the fund's vault.
+
+-provides view functions to get order information regarding specific assets on specific exchanges as well as specific order detail.
+
+The contract has a fallback function to retrieve ETH.
+
+Inherits from
+Spoke, DSMath, TradingInterface (link)
+
+On Construction
+
+The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
+
+Structs
+
+`Exchange`
+Member Variables
+
+`address exchange` - The address of the decentralized exchange smart contact.
+
+`address adapter` - The address of the corresponding adapter smart contract.
+
+`bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
+
+`Order`
+Member Variables
+
+`address exchangeAddress` - The address of the decentralized exchange smart contact.
+
+`bytes32 orderId` - A unique identifier for a specific order on the specific exchange.
+
+`UpdateType updateType` - A struct indicating the update behavior/action of the order. Permitted values are `make`, `take` and `cancel`.
+
+`address makerAsset` - The address of the asset token owned and provided in exchange.
+
+`address takerAsset` - The address of the asset token to be received in exchange.
+
+`uint makerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+
+`uint takerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+
+`uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
+
+`uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
+
+`OpenMakeOrder`
+Member Variables
+
+    `uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
+
+    `uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract. CHECK
+
+Enums
+
+`UpdateType` - An enum which characterizes the type of update to the order.
+
+Member Types
+
+`make` - Indicates a make order type, where a quantity of a specific asset is offered at a specified price.
+
+`take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
+
+`cancel` - A type indicating that the update performed will cancel the order.
+
+`swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
+
+Public State variables
+
+    `Exchange[] public exchanges`
+
+    A public array of `Exchange` structs which stores all exchanges with which the fund has been initialized.
+
+
+    `Order[] public orders`
+
+    A public array of `Order` structs which stores all active orders [CHECK] on the
+
+
+    `mapping (address => bool) public exchangeIsAdded`
+
+    A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
+
+
+    `mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
+
+    A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
+
+    `mapping (address => bool) public isInOpenMakeOrder`
+
+    A public mapping indicating that the specified token asset is currently offered in an open make order on an exchange.
+
+    `uint public constant ORDER_LIFESPAN = 1 days`
+
+    A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
+
+Modifiers
+
+    `delegateInternal()`
+
+    A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
+
+Public functions
+
+    `function addExchange(address _exchange, address _adapter, bool _takesCustody) internal`
+
+    This is an internal function which is called for each exchange address passed to the constructor, adding the full exchange struct to the exchanges array state variable. The function ensures that an exchange has not previously been registered.
+
+
+    `function callOnExchange(
+        uint exchangeIndex,
+        string methodSignature,
+        address[6] orderAddresses,
+        uint[8] orderValues,
+        bytes32 identifier,
+        bytes makerAssetData,
+        bytes takerAssetData,
+        bytes signature
+    ) public`
+
+
+    This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund.  [Get more detail as melon.js matures]
+
+
+
+    `function addOpenMakeOrder(
+        address ofExchange,
+        address ofSellAsset,
+        uint orderId
+    ) delegateInternal`
+
+    This function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping. [Why require >1 orders??]
+
+
+    `function removeOpenMakeOrder(
+        address ofExchange,
+        address ofSellAsset
+    ) delegateInternal`
+
+    This function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
+
+
+    `function orderUpdateHook(
+        address ofExchange,
+        bytes32 orderId,
+        UpdateType updateType,
+        address[2] orderAddresses,
+        uint[3] orderValues
+    ) delegateInternal`
+
+    This function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
+
+    `function updateAndGetQuantityBeingTraded(address _asset) returns (uint)`
+
+    This function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
+
+
+    `function updateAndGetQuantityHeldInExchange(address ofAsset) returns (uint)`
+
+    This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
+
+
+    `function returnToVault(ERC20[] _tokens) public`
+
+    This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
+
+### Exchange Adapters
+
+Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the Melon Fund and the DEX.
+
+Currently, the Melon Protocol has adapters to integrate the following DEXs:
+
+- Oasis DEX
+- 0x (enabling interaction on the orderbooks of all 0x relayers)
+- Kyber Network
+- Ethfinex
+
+Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
+
+### Adapter Function Details
+
+The `Fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
+
+- `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed. Note that this function will not be implemented for the 0x adapter until 0x Version 2 is released.
+
+- `takeOrder()` Represents implicit agreement with a standing make order on the DEX's order book. The order will be immediately executed.
+
+- `cancelOrder()` Retracts a standing make order from the DEX's order book. The cancelation will be immediately executed.
+
+A single event is emitted by the Exchange Adapter:
+
+- `OrderUpdated()` Event to inform other layers (e.g. web page) that the order has been updated in some way.
+
+The following functions are public view functions:
+
+- `getLastOrderId()` - Constant view function which returns the last order Id on a specific exchange.
+
+- `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
+
+Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar.
+
+---
+
 
 ## Fund Policy
 
@@ -1509,621 +2128,3 @@ This view function returns the enum `pre`, indicating the the Policy logic be ev
 
 ---
 
-## Trading
-
-The Melon Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a Melon Fund. This means that a Melon Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
-
-### Trading.sol
-
-Description
-
-The Trading contract is created by the tradingFactory, which holds a queryable array of all created Trading contracts and emits the `instanceCreated` event along with the trading contract's address.
-
-The trading contract:
-
--manages the set up of the interface infrastructure to the various selected exchanges.
-
--manages open make orders that the fund has submitted to the various registered exchanges.
-
--houses the common function for calling specific exchange functions through each exchange's respective exchange adapters. Note that each exchange will have their own unique interface and required parameters, which the adapters accommodate.
-
--provides a public function to transfer an array of token assets to the fund's vault.
-
--provides view functions to get order information regarding specific assets on specific exchanges as well as specific order detail.
-
-The contract has a fallback function to retrieve ETH.
-
-Inherits from
-Spoke, DSMath, TradingInterface (link)
-
-On Construction
-
-The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
-
-Structs
-
-`Exchange`
-Member Variables
-
-`address exchange` - The address of the decentralized exchange smart contact.
-
-`address adapter` - The address of the corresponding adapter smart contract.
-
-`bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
-
-`Order`
-Member Variables
-
-`address exchangeAddress` - The address of the decentralized exchange smart contact.
-
-`bytes32 orderId` - A unique identifier for a specific order on the specific exchange.
-
-`UpdateType updateType` - A struct indicating the update behavior/action of the order. Permitted values are `make`, `take` and `cancel`.
-
-`address makerAsset` - The address of the asset token owned and provided in exchange.
-
-`address takerAsset` - The address of the asset token to be received in exchange.
-
-`uint makerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
-
-`uint takerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
-
-`uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
-
-`uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
-
-`OpenMakeOrder`
-Member Variables
-
-    `uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
-
-    `uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract. CHECK
-
-Enums
-
-`UpdateType` - An enum which characterizes the type of update to the order.
-
-Member Types
-
-`make` - Indicates a make order type, where a quantity of a specific asset is offered at a specified price.
-
-`take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
-
-`cancel` - A type indicating that the update performed will cancel the order.
-
-`swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
-
-Public State variables
-
-    `Exchange[] public exchanges`
-
-    A public array of `Exchange` structs which stores all exchanges with which the fund has been initialized.
-
-
-    `Order[] public orders`
-
-    A public array of `Order` structs which stores all active orders [CHECK] on the
-
-
-    `mapping (address => bool) public exchangeIsAdded`
-
-    A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
-
-
-    `mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
-
-    A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
-
-    `mapping (address => bool) public isInOpenMakeOrder`
-
-    A public mapping indicating that the specified token asset is currently offered in an open make order on an exchange.
-
-    `uint public constant ORDER_LIFESPAN = 1 days`
-
-    A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
-
-Modifiers
-
-    `delegateInternal()`
-
-    A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
-
-Public functions
-
-    `function addExchange(address _exchange, address _adapter, bool _takesCustody) internal`
-
-    This is an internal function which is called for each exchange address passed to the constructor, adding the full exchange struct to the exchanges array state variable. The function ensures that an exchange has not previously been registered.
-
-
-    `function callOnExchange(
-        uint exchangeIndex,
-        string methodSignature,
-        address[6] orderAddresses,
-        uint[8] orderValues,
-        bytes32 identifier,
-        bytes makerAssetData,
-        bytes takerAssetData,
-        bytes signature
-    ) public`
-
-
-    This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund.  [Get more detail as melon.js matures]
-
-
-
-    `function addOpenMakeOrder(
-        address ofExchange,
-        address ofSellAsset,
-        uint orderId
-    ) delegateInternal`
-
-    This function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping. [Why require >1 orders??]
-
-
-    `function removeOpenMakeOrder(
-        address ofExchange,
-        address ofSellAsset
-    ) delegateInternal`
-
-    This function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
-
-
-    `function orderUpdateHook(
-        address ofExchange,
-        bytes32 orderId,
-        UpdateType updateType,
-        address[2] orderAddresses,
-        uint[3] orderValues
-    ) delegateInternal`
-
-    This function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
-
-    `function updateAndGetQuantityBeingTraded(address _asset) returns (uint)`
-
-    This function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
-
-
-    `function updateAndGetQuantityHeldInExchange(address ofAsset) returns (uint)`
-
-    This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
-
-
-    `function returnToVault(ERC20[] _tokens) public`
-
-    This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
-
-### Exchange Adapters
-
-Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the Melon Fund and the DEX.
-
-Currently, the Melon Protocol has adapters to integrate the following DEXs:
-
-- Oasis DEX
-- 0x (enabling interaction on the orderbooks of all 0x relayers)
-- Kyber Network
-- Ethfinex
-
-Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
-
-### Adapter Function Details
-
-The `Fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
-
-- `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed. Note that this function will not be implemented for the 0x adapter until 0x Version 2 is released.
-
-- `takeOrder()` Represents implicit agreement with a standing make order on the DEX's order book. The order will be immediately executed.
-
-- `cancelOrder()` Retracts a standing make order from the DEX's order book. The cancelation will be immediately executed.
-
-A single event is emitted by the Exchange Adapter:
-
-- `OrderUpdated()` Event to inform other layers (e.g. web page) that the order has been updated in some way.
-
-The following functions are public view functions:
-
-- `getLastOrderId()` - Constant view function which returns the last order Id on a specific exchange.
-
-- `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
-
-Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar.
-
----
-
-## Accounting
-
-### General
-
-### Accounting.sol
-
-#### Description
-
-The Accounting contract defines the accounting rules implemented by the fund. All operations concerning the underlying fund positions, fund position maintenance, asset token pricing, fees, Gross- and Net Asset value calculations and per-share calculations come together in this contract's business logic.
-
-#### Inherits from
-
-Spoke, DSMath (links)
-
-#### On Construction
-
-The contract requires the hub address, the quote asset address and an array of default asset addresses. These inputs set the accounting spoke's quote asset, share decimals (18), the default share price (1.0 in quote asset terms) and add all default assets passed in to the `ownedAssets` array state variable.
-
-The Accounting contract is created from the AccountingFactory contract, which creates a new instance of `Accounting` given the `hub` address, registering the address of the newly created Accounting contract as a child of the AccountingFactory.
-
-#### Structs
-
-`Calculations`
-
-Member Variables:
-
-`uint gav` - The Gross Asset Value of all fund positions  
- `uint nav` - The Net Asset Value of all fund positions  
- `uint allocatedFees` - Fee shares accrued since the previous fee calculation about to be allocated
-`uint totalSupply` - The quantity of fund shares  
- `uint timestamp` - The timestamp of the current transactions block
-
-#### Enums
-
-None.
-
-#### Modifiers
-
-None.
-
-#### Public State Variables
-
-`address[] public ownedAssets`
-
-A pubic array containing the addresses of tokens currently held by the fund.
-
-`mapping (address => bool) public isInAssetList`
-
-A mapping defining the status of an asset's membership in the `ownedAssets` array.
-
-`address public QUOTE_ASSET`
-
-The address of the token defined to be the quote asset, or base currency of the fund. NAV, performance and all fund-level metrics will be denominated in this asset. One unit of the quote asset.
-
-`uint public DEFAULT_SHARE_PRICE`
-
-An integer determining the initial "sizing" of one share in the fund relative to the quote asset. The share price at fund inception will always be one unit of the quote asset. _rename to INCEPTION_SHARE_PRICE_, _should this be configureable?_
-
-`uint public SHARES_DECIMALS`
-
-An integer determining the number of decimals, or the degree of divisibility, of a fund share. This value is set to 18, which is congruent with the divisibility of ETH and many other tokens. [CHECK Also stored in shares.sol]
-
-`Calculations public atLastAllocation`
-
-A `Calculations` structure holding the latest state of the member fund calculations described above.
-
-#### Public functions
-
-`function getFundHoldings() returns (uint[], address[])`
-
-This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
-
-`function getFundHoldingsLength() view returns (uint)`
-
-This view function returns the number of distinct token assets held by the fund.
-
-`function calcAssetGAV(address ofAsset) returns (uint)`
-
-This function calculates and returns the current fund position GAV (in quote asset terms) of the individual asset token as specified by the address provided.
-
-`function assetHoldings(address _asset) public returns (uint)`
-
-This function returns the fund position quantity of the asset token as specified by the address provided.
-
-`function calcGav() public returns (uint gav)`
-
-This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in quote asset terms.
-
-`function calcUnclaimedFees(uint gav) view returns (uint)`
-
-This function calculates and returns all fees due to the manager (in share terms) at the time of execution given the fund Gross Asset Value (GAV).
-
-`function calcNav(uint gav, uint unclaimedFees) pure returns (uint)`
-
-This function calculates and returns the fund's Net Asset Value (NAV) given the provided fund GAV and current quantity of unclaimed fee shares.
-
-`function calcValuePerShare(uint totalValue, uint numShares) view returns (uint)`
-
-This function calculates and returns the value (in quote asset terms) of a single share in the fund given the fund total value and the total number of shares.
-
-`function performCalculations() view returns (uint gav, uint unclaimedFees, uint feesShareQuantity, uint nav, uint sharePrice)`
-
-This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in quote asset terms).
-
-`function calcSharePrice() view returns (uint sharePrice)`
-
-This function calculates and returns the current price (in quote asset terms) of a single share in the fund.
-
-`function calcSharePriceAndAllocateFees() public returns (uint)`
-
-This function calculates and returns the price of a single share (in quote asset terms) as well as performing the fee share calculation and allocation.
-
-`function updateOwnedAssets() public`
-
-This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing or adding asset addresses as the fund holdings composition changes.
-
-`function addAssetToOwnedAssets(address _asset) public auth`
-
-This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
-
-`function removeFromOwnedAssets(address _asset) public auth`
-
-This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
-
----
-
-## Fees
-
-### General
-
-Fees are charges levied against a Melon fund's assets for:
-
-- management services rendered, in the form of Management Fees
-- fund performance achieved, in the form of Performance Fees.
-
-Legacy investment funds are typically run as legal vehicle; a business with income and expenses. As a traditional fund incurs expenses (not only those listed above, but others like administration-, custody-, directors-, audit fess), traditional funds must liquidate assets to cash or pay the expenses out of cash held by the fund. This necessarily reduces the assets of the fund and incurs further trading costs.
-
-Melon funds employ a novel and elegant solution: Instead of using cash, or liquidating positions to pay fees, the Melon fund smart contract itself calculates and creates new shares (or share fractions), allocating them to the investment manager's own account holdings within the fund as payment.
-
-At that point, the investment manager can continue holding an increased number of shares in their own fund, or redeem the shares to pay their own operating costs, expand their research activities or whatever else they deem appropriate. The Melon Fund smart contract autonomously and verifiably maintains the shareholder accounting impact in a truly reliable and transparent manner.
-
-Paying fees in this manner has a few interesting side-effects: Assets do not leave the fund, as would a cash payment. There are no unnecessary trading or cash management transactions. Investors and managers have access to real-time fee accrual metrics. Finally, the incentives to the manager are reinforced beyond a cash performance fee by being paid in the currency that is their own product.
-
-The Management Fee and Performance Fee are each represented by an individual contract. The business logic and functionality of each fee is defined within the respective contract. The contract will interact with the various components of the fund to calculate and return the quantity of shares to create. This quantity is then added to the Manager address balance and to the total supply balance.
-
-The Fee Manager component manages the individual fee contracts which have been configured for the Melon fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
-
-Fees are calculated and allocated when fund actions such as subscribe, redeem or claim fees are executed by a participant. Calling `rewardAllFees()` will iterate over the array of registered fees in the fee manager, calling each fee's calculation logic. This returns the quantity of shares to create and allocate to the manager.
-
-It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the Melon fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
-
-### Management Fees
-
-Management Fees are earned with the passage of time, irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
-
-The Management Fee calculation business logic is fully encapsulated by the Management Fee contract. This logic can be represented as follows.
-
-First, the time-weighted, pre-dilution share quantity is calculated:
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
-
-then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
-
-where,
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
-
-&nbsp;
-
-### Performance Fees
-
-Performance Fees accrue over time with performance, but can only be harvested after regular, pre-determined points in time. This period is referred to as the Measurement Period and is decided by the fund manager and configured at fund set up.
-
-Performance is assessed at the end of the Measurement Period by comparing the fund's current share price net of Management Fees to the fund's current high-water mark (HWM).
-
-The HWM represents the highest share valuation which the Melon fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share valuation of all Measurement Period-end snapshot valuations.
-
-If the difference to the HWM is positive, performance has been achieved and a Performance Fee is due to the fund manager. This calculation is straightforward and is the aforementioned difference multiplied by the Performance Fee rate. The Performance Fee is _not_ an annualized fee rate.
-
-The calculation of the Performance Fee requires that, at that moment, no Management Fees are due. This will be true as the code structure always invokes the Management Fee calculation and allocation immediately preceding, and in the same transaction, the Performance Fee calculation.
-
-The Performance Fee calculation business logic is fully encapsulated by the Performance Fee contract. This logic can be represented as follows.
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
-
-&nbsp;
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
-
-where,
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
-
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
-
-&nbsp;
-
-While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
-
-In the case where an investor redeems prior to the current Measurement Period's end and where the current share price exceeds the fund HWM, a Performance Fee is due. The Redemption business logic calculates the accrued Performance Fee for the entire fund at the time of redemption and weights this by the redemption share quantity's proportion to the fund's total share quantity. The resulting percentage is the proportion of the redemption share quantity due as the redeeming investor's Performance Fee payment. This quantity is deducted from the redeeming share quantity and credited to the manager's share account balance. The remaining redeeming share quantity is destroyed as the proportionate individual token assets are transferred out of the fund and the fund's total share quantity and the investor's share quantity is reduced by this net redeeming share quantity.
-
-**Note on Fee Share Allocation**
-
-The intended behavior is for the Manager to immediately redeem fee shares as they are created. This will ensure a fair and precise share allocation. The implemented code that represents the fee calculations above contain smart contract optimizations for state variable storage. By not immediately redeeming fee shares, a negligible deviation to the manager fee payout will arise due to this optimization.
-
-### FeeManager.sol
-
-##### Description
-
-The Fee Manager is a spoke which is initialized and permissioned in the same manner as all other spokes. The Fee Manager registers and administers the execution order of the individual fee contracts.
-
-##### Inherits from
-
-Spoke, DSMath (link)
-
-##### On Construction
-
-Sets the hub of the spoke.
-
-##### Structs
-
-None.
-
-##### Enums
-
-None.
-
-##### Public State Variables
-
-`Fee[] public fees`
-
-An array of type fees storing the defined fees.
-
-`mapping (address => bool) public feeIsRegistered`
-
-A mapping storing the registration status of a fee address.
-
-##### Public Functions
-
-`function register(address feeAddress) public`
-
-This function adds the feeAddress provided to the `Fee[]` array and sets the `feeIsRegistered` mapping for that address to `true`.
-
-`function batchRegister(address[] feeAddresses) public`
-
-This function adds an array of fee addresses provided to the `Fee[]` array and sets the `feeIsRegistered` mappings for those addresses to `true`.
-
-`function totalFeeAmount() public view returns (uint total)`
-
-This function returns the total amount of fees incurred for the hub.
-
-`function rewardFee(Fee fee) public`
-
-This function creates shares commensurate with the fee provided.
-
-`function rewardAllFees() public`
-
-This function creates shares commensurate with all fees stored in the `Fee[]` state variable array.
-
-### FixedManagementFee.sol
-
-##### Description
-
-The FixedManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
-
-##### Inherits from
-
-Fee and DSMath (link)
-
-##### On Construction
-
-No specified behavior.
-
-##### Structs
-
-None.
-
-##### Enums
-
-None.
-
-##### Public State Variables
-
-`uint public PAYMENT_TERM`
-
-An integer defining the measurement period in seconds.
-
-`uint public MANAGEMENT_FEE_RATE`
-
-An integer defining the management fee percentage rate.
-
-`uint public DIVISOR`
-
-An integer defining the standard divisor.
-
-`uint public lastPayoutTime`
-
-An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
-
-##### Public Functions
-
-`function feeAmount(address hub) public view returns (uint feeInShares)`
-
-This function calculates and returns the number of shares to be created given the amount of time since the previous fee payment, asset value and the defined management fee rate.
-
-`function updateState(address hub) external`
-
-This function sets `lastPayoutTime` to the current block timestamp.
-
-### FixedPerformanceFee.sol
-
-##### Description
-
-The FixedPerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
-
-Inherits from Fee and DSMath (link)
-
-##### On Construction
-
-No specified behavior.
-
-##### Structs
-
-None.
-
-##### Enums
-
-None.
-
-##### Public State Variables
-
-`uint public PERFORMANCE_FEE_RATE`
-
-An integer defining the performance fee percentage rate.
-
-`uint public DIVISOR`
-
-An integer defining the standard divisor.
-
-`uint public highWaterMark`
-
-An integer defining the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
-
-`uint public lastPayoutTime`
-
-An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
-
-##### Public Functions
-
-`function feeAmount(address hub) public view returns (uint feeInShares)`
-
-This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
-
-`function updateState(address hub) external`
-
-This function sets the `highwatermark` and `lastPayoutTime` if applicable.
-
-***
