@@ -1,5 +1,6 @@
 # Trading
 
+The Melon Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a Melon Fund. This means that a Melon Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
 
 ## Trading.sol
 
@@ -28,41 +29,40 @@ On Construction
 
 The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
 
-
 Structs
 
 `Exchange`
-  Member Variables
+Member Variables
 
-  `address exchange` - The address of the decentralized exchange smart contact.
+`address exchange` - The address of the decentralized exchange smart contact.
 
-  `address adapter` - The address of the corresponding adapter smart contract.
+`address adapter` - The address of the corresponding adapter smart contract.
 
-  `bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
+`bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
 
 `Order`
-  Member Variables
+Member Variables
 
-  `address exchangeAddress` - The address of the decentralized exchange smart contact.
+`address exchangeAddress` - The address of the decentralized exchange smart contact.
 
-  `bytes32 orderId` - A unique identifier for a specific order on the specific exchange.
+`bytes32 orderId` - A unique identifier for a specific order on the specific exchange.
 
-  `UpdateType updateType` - A struct indicating the update behavior/action of the order. Permitted values are `make`, `take` and `cancel`.
+`UpdateType updateType` - A struct indicating the update behavior/action of the order. Permitted values are `make`, `take` and `cancel`.
 
-  `address makerAsset` - The address of the asset token owned and provided in exchange.
+`address makerAsset` - The address of the asset token owned and provided in exchange.
 
-  `address takerAsset` - The address of the asset token to be received in exchange.
+`address takerAsset` - The address of the asset token to be received in exchange.
 
-  `uint makerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+`uint makerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
 
-  `uint takerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
+`uint takerQuantity` - An integer representing the quantity of the asset token owned and provided in exchange.
 
-  `uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
+`uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
 
-  `uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
+`uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
 
 `OpenMakeOrder`
-  Member Variables
+Member Variables
 
     `uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
 
@@ -72,16 +72,15 @@ Enums
 
 `UpdateType` - An enum which characterizes the type of update to the order.
 
-  Member Types
+Member Types
 
-  `make` - Indicates a make order type, where a quantity of a specific asset is offered at a specified price.
+`make` - Indicates a make order type, where a quantity of a specific asset is offered at a specified price.
 
-  `take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
+`take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
 
-  `cancel` - A type indicating that the update performed will cancel the order.
+`cancel` - A type indicating that the update performed will cancel the order.
 
-  `swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
-
+`swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
 
 Public State variables
 
@@ -92,7 +91,7 @@ Public State variables
 
     `Order[] public orders`
 
-    A public array of `Order` structs which stores all active orders [CHECK] on the  
+    A public array of `Order` structs which stores all active orders [CHECK] on the
 
 
     `mapping (address => bool) public exchangeIsAdded`
@@ -118,9 +117,7 @@ Modifiers
 
     A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
 
-
 Public functions
-
 
     `function addExchange(address _exchange, address _adapter, bool _takesCustody) internal`
 
@@ -183,3 +180,38 @@ Public functions
     `function returnToVault(ERC20[] _tokens) public`
 
     This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
+
+## Exchange Adapters
+
+Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the Melon Fund and the DEX.
+
+Currently, the Melon Protocol has adapters to integrate the following DEXs:
+
+- Oasis DEX
+- 0x (enabling interaction on the orderbooks of all 0x relayers)
+- Kyber Network
+- Ethfinex
+
+Each exchange is tied to a specific adapter by the canonical registrar. A fund can be setup to use multiple exchanges, provided they are registered by the registrar.
+
+## Adapter Function Details
+
+The `Fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
+
+- `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed. Note that this function will not be implemented for the 0x adapter until 0x Version 2 is released.
+
+- `takeOrder()` Represents implicit agreement with a standing make order on the DEX's order book. The order will be immediately executed.
+
+- `cancelOrder()` Retracts a standing make order from the DEX's order book. The cancelation will be immediately executed.
+
+A single event is emitted by the Exchange Adapter:
+
+- `OrderUpdated()` Event to inform other layers (e.g. web page) that the order has been updated in some way.
+
+The following functions are public view functions:
+
+- `getLastOrderId()` - Constant view function which returns the last order Id on a specific exchange.
+
+- `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
+
+Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar.
