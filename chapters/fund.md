@@ -560,18 +560,19 @@ This function requires that the caller is the `owner` or the current contract, a
 
 ---
 
-## Policy Manager
 
-### General
+## Policy
+
+### Policy Manager
 
 The policyManager contract is the core of risk management and compliance policies. Policies are individual contracts that define and enforce specific business logic codified within. Policies are registered with the Melon fund's policyManager contract for specific function call pertaining to trading fund positions or investor subscriptions.
 
 The policyManager is embedded into specific function calls in other Spokes of the Melon fund as required through the modifiers described below.
 &nbsp;
 
-### PolicyManager.sol
+#### PolicyManager.sol
 
-#### Description
+##### Description
 
 In many of the functions below an array of address `addresses`, an array of uint `values` and an `identifier` are passed as parameters. For the arrays, the order of the address or value in the array is semantically significant. The individual array positions, [n], are defined within the policyManager contract as follows:
 
@@ -597,13 +598,13 @@ Finally, `identifier` and `sig` parameters are described below:
 
 &nbsp;
 
-#### Inherits from
+##### Inherits from
 
 Spoke (link)
 
 &nbsp;
 
-#### On Construction
+##### On Construction
 
 The PolicyManager contract is passed the corresponding Hub address and sets this as the hub state variable inherited from Spoke.
 
@@ -611,7 +612,7 @@ The PolicyManager contract is created from the PolicyManagerFactory contract, wh
 
 &nbsp;
 
-#### Structs
+##### Structs
 
 `Entry`
 
@@ -623,13 +624,13 @@ Member variables:
 
 &nbsp;
 
-#### Enums
+##### Enums
 
 None.
 
 &nbsp;
 
-#### Modifiers
+##### Modifiers
 
 `modifier isValidPolicyBySig(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier)`
 
@@ -643,13 +644,13 @@ This modifier ensures that `preValidate()` is called prior to applied function c
 
 &nbsp;
 
-#### Events
+##### Events
 
 None.
 
 &nbsp;
 
-#### Public State Variables
+##### Public State Variables
 
 `mapping(bytes4 => Entry) policies`
 
@@ -657,7 +658,7 @@ A mapping of bytes4 to an `Entry` struct.
 
 &nbsp;
 
-#### Public Functions
+##### Public Functions
 
 `function registerBatch(bytes4[] sig, address[] ofPolicies) public`
 
@@ -688,9 +689,7 @@ This view function calls the `validate()` function, explicitly passing the `post
 
 This internal view function receives a function-specific filtered array of Policy contract addresses and iterates over the array, calling each Policy's implemented `rule()` function. If the call to a Policy's `rule()` evaluates to `true`, execution and any state transition proceeds. If the call to a Policy's `rule()` evaluates to `false`, all execution and preliminary state transitions are reverted.
 
-## Policies
-
-### General
+### Policies
 
 Polices are individual smart contracts which define rule or set of rules to be compared to the state of the Melon fund. Policies simply assess the current state of the Melon fund and resolve to a boolean decision, whether the action may be executed or not, returning `true` for allowed actions and `false` for disallowed actions. The Melon fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the permissibility of the action.
 
@@ -705,32 +704,32 @@ Other Policies may need to assess the consequence of the behavior or action befo
 On the blockchain and in smart contracts, we can use a fortunate side-effect of the process of mining and block finalization to help determine the validity of post-condition Policies. With post-condition Policies, the action or behavior is executed with the smart contract logic and the changed (but not yet finalized or mined) state is assessed against the logic and defined parameters of the post-condition Policy. In the case where this new state complies with the logic and criteria of the Policy, the action is allowed, meaning the smart contract execution is allowed to run to completion, the block is eventually mined and this new compliant state is finalized in that mined block. In the case where the new state does not comply with the logic and criteria of the Policy, the action is disallowed and the revert() function is called, stopping execution and discarding (or rolling back) all state changes. In calling the revert() function, gas is consumed to arrive at the reference state, but any unused gas is returned to the caller as the reference state is discarded.
 &nbsp;
 
-### Policy.sol
+#### Policy.sol
 
-#### Description
+##### Description
 
 The Policy contract is inherited by implemented Policies. This contract will be changed to an interface when upgraded to Solidity 0.5, as enums and structs are allowed to be defined in interfaces in that version.
 &nbsp;
 
-#### Inherits from
+##### Inherits from
 
 None.
 
 &nbsp;
 
-#### On Construction
+##### On Construction
 
 None.
 
 &nbsp;
 
-#### Structs
+##### Structs
 
 None.
 
 &nbsp;
 
-#### Enums
+##### Enums
 
 `Applied` - An enum which characterizes the conditionality type of the Policy.
 
@@ -741,25 +740,25 @@ Member Types
 `post` - Indicates that the Policy will be evaluated after the corresponding function's execution.
 &nbsp;
 
-#### Modifiers
+##### Modifiers
 
 None.
 
 &nbsp;
 
-#### Events
+##### Events
 
 None.
 
 &nbsp;
 
-#### Public State Variables
+##### Public State Variables
 
 None.
 
 &nbsp;
 
-#### Public Functions
+##### Public Functions
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
