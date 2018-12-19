@@ -1,0 +1,409 @@
+# Factory
+
+## General
+
+Factory contracts are utilities for the creation of the many component contracts and infrastructure providing services to Melon funds.
+&nbsp;
+
+## Factory.sol
+
+#### Description
+
+The contract is a base contract which defines base elements below. It is inherited by all factory contracts.
+&nbsp;
+
+#### Inherits from
+
+None.
+&nbsp;
+
+#### On Construction
+
+None.
+
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+None.
+
+&nbsp;
+
+#### Events
+
+`event NewInstance()`
+
+    `address indexed hub` - The address of the `hub` corresponding to the created contract.
+    `address indexed instance) - The address of the created contract.
+
+This event is triggered when a the Factory creates a new contract. The parameters listed above are logged with the event.
+&nbsp;
+
+#### Public State Variables
+
+`mapping (address => bool) public childExists`
+
+This public mapping state variable maps an address to boolean. It is used to determine whether an address is that of a contract created by the Factory.
+&nbsp;
+
+#### Public Functions
+
+`function isInstance(address _child) public returns (bool)`
+
+This public function returns a boolean indicating whether the address provided corresponds to a contract created by the `Factory` contract.
+&nbsp;
+
+## FundFactory.sol
+
+#### Description
+
+This contract manages and executes the orderly creation of a new Melon fund, linking all aspects of components, settings, routings and permissions.
+&nbsp;
+
+#### Inherits from
+
+Factory, AmguConsumer (link)
+&nbsp;
+
+#### On Construction
+
+The contract constructor requires the following address parameters and sets the corresponding address state variables:
+
+`address _accountingFactory` - The address of the Version's `AccountingFactory` contract.
+`address _feeManagerFactory` - The address of the Version's `FeeManagerFactory` contract.
+`address _participationFactory` - The address of the Version's `ParticipationFactory` contract.
+`address _sharesFactory` - The address of the Version's `SharesFactory` contract.
+`address _tradingFactory` - The address of the Version's `TradingFactory` contract.
+`address _vaultFactory` - The address of the Version's `VaultFactory` contract.
+`address _policyManagerFactory` - The address of the Version's `PolicyManagerFactory` contract.
+`address _version` - The address of the `Version` contract.
+`address _engine` - The address of the Version's `Engine` contract.
+`address _factoryPriceSource` - The address of the Version's `FactoryPriceSource` contract.
+`address _mlnToken` - The address of the MLN Token contract.
+&nbsp;
+
+#### Structs
+
+`Components`
+
+  Member variables:
+
+  `address accounting` - The address of the Melon fund's accounting spoke contract.
+  `address feeManager` - The address of the Melon fund's feeManager spoke contract.
+  `address participation` - The address of the Melon fund's participation spoke contract.
+  `address policyManager` - The address of the Melon fund's policyManager spoke contract.
+  `address shares` - The address of the Melon fund's shares spoke contract.
+  `address trading` - The address of the Melon fund's trading spoke contract.
+  `address vault` - The address of the Melon fund's vault spoke contract.
+  `address priceSource` - The address of the Melon fund's priceSource spoke contract.
+  `address registry` - The address of the Melon fund's registry contract.
+  `address version` - The address of the Melon fund's version contract.
+  `address engine` - The address of the Melon Engine contract.
+  `address mlnToken` - The address of the MLN token contract.
+&nbsp;
+
+Settings
+
+  Member variables:
+
+  `string name` - The name of the Melon fund.
+  `address[] exchanges` - An array of exchange contract addresses registered for the Melon fund.
+  `address[] adapters` - An array of exchange adapter contract addresses registered for the Melon fund.
+  `address quoteAsset` - The address of the asset token designated as the Melon fund's quote asset, i.e. the token in which the Melon fund is denominated.
+  `address nativeAsset` - The address of the asset token designated as the Melon fund's native asset, i.e. the Melon fund's native network token.
+  `address[] defaultAssets` - An array of addresses designating the Melon fund's accepted asset tokens for subscription.
+  `bool[] takesCustody` - An array of booleans mirroring an exchange contract's `takesCustody` state variable.
+  `address priceSource` - The address of the Melon fund's price source.
+  `address[] fees` - An array of addresses of the Melon fund's registered `fee` contracts.
+  `uint[] feeRates` - An array of integers representing the fee rates registered for the Melon fund.
+  `uint[] feePeriods` - An array of integer representing the the duration of a fee performance measurement period in seconds.
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+modifier step(uint8 n)
+
+This modifier enables a function to manage and enforce an order in executing specific steps. The modifier requires the parameter `n` which represents the ordinal number of the current step and that the provided `n` is the next consecutive ordinal number after the previously registered step ordinal. Then, the functionality of the implementing function is executed. Finally, the current step ordinal `n` is registered for assessment by any successive step.
+&nbsp;
+
+#### Events
+
+NewFund()
+
+    `address manager` - The address of the Melon fund's manager.
+    `address hub` - The address of the Melon fund's `hub`.
+    `address[12] components` - An array of 12 address representing the relevant Melon fund component addresses are specified by the `Components` struct above.
+
+This event is emitted when the FundFactory creates a new fund. The event logs the parameters listed above.
+&nbsp;
+
+#### Public State Variables
+
+`address public factoryPriceSource`
+
+This public state variable represents the Version's price source contract.
+&nbsp;
+
+`address public mlnToken`
+
+This public state variable represents MLN token contract.
+&nbsp;
+
+`VersionInterface public version`
+
+This public state variable represents the Version contract.
+&nbsp;
+
+`address public engine`
+
+This public state variable represents the Version's Melon Engine contract.
+&nbsp;
+
+`address public registry`
+
+This public state variable represents the Version's Registry contract.
+&nbsp;
+
+`AccountingFactory public accountingFactory`
+
+This public state variable represents the Version's AccountingFactory contract.
+&nbsp;
+
+`FeeManagerFactory public feeManagerFactory`
+
+This public state variable represents the Version's FeeManagerFactory contract.
+&nbsp;
+
+`ParticipationFactory public participationFactory`
+
+This public state variable represents the Version's ParticipationFactory contract.
+&nbsp;
+
+`PolicyManagerFactory public policyManagerFactory`
+
+This public state variable represents the Version's PolicyManagerFactory contract.
+&nbsp;
+
+`SharesFactory public sharesFactory`
+
+This public state variable represents the Version's SharesFactory contract.
+&nbsp;
+
+`TradingFactory public tradingFactory`
+
+This public state variable represents the Version's TradingFactory contract.
+&nbsp;
+
+`VaultFactory public vaultFactory`
+
+This public state variable represents the Version's VaultFactory contract.
+&nbsp;
+
+`address[] public funds`
+
+This public state variable address array represents all fund contract addresses created by the FundFactory.
+&nbsp;
+
+`mapping (address => bool) public hubExists`
+
+This public state variable mapping maps an address to boolean to determine whether a specific address has a corresponding `hub` registered.
+&nbsp;
+
+`mapping (address => address) public managersToHubs`
+
+This public state variable mapping maps an address to an address, creating a relationship of manager to `hub`.
+&nbsp;
+
+`mapping (address => Components) public managersToComponents`
+
+This public state variable mapping maps an address to `Components` struct, creating a relationship of manager to `Components`.
+&nbsp;
+
+`mapping (address => Settings) public managersToSettings`
+
+This public state variable mapping maps an address to `Settings` struct, creating a relationship of manager to `Settings`. This mapping is only used internally.
+&nbsp;
+
+`mapping (address => uint8) public stepFor`
+
+This public state variable mapping maps an address to and integer, for use with the `step()` modifier to assist in enforcing a step execution order.
+&nbsp;
+
+#### Public Functions
+
+`function beginSetup(
+    string _name,
+    // address _compliance,
+    // address[] _policies,
+    address[] _fees,
+    uint[] _feeRates,
+    uint[] _feePeriods,
+    address[] _exchanges,
+    address[] _adapters,
+    address _quoteAsset,
+    address _nativeAsset,
+    address[] _defaultAssets,
+    bool[] _takesCustody,
+    address _priceSource
+) step(1)`
+
+This public function takes the following parameters and initiates the set up process of a Melon fund. The function implements the `step()` modifier with a value of "1", ensuring that this is the first function executed in the Melon fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the managersToComponents mapping by mapping the `msg.sender` (manager) address to the following individual `Component` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
+&nbsp;
+
+`function createAccounting() step(2) amguPayable payable`
+
+This public function creates the Accounting spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "2", ensuring that this is the second function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createFeeManager() step(3) amguPayable payable`
+
+This public function creates the FeeManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "3", ensuring that this is the third function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createParticipation() step(4) amguPayable payable`
+
+This public function creates the Participation spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "4", ensuring that this is the fourth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createPolicyManager() step(5) amguPayable payable`
+
+This public function creates the PolicyManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "5", ensuring that this is the fifth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createShares() step(6) amguPayable payable`
+
+This public function creates the Shares spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "6", ensuring that this is the sixth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createTrading() step(7) amguPayable payable`
+
+This public function creates the Trading spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "7", ensuring that this is the seventh function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function createVault() step(8) amguPayable payable`
+
+This public function creates the Vault spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "8", ensuring that this is the eighth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function completeSetup() step(9) amguPayable payable`
+
+This public function completes the set up of a Melon fund. The `Hub` address is added to the `hubExists` mapping. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new Melon fund is then registered with the Version Registry. The function deletes the msg.sender's entry in the `managersToSettings` mapping and finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `step()` modifier with a value of "9", ensuring that this is the ninth and final function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
+
+`function getFundById(uint withId) public view returns (address)`
+
+This public view function returns the address of the Melon fund given the `withId` value provided, which is the index of of the `funds` address array state variable.
+&nbsp;
+
+`function getLastFundId() public view returns (uint)`
+
+This public view function returns the index position of the most recently added Melon fund to the `funds` array state variable.
+&nbsp;
+
+`function engine() view returns (address)`
+
+This public view function returns the address of the Melon Engine contract.
+&nbsp;
+
+`function mlnToken() view returns (address)`
+
+This public view function returns the address of the MLN token contract.
+&nbsp;
+
+`function priceSource() view returns (address)`
+
+This public view function returns the address of the PriceSource contract.
+&nbsp;
+
+`function version() view returns (address)`
+
+This public view function returns the address of the Version contract.
+&nbsp;
+
+## FundRanking.sol
+
+#### Description
+
+The contract defines a function which returns specified information on each Melon fund created under a specific Version.
+&nbsp;
+
+#### Inherits from
+
+None.
+
+&nbsp;
+
+#### On Construction
+
+None.
+
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+None.
+
+&nbsp;
+
+#### Events
+
+None.
+
+&nbsp;
+
+#### Public State Variables
+
+None.
+
+&nbsp;
+
+#### Public Functions
+
+`function getFundDetails(
+  address _factory)
+view
+returns(
+  address[],
+  uint[],
+  uint[],
+  string[],
+  address[])`
+
+This public view function gathers and returns the following Melon platform details for a specific Version, given the FundFactory address provided:
+
+`address[]` - An exhaustive array of Hub (i.e. Melon fund) addresses.
+`uint[]` - An exhaustive array of each Melon fund's current share price.
+`uint[]` - An exhaustive array of each Melon fund's creation time.
+`string[]` - An exhaustive array of each Melon funds' name.
+`address[]` - An exhaustive array of each Melon fund's quote asset token address.
+&nbsp;
