@@ -378,7 +378,7 @@ This public function cancels an existing order on the Ethfinex exchange contract
 
 Please see parameter descriptions above.
 
-This public function withdraws all asset tokens held by the Ethfinex exchange in open make orders, then removes the make order form the Melon fund's internal order tracking by calling the Trading contract's `removeOpenMakeOrder()`.
+This public function withdraws all asset tokens held by the Ethfinex exchange in open make orders, then removes the make order form the Melon fund's internal order tracking by calling the Trading contract's `removeOpenMakeOrder()`. Finally, the function returns the asset tokens to the vault and adds the asset token to `ownedAssets`.
 &nbsp;
 
 `function getOrder(

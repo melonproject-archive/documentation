@@ -121,7 +121,7 @@ Settings
   `string name` - The name of the Melon fund.
   `address[] exchanges` - An array of exchange contract addresses registered for the Melon fund.
   `address[] adapters` - An array of exchange adapter contract addresses registered for the Melon fund.
-  `address quoteAsset` - The address of the asset token designated as the Melon fund's quote asset, i.e. the token in which the Melon fund is denominated.
+  `address denominationAsset` - The address of the asset token in which the Melon fund is denominated.
   `address nativeAsset` - The address of the asset token designated as the Melon fund's native asset, i.e. the Melon fund's native network token.
   `address[] defaultAssets` - An array of addresses designating the Melon fund's accepted asset tokens for subscription.
   `bool[] takesCustody` - An array of booleans mirroring an exchange contract's `takesCustody` state variable.
@@ -139,9 +139,9 @@ None.
 
 #### Modifiers
 
-modifier step(uint8 n)
+`modifier componentNotSet(address _component)`  
 
-This modifier enables a function to manage and enforce an order in executing specific steps. The modifier requires the parameter `n` which represents the ordinal number of the current step and that the provided `n` is the next consecutive ordinal number after the previously registered step ordinal. Then, the functionality of the implementing function is executed. Finally, the current step ordinal `n` is registered for assessment by any successive step.
+This modifier enables a function to enforce the single execution of the implementing function and is evaluated prior the executing the implementing function's functionality.
 &nbsp;
 
 #### Events
@@ -222,11 +222,6 @@ This public state variable represents the Version's VaultFactory contract.
 This public state variable address array represents all fund contract addresses created by the FundFactory.
 &nbsp;
 
-`mapping (address => bool) public hubExists`
-
-This public state variable mapping maps an address to boolean to determine whether a specific address has a corresponding `hub` registered.
-&nbsp;
-
 `mapping (address => address) public managersToHubs`
 
 This public state variable mapping maps an address to an address, creating a relationship of manager to `hub`.
@@ -242,11 +237,6 @@ This public state variable mapping maps an address to `Components` struct, creat
 This public state variable mapping maps an address to `Settings` struct, creating a relationship of manager to `Settings`. This mapping is only used internally.
 &nbsp;
 
-`mapping (address => uint8) public stepFor`
-
-This public state variable mapping maps an address to and integer, for use with the `step()` modifier to assist in enforcing a step execution order.
-&nbsp;
-
 #### Public Functions
 
 `function beginSetup(
@@ -258,54 +248,62 @@ This public state variable mapping maps an address to and integer, for use with 
     uint[] _feePeriods,
     address[] _exchanges,
     address[] _adapters,
-    address _quoteAsset,
+    address _denominationAsset,
     address _nativeAsset,
     address[] _defaultAssets,
     bool[] _takesCustody,
     address _priceSource
-) step(1)`
+) componentNotSet(managersToHubs[msg.sender])`
 
-This public function takes the following parameters and initiates the set up process of a Melon fund. The function implements the `step()` modifier with a value of "1", ensuring that this is the first function executed in the Melon fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the managersToComponents mapping by mapping the `msg.sender` (manager) address to the following individual `Component` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
+This public function takes the following parameters and initiates the set up process of a Melon fund. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the managersToComponents mapping by mapping the `msg.sender` (manager) address to the following individual `Component` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
 &nbsp;
 
-`function createAccounting() step(2) amguPayable payable`
+`function createAccounting()
+componentNotSet(managersToRoutes[msg.sender].accounting) amguPayable payable`
 
-This public function creates the Accounting spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "2", ensuring that this is the second function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Accounting spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createFeeManager() step(3) amguPayable payable`
+`function createFeeManager()
+componentNotSet(managersToRoutes[msg.sender].feeManager) amguPayable payable`
 
-This public function creates the FeeManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "3", ensuring that this is the third function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the FeeManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createParticipation() step(4) amguPayable payable`
+`function createParticipation()
+componentNotSet(managersToRoutes[msg.sender].participation) amguPayable payable`
 
-This public function creates the Participation spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "4", ensuring that this is the fourth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Participation spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createPolicyManager() step(5) amguPayable payable`
+`function createPolicyManager()
+componentNotSet(managersToRoutes[msg.sender].policyManager) amguPayable payable`
 
-This public function creates the PolicyManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "5", ensuring that this is the fifth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the PolicyManager spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createShares() step(6) amguPayable payable`
+`function createShares()
+componentNotSet(managersToRoutes[msg.sender].shares) amguPayable payable`
 
-This public function creates the Shares spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "6", ensuring that this is the sixth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Shares spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createTrading() step(7) amguPayable payable`
+`function createTrading()
+componentNotSet(managersToRoutes[msg.sender].trading) amguPayable payable`
 
-This public function creates the Trading spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "7", ensuring that this is the seventh function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Trading spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function createVault() step(8) amguPayable payable`
+`function createVault()
+componentNotSet(managersToRoutes[msg.sender].vault) amguPayable payable`
 
-This public function creates the Vault spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `step()` modifier with a value of "8", ensuring that this is the eighth function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Vault spoke of a Melon fund and adds the resulting contract address to the `managersToComponents` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
-`function completeSetup() step(9) amguPayable payable`
+`function completeSetup()
+amguPayable payable`
 
-This public function completes the set up of a Melon fund. The `Hub` address is added to the `hubExists` mapping. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new Melon fund is then registered with the Version Registry. The function deletes the msg.sender's entry in the `managersToSettings` mapping and finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `step()` modifier with a value of "9", ensuring that this is the ninth and final function executed in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function completes the set up of a Melon fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new Melon fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function getFundById(uint withId) public view returns (address)`
@@ -405,5 +403,5 @@ This public view function gathers and returns the following Melon platform detai
 `uint[]` - An exhaustive array of each Melon fund's current share price.
 `uint[]` - An exhaustive array of each Melon fund's creation time.
 `string[]` - An exhaustive array of each Melon funds' name.
-`address[]` - An exhaustive array of each Melon fund's quote asset token address.
+`address[]` - An exhaustive array of each Melon fund's denomination asset token address.
 &nbsp;

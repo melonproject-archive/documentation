@@ -108,11 +108,6 @@ None.
 
 #### Public State Variables
 
-`uint constant public updateId = 1`
-
-[CHECK: Not currently used.]
-&nbsp;
-
 `address public KYBER_NETWORK_PROXY`
 
 The address of the Kyber network proxy contract.
