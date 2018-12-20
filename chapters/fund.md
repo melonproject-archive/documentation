@@ -4,15 +4,15 @@
 
 ### General
 
-The Hub and Spoke contracts make up the core contract framework of the Melon fund. Hub and Spoke is an architecture design to help reason about all the moving parts of fund as constructed by an interconnected system of linked smart contracts. The Hub will contain all relevant information for all Spokes registered with the Hub. Each Spoke will independently contain all relevant information about the Hub. Individual Spokes will have programmatic access to information in specific other Spokes.
+The Hub and Spoke contracts make up the core contract framework of the water<b>melon</b> fund. Hub and Spoke is an architecture design to help reason about all the moving parts of fund as constructed by an interconnected system of linked smart contracts. The Hub will contain all relevant information for all Spokes registered with the Hub. Each Spoke will independently contain all relevant information about the Hub. Individual Spokes will have programmatic access to information in specific other Spokes.
 
-In general, there is one Hub contract and separate, distinct Spoke contracts for each fund. (CHECK: Implementation for shared components as spoke) The Hub forms the core of the individual Melon fund with each Spoke contributing specific services to the fund. The Hub contract stores the manager's address and the fund name permanently in state, and also contains the functionality to permanently and irreversibly shut the Melon fund down.
+In general, there is one Hub contract and separate, distinct Spoke contracts for each fund. (CHECK: Implementation for shared components as spoke) The Hub forms the core of the individual water<b>melon</b> fund with each Spoke contributing specific services to the fund. The Hub contract stores the manager's address and the fund name permanently in state, and also contains the functionality to permanently and irreversibly shut the water<b>melon</b> fund down.
 
 ### Hub.sol
 
 #### Description
 
-The Hub maintains the specific Spoke components of the fund in terms of their routing and their permissioning. Permissioning is of utmost importance as it ensures only design-intended access to specific components of the Melon fund smart contract system. The permissioning has a very low-level granularity, exclusively permitting only specific Spokes to invoke specific functions on specific target Spokes. This surgical permissioning system ensures that sensitive function execution can occur as intended and not by external actors.
+The Hub maintains the specific Spoke components of the fund in terms of their routing and their permissioning. Permissioning is of utmost importance as it ensures only design-intended access to specific components of the water<b>melon</b> fund smart contract system. The permissioning has a very low-level granularity, exclusively permitting only specific Spokes to invoke specific functions on specific target Spokes. This surgical permissioning system ensures that sensitive function execution can occur as intended and not by external actors.
 
 #### Inherits from
 
@@ -220,7 +220,7 @@ This view function returns the version component contract address.
 
 ### Overview
 
-The Manager (Investment Manager) is the central actor in the Melon Fund. The Investment Manager is the creator of the Melon Fund and as such, the `owner` of the Melon Fund smart contract. In this capacity, the Investment Manager designs the initial set up of the Melon Fund, including:
+The Manager (Investment Manager) is the central actor in the water<b>melon</b> Fund. The Investment Manager is the creator of the water<b>melon</b> Fund and as such, the `owner` of the water<b>melon</b> Fund smart contract. In this capacity, the Investment Manager designs the initial set up of the water<b>melon</b> Fund, including:
 
 - Compliance rules regarding Investor participation
 - Risk Engineering rules regarding Investments guidelines
@@ -229,13 +229,13 @@ The Manager (Investment Manager) is the central actor in the Melon Fund. The Inv
 - Asset Tokens eligible for Subscription and Redemption
 - Fund name
 
-Once the Melon Fund is set up, it will be open for investment from Investors. When Investors transfer investment capital to the Melon Fund, the Investment Manager has full discretionary investment allocation authority over the assets, although Investors retain ultimate control over their respective shares in the Melon Fund. The discretionary investment allocation authority is, however, constrained by those Risk Engineering rules put in place by the Investment Manager during fund set up.
+Once the water<b>melon</b> Fund is set up, it will be open for investment from Investors. When Investors transfer investment capital to the water<b>melon</b> Fund, the Investment Manager has full discretionary investment allocation authority over the assets, although Investors retain ultimate control over their respective shares in the water<b>melon</b> Fund. The discretionary investment allocation authority is, however, constrained by those Risk Engineering rules put in place by the Investment Manager during fund set up.
 
-The critical point about a Melon Fund is that Investors retain control of their investment in the fund, while delegating asset management activity to the Investment Manager, who has the fine-grained trade and asset management authority, but no ability to remove asset tokens from the segregated safety of the Melon Fund's smart contact custody.
+The critical point about a water<b>melon</b> Fund is that Investors retain control of their investment in the fund, while delegating asset management activity to the Investment Manager, who has the fine-grained trade and asset management authority, but no ability to remove asset tokens from the segregated safety of the water<b>melon</b> Fund's smart contact custody.
 
 ### Fund Interaction
 
-The Investment Manager in the capacity of `owner` of the Melon Fund smart contract can as the ability to interact with the following smart contract functions:
+The Investment Manager in the capacity of `owner` of the water<b>melon</b> Fund smart contract can as the ability to interact with the following smart contract functions:
 
 - `enableInvestment()`
 
@@ -251,9 +251,9 @@ Please refer to the Fund components documentation for further details on these f
 
 ## Investors
 
-A Melon Fund is setup to serve Investors. That is, an Investment Manager creates a Melon Fund in order to provide the service of managing capital on behalf of participating Investors.
+A water<b>melon</b> Fund is setup to serve Investors. That is, an Investment Manager creates a water<b>melon</b> Fund in order to provide the service of managing capital on behalf of participating Investors.
 
-Investors are individuals or institutions participating in the performance of Melon Funds by sending cryptographic Asset tokens to the specific Melon Fund via the fund's `requestInvestment()` function.
+Investors are individuals or institutions participating in the performance of water<b>melon</b> Funds by sending cryptographic Asset tokens to the specific water<b>melon</b> Fund via the fund's `requestInvestment()` function.
 
 In the context of the platform, the Investor is the Ethereum address from which the `requestInvestment()` was called and tokens sent (i.e. `msg.sender`).
 
@@ -277,7 +277,7 @@ Example Ethereum Private Key:
 
 #### Description
 
-The Participation contract encompasses the entire Melon fund interface to the investor and manages or delegates all functionality pertaining to fund subscription and redemption activities including the creation/destruction of Melon fund shares, fee calculations, asset token transfers and enabling/disabling specific asset tokens for subscription.
+The Participation contract encompasses the entire water<b>melon</b> fund interface to the investor and manages or delegates all functionality pertaining to fund subscription and redemption activities including the creation/destruction of water<b>melon</b> fund shares, fee calculations, asset token transfers and enabling/disabling specific asset tokens for subscription.
 
 #### Inherits from
 
@@ -335,7 +335,7 @@ A public mapping which assigns an investor's address to a `Request` struct.
 
 `mapping (address => bool) public investAllowed`
 
-A public mapping which specifies all asset tokens which have been enabled for subscription to the Melon fund.
+A public mapping which specifies all asset tokens which have been enabled for subscription to the water<b>melon</b> fund.
 
 `uint public SHARES_DECIMALS`
 
@@ -345,7 +345,7 @@ An integer which specifies the decimal precision of a single share. The value is
 
 `function enableInvestment(address[] _assets) public auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the Melon fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping.
+This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the water<b>melon</b> fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping.
 
 `function disableInvestment(address[] _assets) public auth`
 
@@ -353,7 +353,7 @@ This function requires that the caller is the `owner` or the current contract. T
 
 `function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external payable amguPayable`
 
-This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Execution of this functions requires payment of AMGU ETH to the Melon Engine. [CHECK: Further explantation and detail][check: add compliance when implemented]
+This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine. [CHECK: Further explantation and detail][check: add compliance when implemented]
 
 `function cancelRequest() external`
 
@@ -420,7 +420,7 @@ This view function returns a boolean indicating whether the provided address has
 
 In fund management, shares assign proportionate ownership of the collective underlying assets held in the fund. Each share in a fund has equal claim to the fund's assets. Shareholders then have a claim to the underlying fund assets in proportion to the quantity of shares under their control, i.e. ownership.
 
-In a Melon fund, fund shares are represented as ERC20 tokens. Each token has equal and proportionate claim to the underlying assets. The share tokens are fungible but are not transferrable [CHECK if this will remain so.] between owners.
+In a water<b>melon</b> fund, fund shares are represented as ERC20 tokens. Each token has equal and proportionate claim to the underlying assets. The share tokens are fungible but are not transferrable [CHECK if this will remain so.] between owners.
 
 As subscribed capital enters the fund, the Shares contract will create a proportionate quantity of share tokens based on the current market prices of the fund's underlying assets and the market price of the subscribed capital and assign allocate these newly created share tokens to the subscribing address.
 
@@ -432,7 +432,7 @@ Spoke, StandardToken (links)
 
 #### On construction
 
-The Shares contract requires the address of the `hub` and becomes a `spoke` of the `hub`. The Shares contract describes the Melon fund's shares as _ERC20 tokens_. The share tokens take their name as defined by the `hub`. The share token's symbol and decimals are hardcoded in the contract.
+The Shares contract requires the address of the `hub` and becomes a `spoke` of the `hub`. The Shares contract describes the water<b>melon</b> fund's shares as _ERC20 tokens_. The share tokens take their name as defined by the `hub`. The share token's symbol and decimals are hardcoded in the contract.
 
 The Shares contract is created from the sharesFactory contract, which creates a new instance of `Shares` given the `hub` address, register the address of the newly created shares contract as a child of the sharesFactory.
 
@@ -440,15 +440,15 @@ The Shares contract is created from the sharesFactory contract, which creates a 
 
 `string public symbol`
 
-A public string variable denoting the Melon fund's share token symbol, currently defaulting to "MLNF".
+A public string variable denoting the water<b>melon</b> fund's share token symbol, currently defaulting to "MLNF".
 
 `string public name`
 
-A public string variable denoting the Melon fund's name as specified by the manager at set up.
+A public string variable denoting the water<b>melon</b> fund's name as specified by the manager at set up.
 
 `uint8 public decimals`
 
-A public integer variable storing the decimal precision of the Melon fund's share quantity, currently defaulting to 18, the same decimal precision as ETH and many other ERC20 tokens.
+A public integer variable storing the decimal precision of the water<b>melon</b> fund's share quantity, currently defaulting to 18, the same decimal precision as ETH and many other ERC20 tokens.
 
 #### Structs
 
@@ -690,26 +690,26 @@ This function requires that the caller is the `owner` or the current contract. T
 
 ### General
 
-Fees are charges levied against a Melon fund's assets for:
+Fees are charges levied against a water<b>melon</b> fund's assets for:
 
 - management services rendered, in the form of Management Fees
 - fund performance achieved, in the form of Performance Fees.
 
 Legacy investment funds are typically run as legal vehicle; a business with income and expenses. As a traditional fund incurs expenses (not only those listed above, but others like administration-, custody-, directors-, audit fess), traditional funds must liquidate assets to cash or pay the expenses out of cash held by the fund. This necessarily reduces the assets of the fund and incurs further trading costs.
 
-Melon funds employ a novel and elegant solution: Instead of using cash, or liquidating positions to pay fees, the Melon fund smart contract itself calculates and creates new shares (or share fractions), allocating them to the investment manager's own account holdings within the fund as payment.
+water<b>melon</b> funds employ a novel and elegant solution: Instead of using cash, or liquidating positions to pay fees, the water<b>melon</b> fund smart contract itself calculates and creates new shares (or share fractions), allocating them to the investment manager's own account holdings within the fund as payment.
 
-At that point, the investment manager can continue holding an increased number of shares in their own fund, or redeem the shares to pay their own operating costs, expand their research activities or whatever else they deem appropriate. The Melon Fund smart contract autonomously and verifiably maintains the shareholder accounting impact in a truly reliable and transparent manner.
+At that point, the investment manager can continue holding an increased number of shares in their own fund, or redeem the shares to pay their own operating costs, expand their research activities or whatever else they deem appropriate. The water<b>melon</b> Fund smart contract autonomously and verifiably maintains the shareholder accounting impact in a truly reliable and transparent manner.
 
 Paying fees in this manner has a few interesting side-effects: Assets do not leave the fund, as would a cash payment. There are no unnecessary trading or cash management transactions. Investors and managers have access to real-time fee accrual metrics. Finally, the incentives to the manager are reinforced beyond a cash performance fee by being paid in the currency that is their own product.
 
 The Management Fee and Performance Fee are each represented by an individual contract. The business logic and functionality of each fee is defined within the respective contract. The contract will interact with the various components of the fund to calculate and return the quantity of shares to create. This quantity is then added to the Manager address balance and to the total supply balance.
 
-The Fee Manager component manages the individual fee contracts which have been configured for the Melon fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
+The Fee Manager component manages the individual fee contracts which have been configured for the water<b>melon</b> fund at set up. The core of the Fee Manager is an array of Fee contract instances. Functions exist to prime this array at fund setup with the selected and configured fee contracts, as well as basic query functionality to aid the user interface in calculating and representing the share NAV.
 
 Fees are calculated and allocated when fund actions such as subscribe, redeem or claim fees are executed by a participant. Calling `rewardAllFees()` will iterate over the array of registered fees in the fee manager, calling each fee's calculation logic. This returns the quantity of shares to create and allocate to the manager.
 
-It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the Melon fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
+It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the water<b>melon</b> fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
 
 ### Management Fees
 
@@ -751,7 +751,7 @@ Performance Fees accrue over time with performance, but can only be harvested af
 
 Performance is assessed at the end of the Measurement Period by comparing the fund's current share price net of Management Fees to the fund's current high-water mark (HWM).
 
-The HWM represents the highest share valuation which the Melon fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share valuation of all Measurement Period-end snapshot valuations.
+The HWM represents the highest share valuation which the water<b>melon</b> fund has historically achieved _at a Measurement Period ending time_. More clearly, it is not a fund all-time-high, but rather the maximum share valuation of all Measurement Period-end snapshot valuations.
 
 If the difference to the HWM is positive, performance has been achieved and a Performance Fee is due to the fund manager. This calculation is straightforward and is the aforementioned difference multiplied by the Performance Fee rate. The Performance Fee is _not_ an annualized fee rate.
 
@@ -961,7 +961,7 @@ This function sets the `highwatermark` and `lastPayoutTime` if applicable.
 
 ## Trading
 
-The Melon Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a Melon Fund. This means that a Melon Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
+The water<b>melon</b> Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a water<b>melon</b> Fund. This means that a water<b>melon</b> Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
 
 ### Trading.sol
 
@@ -1144,9 +1144,9 @@ Public functions
 
 ### Exchange Adapters
 
-Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the Melon Fund and the DEX.
+Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the water<b>melon</b> Fund and the DEX.
 
-Currently, the Melon Protocol has adapters to integrate the following DEXs:
+Currently, the water<b>melon</b> Protocol has adapters to integrate the following DEXs:
 
 - Oasis DEX
 - 0x (enabling interaction on the orderbooks of all 0x relayers)
@@ -1157,7 +1157,7 @@ Each exchange is tied to a specific adapter by the canonical registrar. A fund c
 
 ### Adapter Function Details
 
-The `Fund.sol` smart contract in the Melon Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
+The `Fund.sol` smart contract in the water<b>melon</b> Protocol (the blockchain fund instance) commonly uses the following functions in the Exchange Adapter to interact with the intended DEX for trading purposes:
 
 - `makeOrder()` Creates a new order in the DEX's order book. The order may not be immediately executed. Note that this function will not be implemented for the 0x adapter until 0x Version 2 is released.
 
@@ -1184,9 +1184,9 @@ Note that fund is not limited to these functions and can call arbitrary function
 
 ### Policy Manager
 
-The policyManager contract is the core of risk management and compliance policies. Policies are individual contracts that define and enforce specific business logic codified within. Policies are registered with the Melon fund's policyManager contract for specific function call pertaining to trading fund positions or investor subscriptions.
+The policyManager contract is the core of risk management and compliance policies. Policies are individual contracts that define and enforce specific business logic codified within. Policies are registered with the water<b>melon</b> fund's policyManager contract for specific function call pertaining to trading fund positions or investor subscriptions.
 
-The policyManager is embedded into specific function calls in other Spokes of the Melon fund as required through the modifiers described below.
+The policyManager is embedded into specific function calls in other Spokes of the water<b>melon</b> fund as required through the modifiers described below.
 &nbsp;
 
 #### PolicyManager.sol
@@ -1310,7 +1310,7 @@ This internal view function receives a function-specific filtered array of Polic
 
 ### Policies
 
-Polices are individual smart contracts which define rule or set of rules to be compared to the state of the Melon fund. Policies simply assess the current state of the Melon fund and resolve to a boolean decision, whether the action may be executed or not, returning `true` for allowed actions and `false` for disallowed actions. The Melon fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the permissibility of the action.
+Polices are individual smart contracts which define rule or set of rules to be compared to the state of the water<b>melon</b> fund. Policies simply assess the current state of the water<b>melon</b> fund and resolve to a boolean decision, whether the action may be executed or not, returning `true` for allowed actions and `false` for disallowed actions. The water<b>melon</b> fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the permissibility of the action.
 
 #### Pre- and Post-Conditionality
 
@@ -1417,17 +1417,17 @@ This view function returns the enum `Applied` which is defined for each specific
 
 ### General
 
-The contracts below define the business logic for the screening of investor addresses allowed to- or prevented from subscribing to a Melon fund.
+The contracts below define the business logic for the screening of investor addresses allowed to- or prevented from subscribing to a water<b>melon</b> fund.
 
-In the Melon Protocol, the term "Compliance" revolves around the specifics of investing as an Investor _into_ Melon Fund. This is often referred to as a "Subscription". Details around which addresses, amounts and when Investors may subscribe to the Melon Fund are configured in-, and managed by the Compliance module. To clarify, in the traditional investment management industry, "compliance" is also used to refer to trading of underlying fund assets, as in a whether a certain asset or trade is compliant with portfolio guidelines, laws and regulations. This type of intra-portfolio asset level compliance is handled by the Risk Engineering module in the Melon Protocol.
+In the water<b>melon</b> Protocol, the term "Compliance" revolves around the specifics of investing as an Investor _into_ water<b>melon</b> Fund. This is often referred to as a "Subscription". Details around which addresses, amounts and when Investors may subscribe to the water<b>melon</b> Fund are configured in-, and managed by the Compliance module. To clarify, in the traditional investment management industry, "compliance" is also used to refer to trading of underlying fund assets, as in a whether a certain asset or trade is compliant with portfolio guidelines, laws and regulations. This type of intra-portfolio asset level compliance is handled by the Risk Engineering module in the water<b>melon</b> Protocol.
 
-The main use case for the Melon Fund Compliance module is the ability to create and maintain a whitelist for specific addresses. That is, the Investment Manager can explicitly define specific addresses which will then have the ability to subscribe to the Melon Fund.
+The main use case for the water<b>melon</b> Fund Compliance module is the ability to create and maintain a whitelist for specific addresses. That is, the Investment Manager can explicitly define specific addresses which will then have the ability to subscribe to the water<b>melon</b> Fund.
 
-Note that any listing of an address on the Compliance module whitelist only impacts the Investor's _ability_ to subscribe to the Melon Fund. An existing investment from a specific address will remain invested irrespective of any change in that address's whitelist status. The current implementation does not affect an address status after the fact. Blacklisting does not affect an invested address's current invested status or ability to redeem, but will prevent future subscriptions. The whitelist can be seen as a positive filter, creating a known universe of allowed investor addresses. Investor addresses can be added to- or removed from either list, individually or in batch by the fund manager (`owner`).
+Note that any listing of an address on the Compliance module whitelist only impacts the Investor's _ability_ to subscribe to the water<b>melon</b> Fund. An existing investment from a specific address will remain invested irrespective of any change in that address's whitelist status. The current implementation does not affect an address status after the fact. Blacklisting does not affect an invested address's current invested status or ability to redeem, but will prevent future subscriptions. The whitelist can be seen as a positive filter, creating a known universe of allowed investor addresses. Investor addresses can be added to- or removed from either list, individually or in batch by the fund manager (`owner`).
 
 ### Future Directions
 
-The Melon Fund Compliance module potentially has great significance for regulators and regulatory frameworks. Possible use cases are: Regulators or KYC/AML providers may create and maintain their own whitelist of Investor addresses in a Melon Compliance module that individual Melon Funds could query; the ability for the Investment Manager to "Hard Close" or "Soft Close" subscriptions; the ability to cap subscription amounts.
+The water<b>melon</b> Fund Compliance module potentially has great significance for regulators and regulatory frameworks. Possible use cases are: Regulators or KYC/AML providers may create and maintain their own whitelist of Investor addresses in a water<b>melon</b> Compliance module that individual water<b>melon</b> Funds could query; the ability for the Investment Manager to "Hard Close" or "Soft Close" subscriptions; the ability to cap subscription amounts.
 
 Hard Close - A fund refuses all new investment subscriptions, usually due to capacity limitations for a specific strategy.
 
@@ -1596,9 +1596,9 @@ Portfolio guidelines are rules which are laid out in a legal document (Offering 
 
 All institutional fund managers use software to help them manage portfolios. They will say, "Our software will not allow a trade which conflicts with the guidelines", or they will have a process in place which has a name like "pre-trade clearance" or "hypothetical trading". These methods have served the industry to a satisfactory level, but non-compliant trades do find their way into a portfolio.
 
-Melon funds approach risk differently. Melon fund currently implement _risk engineering_ i.e. anticipating a specific risk and handling it in the code of the smart contract. Essentially, this is a proactive posture, as opposed to a reactive posture.
+water<b>melon</b> funds approach risk differently. water<b>melon</b> fund currently implement _risk engineering_ i.e. anticipating a specific risk and handling it in the code of the smart contract. Essentially, this is a proactive posture, as opposed to a reactive posture.
 
-_Risk engineering_ is the anticipation and identification of different risks, and the action of preventing their occurrence through code. Rules coded into smart contracts that are meant to ensure that something **cannot not** happen in the structure of a Melon fund.
+_Risk engineering_ is the anticipation and identification of different risks, and the action of preventing their occurrence through code. Rules coded into smart contracts that are meant to ensure that something **cannot not** happen in the structure of a water<b>melon</b> fund.
 
 ### What is risk management ?
 
@@ -1610,9 +1610,9 @@ _Risk engineering_ is the anticipation and identification of different risks, an
 
 In Melon, it's different. We're not doing risk management, rather are we doing _risk engineering_ ie. anticipating the risk ahead of time, and handling it in the code of the smart contract. Being proactive vs reactive.
 
-_risk engineering_ = the anticipation and identification of different risks ahead of time, and the action of preventing their occurrence through code. Rules coded into smart contracts that are meant to make sure that something **will not** happen in the context of a Melon fund.
+_risk engineering_ = the anticipation and identification of different risks ahead of time, and the action of preventing their occurrence through code. Rules coded into smart contracts that are meant to make sure that something **will not** happen in the context of a water<b>melon</b> fund.
 
-**What risks can we identify within the context of a Melon fund?**
+**What risks can we identify within the context of a water<b>melon</b> fund?**
 
 - Malevolent behavior of fund manager (trying to embezzle funds through orders on exchanges)
 - Bad trading decisions from fund manager
@@ -1735,7 +1735,7 @@ Portfolio base currency cannot be considered for this rule.
 **Rationale**: Investors have an understanding of the volatility level of the portfolio maintained at the time of trading.
 **Implementation**: Before a trade is authorized, the system must check the post volatility of the total portfolio and make sure it is included in the specified [x;y] range.
 **Parameters**: x as low boundary of the acceptable portfolio volatility range and y as high boundary of the acceptable portfolio volatility range.
-**Side note**: This computation may be too expensive on Ethereum smart contract. We might be able to use a simplified computation. But this rule is to be envisioned in the Melon chain context.
+**Side note**: This computation may be too expensive on Ethereum smart contract. We might be able to use a simplified computation. But this rule is to be envisioned in the water<b>melon</b> chain context.
 
 Edge case: Could also allow trades which incrementally reduce (increase) portfolio volatility. Basically, is the trade beneficial to the investor and in the spirit of the guidelines.
 
@@ -1777,7 +1777,7 @@ This rule assigns a maximum allocation as a percentage of NAV to a specific toke
 
 #### Rule 18: Fund Cap
 
-This rule could be implemented by an Investment Manager to cap the overall AuM of a Melon Fund for various reasons, in particular when a specific strategy may have no further market capacity within its mandate.
+This rule could be implemented by an Investment Manager to cap the overall AuM of a water<b>melon</b> Fund for various reasons, in particular when a specific strategy may have no further market capacity within its mandate.
 
 #### Rule 19: Fund Audit
 
@@ -1789,7 +1789,7 @@ This rule could be implemented by an Investment Manager to enforce fund audits b
 
 #### Description
 
-The Policy explicitly prohibits the Melon fund from investing in or hold any asset token which is part of the contract's blacklist. The rationale for this Policy my be: (i) investors have a guarantee that the fund will never invest in an asset. (ii) explicit restrictions on the manager (iii) regulatory compliance (iv) investor preferences. Assets token addresses can be added, but not removed from the contract's blacklist.
+The Policy explicitly prohibits the water<b>melon</b> fund from investing in or hold any asset token which is part of the contract's blacklist. The rationale for this Policy my be: (i) investors have a guarantee that the fund will never invest in an asset. (ii) explicit restrictions on the manager (iii) regulatory compliance (iv) investor preferences. Assets token addresses can be added, but not removed from the contract's blacklist.
 &nbsp;
 
 #### Inherits from
@@ -1855,7 +1855,7 @@ This view function returns the enum `pre`, indicating the the Policy logic be ev
 
 #### Description
 
-The Policy explicitly permits the Melon fund to invest in and hold any asset token which is part of the contract's whitelist as defined at fund setup. The rationale for this Policy my be: (i) Investors have a clear understanding of which assets can ever be invested in by the fund. (ii) restricting the investment manager - tightening the scope of the investment universe. (iii) the fund can only invest in a niche classification (eg. ESG, utility tokens, virtual currencies, commodities only etc.). Assets token addresses can be removed from, but not added to the contract's whitelist.
+The Policy explicitly permits the water<b>melon</b> fund to invest in and hold any asset token which is part of the contract's whitelist as defined at fund setup. The rationale for this Policy my be: (i) Investors have a clear understanding of which assets can ever be invested in by the fund. (ii) restricting the investment manager - tightening the scope of the investment universe. (iii) the fund can only invest in a niche classification (eg. ESG, utility tokens, virtual currencies, commodities only etc.). Assets token addresses can be removed from, but not added to the contract's whitelist.
 &nbsp;
 
 #### Inherits from
@@ -1970,7 +1970,7 @@ This public variable stores the upper limit, in percentage of fund value, which 
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
-This view function returns `true` if Melon fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum concentration rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade allocation percentage of the position to fund value, returning `true` if the entire fund post-trade position in the taker asset does not exceed the maximum concentration percentage. If the fund's post-trade position in the taker asset does exceed the maximum concentration percentage, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
+This view function returns `true` if water<b>melon</b> fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum concentration rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade allocation percentage of the position to fund value, returning `true` if the entire fund post-trade position in the taker asset does not exceed the maximum concentration percentage. If the fund's post-trade position in the taker asset does exceed the maximum concentration percentage, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
 &nbsp;
 
 `function position() external view returns (Applied)`
@@ -1993,7 +1993,7 @@ Policy (Link)
 
 #### On Construction
 
-The contract requires a parameter representing the maximum number of non-quote asset token positions permitted in the Melon fund. The public state variable `maxPositions` is then set to the value provided by this parameter. A value of 0 means that no non-quote assets positions are permitted.
+The contract requires a parameter representing the maximum number of non-quote asset token positions permitted in the water<b>melon</b> fund. The public state variable `maxPositions` is then set to the value provided by this parameter. A value of 0 means that no non-quote assets positions are permitted.
 &nbsp;
 
 #### Structs
@@ -2024,14 +2024,14 @@ None.
 
 `uint public maxPositions`
 
-This public variable stores the upper limit of the number of non-quote asset positions permitted in the Melon fund. For example, `maxPositions` == 5 means that a maximum of five non-quote asset token positions are permitted at any time.
+This public variable stores the upper limit of the number of non-quote asset positions permitted in the water<b>melon</b> fund. For example, `maxPositions` == 5 means that a maximum of five non-quote asset token positions are permitted at any time.
 &nbsp;
 
 #### Public Functions
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
-This view function returns `true` if Melon fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum positions rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade number of non-quote asset positions in the fund, returning `true` if the post-trade number of non-quote asset positions in the fund does not exceed the maximum positions configuration. If the fund's post-trade position in the taker asset causes the fund's non-quote asset position quantity to exceed the maximum positions quantity, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
+This view function returns `true` if water<b>melon</b> fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum positions rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade number of non-quote asset positions in the fund, returning `true` if the post-trade number of non-quote asset positions in the fund does not exceed the maximum positions configuration. If the fund's post-trade position in the taker asset causes the fund's non-quote asset position quantity to exceed the maximum positions quantity, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
 &nbsp;
 
 [CHECK]
