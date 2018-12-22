@@ -122,11 +122,6 @@ This internal view function returns a boolean indicating the current shut down s
 This internal view function returns the address of the current fund's fund manager.
 &nbsp;
 
-`function safeAddToOwnedAssets(address _asset) internal`
-
-This internal function first ensures that the asset token of the address provided is either already a member of the fund's owned assets list or the current quantity of owned assets is less than the maximum quantity of owned assets as defined in the fund's Accounting contract. The function then call the Accounting contract's `addAssetToOwnedAssets()` function to add the asset token to the fund's list of owned assets.
-&nbsp;
-
 `function ensureNotInOpenMakeOrder(address _asset) internal view`
 
 This internal view function ensures that no open make order currently exists for the asset token address provided.
@@ -277,7 +272,7 @@ The following parameters are used by the function:
 `orderAddresses[1]` - The address of the WETH token contract (taker asset token).
 `orderValues[0]` - The quantity of the MLN token, expressed in 18 decimal precision.
 
-This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the Melon fund. The function calls the Melon Engine to get the corresponding quantity of ETH. The Melon Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the Melon fund.
+This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the Melon fund. The function calls the Melon Engine to get the corresponding quantity of ETH. The Melon Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the Melon fund and transferred to the Melon fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
 &nbsp;
 
 `function () payable`
@@ -524,7 +519,7 @@ This public function must ensure that:
   applicable risk policies are evaluated,
   asset tokens to be traded are approved (if required),
   the swap order on the Kyber exchange contract is performed,
-  the acquired asset token, if not already held, is added to `ownedAssets`.
+  the acquired asset token, if not already held, is added to `ownedAssets`. Finally, the acquired asset tokens are returned to the Melon fund's vault and the order status is updated.
 
 Finally, the function returns acquired token assets to the fund's vault and updates the fund's internal order tracking.
 &nbsp;
@@ -764,7 +759,7 @@ Please see parameter descriptions above. Of note are the parameters:
   `orderAddresses[2]` - The order maker asset token.
   `identifier` - The active order's orderID.
 
-This public function cancels an existing order on the OasisDex Matching Market exchange contract by calling the  OasisDex Matching Market contract's `cancel()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the Melon fund's internal order tracking.
+This public function cancels an existing order on the OasisDex Matching Market exchange contract by calling the  OasisDex Matching Market contract's `cancel()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the Melon fund's internal order tracking and the maker asset token is returned to the Melon fund's vault.
 &nbsp;
 
 `function getOrder(

@@ -33,9 +33,7 @@ None.
   `string symbol` - The human-readable symbol of the asset token as per ERC223 token standard.
   `uint decimals` -  The divisibility precision of the token as per the ERC223 token standard.
   `string url` - The URL for extended information of the asset token.
-  `string ipfsHash` - The IPFS path for extended information of the asset token.
-  `address breakIn` - The address of the break-in contract on the destination chain.
-  `address breakOut` - The address of the break-out contract on the destination chain.
+  `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
   `uint[] standards` - An array of integers representing EIP standards to which this asset token conforms.
   `bytes4[] sigs` - An array of asset token function signatures which have been whitelisted.
 
@@ -53,6 +51,16 @@ This struct stores all relevant information pertaining to the asset token.
   `bytes4[] sigs` - An array of exchange function signatures which have been whitelisted.
 
 This struct stores all relevant information pertaining to the exchange.
+&nbsp;
+
+Version
+
+  Member variables:  
+
+  `bool exists` -  A boolean to conveniently and clearly indicate existence in a mapping.
+  `string name` - A string to represent the name of the Version.
+
+This struct stores all relevant information pertaining to the Version.
 &nbsp;
 
 #### Enums
@@ -77,8 +85,7 @@ None.
   `string symbol` - The human-readable symbol of the asset token as in ERC223 token standard
   `uint decimals` - The divisibility precision of the token as per the ERC223 token standard.
   `string url` - The URL for extended information of the asset token.
-  `string ipfsHash` - The IPFS path for extended information of the asset token.
-  `address[2] breakInBreakOut`- An array of addresses of break-in and break-out contracts on the destination chain. This is meant for potential intra-chain asset holdings.
+  `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
   `uint[] standards` - An array of integers representing EIP standards to which this asset token conforms.
   `bytes4[] sigs` - An array of asset token function signatures which have been whitelisted.
 
@@ -99,14 +106,49 @@ This event is triggered when an exchange is added or updated in `registeredExcha
 
   `address indexed asset` - The address of the registered asset token contract to be removed.
 
-This event is triggered when an asset is removed from the `registeredAssets` array state variable. The parameters listed above are provided with the event.
+This event is triggered when an asset is removed from the `registeredAssets` array state variable. The parameter listed above are provided with the event.
 &nbsp;
 
 `event ExchangeRemoval()`
 
   `address indexed exchange` - The address of the registered exchange contract to be removed.
 
-This event is triggered when an exchange is removed from the `registeredExchanges` array state variable. The parameters listed above are provided with the event.
+This event is triggered when an exchange is removed from the `registeredExchanges` array state variable. The parameter listed above are provided with the event.
+&nbsp;
+
+`event VersionRegistration()`
+
+  `address indexed version` - The address of the Version registered.
+
+This event is triggered when a Version is registered. The parameter listed above are provided with the event.
+&nbsp;
+
+`event PriceSourceChange()`
+
+  `address indexed priceSource` - The address of the new price source.
+
+This event is triggered when a price source is changed. The parameter listed above are provided with the event.
+&nbsp;
+
+`event MlnTokenChange()`
+
+  `address indexed mlnToken` - The address of the new MLN token contract.
+
+This event is triggered when the MLN token is migrated to a new contract. The parameter listed above are provided with the event.
+&nbsp;
+
+`event NativeAssetChange()`
+
+  `address indexed nativeAsset` - The address of the new native asset token contract.
+
+This event is triggered when the native asset token is migrated to a new contract. The parameter listed above are provided with the event.
+&nbsp;
+
+`event EngineChange()`
+
+  `address indexed engine` - The address of the new Melon Engine contract.
+
+This event is triggered when the Melon Engine is migrated to a new contract. The parameter listed above are provided with the event.
 &nbsp;
 
 #### Public State Variables
@@ -131,6 +173,51 @@ This public state variable mapping maps an exchange contract `address` to an `Ex
 This public state variable is an array of addresses which stores each exchange contract `address` which is registered.
 &nbsp;
 
+`mapping (address => Version) public versionInformation`
+
+This public state variable mapping maps a Version contract `address` to a `Version` strut containing the Version information described above.
+&nbsp;
+
+`address[] public registeredVersions`
+
+This public state variable is an array of addresses which stores each Version contract `address` which is registered.
+&nbsp;
+
+`mapping (address => address) public fundsToVersions`
+
+This public state variable mapping maps a Version contract `address` to a Melon fund address.
+&nbsp;
+
+`uint public constant MAX_REGISTERED_ENTITIES = 20`
+
+This public constant state variable represent the maximum quantity of registered entities and is set to "20". This constant applies to Exchanges registered and Assets registered.
+&nbsp;
+
+`address public priceSource`
+
+This public state variable is the address of the current, active price source contract.
+&nbsp;
+
+`address public mlnToken`
+
+This public state variable is the address of the Melon token contract.
+&nbsp;
+
+`address public nativeAsset`
+
+This public state variable is the address of the native asset token contract.
+&nbsp;
+
+`address public engine`
+
+This public state variable is the address of the Melon Engine contract.
+&nbsp;
+
+`address public ethfinexWrapperRegistry`  
+
+This public state variable is the address of the Ethfinex Wrapper Registry contract.
+&nbsp;
+
 #### Public Functions
 
 `function registerAsset(
@@ -139,8 +226,7 @@ This public state variable is an array of addresses which stores each exchange c
         string _symbol,
         uint _decimals,
         string _url,
-        string _ipfsHash,
-        address[2] _breakInBreakOut,
+        uint _reserveMin,
         uint[] _standards,
         bytes4[] _sigs
     ) auth`
@@ -152,8 +238,7 @@ This function requires that the caller is the `owner` or the current contract. I
 `string _symbol` - The human-readable symbol of the asset token as in ERC223 token standard
 `uint _decimals` - The divisibility precision of the token as per the ERC223 token standard.
 `string _url` - The URL for extended information of the asset token.
-`string _ipfsHash` - The IPFS path for extended information of the asset token.
-`address[2] _breakInBreakOut`- An array of addresses of break-in and break-out contracts on the destination chain. This is meant for potential intra-chain asset holdings.
+`uint reserveMin` - An integer representing the Kyber Network reserve minimum.
 `uint[] _standards` - An array of integers representing EIP standards to which this asset token conforms.
 `bytes4[] _sigs` - An array of asset token function signatures which have been whitelisted.
 
@@ -183,8 +268,7 @@ Finally, the function ensures that the exchange's information exists in the `exc
     string _symbol,
     uint _decimals,
     string _url,
-    string _ipfsHash,
-    address[2] _breakInBreakOut,
+    uint _reserveMin,
     uint[] _standards,
     bytes4[] _sigs
 ) auth`
@@ -196,8 +280,7 @@ This function requires that the caller is the `owner` or the current contract. I
 `string _symbol` - The human-readable symbol of the asset token as in ERC223 token standard
 `uint _decimals` - The divisibility precision of the token as per the ERC223 token standard.
 `string _url` - The URL for extended information of the asset token.
-`string _ipfsHash` - The IPFS path for extended information of the asset token.
-`address[2] _breakInBreakOut`- An array of addresses of break-in and break-out contracts on the destination chain. This is meant for potential intra-chain asset holdings.
+`uint reserveMin` - An integer representing the Kyber Network reserve minimum.
 `uint[] _standards` - An array of integers representing EIP standards to which this asset token conforms.
 `bytes4[] _sigs` - An array of asset token function signatures which have been whitelisted.
 
@@ -295,4 +378,61 @@ This public view function returns an array of whitelisted exchange function sign
 `function exchangeMethodIsAllowed(address _exchange, bytes4 _sig) returns (bool)`
 
 This public view function returns a boolean indicating whether a specific exchange function is whitelisted given the provided exchange address and the function's signature hash. A return value of `true` indicates that the function is whitelisted. A return value of `false` indicates that the function is not whitelisted.
+&nbsp;
+
+
+
+`function registerVersion(address _version, string _name) auth`
+
+This function requires that the caller is the `owner` or the current contract. The function sets the `versionInformation` mapping to `true` and pushes the Version address on to the `registeredVersions` array. Finally, the `VersionRegistration()` event is emitted, logging the Version address. Versions cannot be removed from the registry.
+&nbsp;
+
+`function setPriceSource(address _priceSource) auth`
+
+This function requires that the caller is the `owner` or the current contract. The function sets the `priceSource` state variable to the `_priceSource` parameter value and emits the `PriceSourceChange()` event, logging `_priceSource`.
+&nbsp;
+
+`function setMlnToken(address _mlnToken) auth`
+
+This function requires that the caller is the `owner` or the current contract. The function sets the `mlnToken` state variable to the `_mlnToken` parameter value and emits the `MlnTokenChange()` event, logging `_mlnToken`.
+&nbsp;
+
+`function setNativeAsset(address _nativeAsset) auth`
+
+This function requires that the caller is the `owner` or the current contract. The function sets the `nativeAsset` state variable to the `_nativeAsset` parameter value and emits the `NativeAssetChange()` event, logging `_nativeAsset`.
+&nbsp;
+
+`function setEngine(address _engine) auth`
+
+This function requires that the caller is the `owner` or the current contract. The function sets the `engine` state variable to the `_engine` parameter value and emits the `EngineChange()` event, logging `_engine`.
+&nbsp;
+
+`function getReserveMin(address _asset) view returns (uint)`
+
+This public view function returns the `reserveMin` for the asset token contract address provided.
+&nbsp;
+
+`function adapterForExchange(address _exchange) view returns (address)`
+
+This public view function returns the address of the exchange adapter contract given the exchange contract address provided.
+&nbsp;
+
+`function getRegisteredVersions() view returns (address[])`
+
+This public view function returns an exhaustive array of addresses of all registered Version contracts.
+&nbsp;
+
+`function isFund(address _who) view returns (bool)`
+
+This public view function returns a boolean indicating whether the address provided is a Melon fund contract.
+&nbsp;
+
+`function isFundFactory(address _who) view returns (bool)`
+
+This public view function returns a boolean indicating whether the address provided is a FundFactory. The function check the existence of the `_who` address in the `versionInformation` mapping. Note that Version inherits FundFactory.
+&nbsp;
+
+`function registerFund(address _fund)`
+
+This public function ensures that `msg.sender` is a Version, as only Versions can register funds. The function then adds an entry to the `fundsToVersions` mapping, associating `_fund` to `msg.sender`, i.e. the Version address.
 &nbsp;

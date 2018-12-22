@@ -17,14 +17,16 @@ The Hub maintains the specific Spoke components of the fund in terms of their ro
 #### Inherits from
 
 DSGuard (link)
+&nbsp;
 
 #### On Construction
 
-The constructor requires and sets the manager address and the fund name.
+The constructor requires and sets the manager address and the fund name as well as the `creator` and `creationTime.
+&nbsp;
 
 #### Structs
 
-`Settings`
+`Routes`
 
 Member variables:
 
@@ -36,10 +38,10 @@ Member variables:
 `address trading`
 `address vault`
 `address priceSource`
-`address canonicalRegistrar`
+`address registry`
 `address version`
 `address engine`
-`address mlnAddress`
+`address mlnToken`
 
 This struct stores the contract addresses of the listed components and spokes.
 &nbsp;
@@ -52,7 +54,9 @@ None.
 
 #### Modifiers
 
-None.
+`modifier onlyCreator()`
+
+A modifier requiring that the `msg.sender` is the `creator`.
 
 &nbsp;
 
@@ -64,9 +68,9 @@ None.
 
 #### Public State Variables
 
-`Settings public settings`
+`Routes public routes`
 
-A `Settings` struct containing Spoke and component addresses.
+A `Routes` struct containing Spoke and component addresses.
 &nbsp;
 
 `address public manager`
@@ -99,6 +103,21 @@ A boolean variable defining the completeness status of all routing settings.
 A boolean variable defining the completeness status of all permissions settings.
 &nbsp;
 
+`address public creator`
+
+An address variable defining the creator of the Melon fund, i.e. `msg.sender`.
+&nbsp;
+
+`uint public creationTime`
+
+An integer variable representing the Melon fund's creation time.
+&nbsp;
+
+mapping (address => bool) public isSpoke
+
+`A public mapping associating an address to a boolean indicating that the address is a Spoke of the Melon fund.`
+&nbsp;
+
 #### Public Functions
 
 `function shutDownFund() public`
@@ -106,19 +125,19 @@ A boolean variable defining the completeness status of all permissions settings.
 This function sets the `ìsShutDown` state variable to `true`, effectively disabling the fund for all activities except investor redemptions. This function can only be successfully called by the manager address. The function's actions are permanent and irreversible.
 &nbsp;
 
-`function setSpokes(address[12] _spokes)`
+`function setSpokes(address[12] _spokes) onlyCreator`
 
-This function takes an array of addresses and sets all member variables of the `settings` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`.
+This function takes an array of addresses and sets all member variables of the `routes` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
-`function setRouting()`
+`function setRouting() onlyCreator`
 
-This function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`.
+This function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
-`function setPermissions()`
+`function setPermissions() onlyCreator`
 
-This function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`.
+This function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
 `function vault() view returns (address)`
@@ -171,7 +190,7 @@ DSAuth (link)
 
 #### On Construction
 
-Sets the `hub` state variable and sets the the `hub` as the `authority` as defined for permissioning within DSAuth.
+Sets the `hub` state variable and sets the the `hub` as the `authority` and `owner` as defined for permissioning within DSAuth.
 
 &nbsp;
 
@@ -208,7 +227,11 @@ None.
 `modifier notShutDown()`
 
 This modifier requires that the fund is not shut down and is evaluated prior to the execution of the functionality of the implementing function.
+&nbsp;
 
+`modifier onlyInitialized()`
+
+This modifier requires that the `initialized` state variable is set to `true`.
 &nbsp;
 
 #### Events
@@ -236,9 +259,9 @@ A boolean variable defining the initialization status of the Spoke.
 
 #### Public Functions
 
-`function initialize(address[10] _spokes)`
+`function initialize(address[12] _spokes) public auth`
 
-This function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true`.
+This function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true` and the `owner` to address "0".
 &nbsp;
 
 `function engine() view returns (address)`
@@ -246,7 +269,7 @@ This function requires firstly that the Spoke not be initialized, then takes an 
 This view function returns the engine component contract address.
 &nbsp;
 
-`function mlnAddress() view returns (address)`
+`function mlnToken() view returns (address)`
 
 This view function returns the MLN token contract address.
 &nbsp;
@@ -362,22 +385,8 @@ None.
 
 #### Events
 
-`RequestExecuted()`
+None.
 
-    `address investmentAsset` - The address of the asset token with which the subscription is made.
-    `uint investmentAmount` - The quantity of tokens of the `investmentAsset`
-    `uint requestedShares` - The calculated quantity of fund shares created for the subscription
-    `uint timestamp` - The timestamp of the block containing the subscription transaction
-    `uint atUpdateId` - [CHECK]
-
-This event is triggered when a subscription is successfully executed by the fund.
-&nbsp;
-
-`SuccessfulRedemption()`
-
-    `uint quantity` - The quantity of shares successfully redeemed
-
-This event is triggered when a redemption is successfully executed by the fund.
 &nbsp;
 
 #### Public State Variables
@@ -406,27 +415,22 @@ An integer constant which specifies the the number of seconds a valid subscripti
 
 `function enableInvestment(address[] _assets) public auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the Melon fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping.
+This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the Melon fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping. Finally the function emits the `EnableInvestment()` event, logging the `_assets`.
 &nbsp;
 
 `function disableInvestment(address[] _assets) public auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping.
+This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
 &nbsp;
 
-`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable`
+`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable onlyInitialized`
 
-This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the Melon Engine.
+This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the Melon Engine. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
 &nbsp;
 
 `function cancelRequest() external`
 
 This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requres the request timestamp to be greater than "0", then emits the `CancelRequest` event.
-&nbsp;
-
-`function executeRequest() public payable`
-
-This function calls `executeRequestFor()` on behalf of `msg.sender`.
 &nbsp;
 
 `function executeRequestFor(address requestOwner) public notShutDown amguPayable payable`
@@ -479,6 +483,11 @@ and finally, the function emits the `SuccessfulRedemption()` event along with th
 
 This view function returns a boolean indicating whether the provided address has a corresponding active request with a positive quantity of requested shares in the `requests` mapping.
 &nbsp;
+
+
+`function hasValidRequest(address _who) public view returns (bool)`
+
+This public view function returns a boolean indicating the `_who` address parameter has a valid request, meaning that either this is the address's first subscription or the INVEST_DELAY is respected, the subscription amount is greater than "0" and the requested share quantity is greater than "0".
 
 ---
 
@@ -587,7 +596,7 @@ The Vault contract is created from the vaultFactory contract, which creates a ne
 
 ##### Inherits from
 
-Spoke (link)
+VaultInterface, Spoke (link)
 
 &nbsp;
 
@@ -609,6 +618,12 @@ None
 Before any execution, this modifier requires that the vault contract's `locked` state variable is `false`.
 &nbsp;
 
+#### Events
+
+`event Lock(bool status)`
+
+This event is triggered when the status of the `locked` state variable is changed. The event logs the new status.
+
 #### Public State Variables
 
 `bool public locked`
@@ -626,11 +641,6 @@ This function requires that the caller is the `owner` or the current contract. T
 `function unlock() auth`
 
 This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `false`.
-&nbsp;
-
-`function deposit(address token, uint amount) auth`
-
-This function requires that the caller is the `owner` or the current contract. This function calls the `transferFrom()` ERC20 function of the provided asset token contract address, transferring ownership of the provided amount to the custody of the vault contract.
 &nbsp;
 
 `function withdraw(address token, uint amount) onlyUnlocked auth`
@@ -653,7 +663,7 @@ The Accounting contract defines the accounting rules implemented by the fund. Al
 
 #### Inherits from
 
-Spoke, DSMath (links)
+AccountingInterface, AmguConsumer, Spoke (links)
 
 &nbsp;
 
@@ -702,6 +712,11 @@ A pubic array containing the addresses of tokens currently held by the fund.
 A mapping defining the status of an asset's membership in the `ownedAssets` array.
 &nbsp;
 
+`uint public constant SHARES_DECIMALS = 18`
+
+A public constant representing the decimal precision of Melon fund share token.
+&nbsp;
+
 `address public NATIVE_ASSET`
 
 The address of the asset token native to the platform.
@@ -729,14 +744,13 @@ A `Calculations` structure holding the latest state of the member fund calculati
 
 #### Public functions
 
+`function getOwnedAssetsLength() view returns (uint)`
+
+This public view function returns the length of the `ownedAssets` array state variable.
+
 `function getFundHoldings() returns (uint[], address[])`
 
 This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
-&nbsp;
-
-`function getFundHoldingsLength() view returns (uint)`
-
-This view function returns the number of distinct token assets held by the fund.
 &nbsp;
 
 `function calcAssetGAV(address ofAsset) returns (uint)`
@@ -754,39 +768,39 @@ This function returns the fund position quantity of the asset token as specified
 This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in denomination asset terms.
 &nbsp;
 
-`function calcUnclaimedFees(uint gav) view returns (uint)`
-
-This function calculates and returns all fees due to the manager (in share terms) at the time of execution given the fund Gross Asset Value (GAV).
-&nbsp;
-
-`function calcNav(uint gav, uint unclaimedFees) pure returns (uint)`
+`function calcNav(uint gav, uint unclaimedFees) public pure returns (uint)`
 
 This function calculates and returns the fund's Net Asset Value (NAV) given the provided fund GAV and current quantity of unclaimed fee shares.
 &nbsp;
 
-`function calcValuePerShare(uint totalValue, uint numShares) view returns (uint)`
+`function valuePerShare(uint totalValue, uint numShares) view returns (uint)`
 
-This function calculates and returns the value (in denomination asset terms) of a single share in the fund given the fund total value and the total number of shares.
+This function calculates and returns the value (in denomination asset terms) of a single share in the fund given the fund total value and the total number of shares provided.
 &nbsp;
 
-`function performCalculations() view returns (uint gav, uint unclaimedFees, uint feesShareQuantity, uint nav, uint sharePrice)`
+`function performCalculations() returns (uint gav, uint unclaimedFees, uint feesInShares, uint nav, uint sharePrice)`
 
 This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in denomination asset terms).
 &nbsp;
 
-`function calcSharePrice() view returns (uint sharePrice)`
+`function calcSharePrice() returns (uint sharePrice)`
 
 This function calculates and returns the current price (in denomination asset terms) of a single share in the fund.
 &nbsp;
 
-`function calcSharePriceAndAllocateFees() public returns (uint)`
+`function getShareCostInAsset(uint _numShares, address _altAsset) returns (uint)`
 
-This function calculates and returns the price of a single share (in denomination asset terms) as well as performing the fee share calculation and allocation.
+This public function calculates and returns the quantity of the `_altAsset` asset token commensurate with the value of `_numShares` quantity of the Melon fund's shares.
+&nbsp;
+
+`function triggerRewardAllFees() public amguPayable payable`
+
+This public function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function updateOwnedAssets() public`
 
-This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing or adding asset addresses as the fund holdings composition changes.
+This function maintains the `ownedAssets` array by removing or adding asset addresses as the fund holdings composition changes.
 &nbsp;
 
 `function addAssetToOwnedAssets(address _asset) public auth`
@@ -964,19 +978,9 @@ A mapping storing the registration status of a fee address.
 This function adds the feeAddress provided to the `Fee[]` array and sets the `feeIsRegistered` mapping for that address to `true`.
 &nbsp;
 
-`function batchRegister(address[] feeAddresses) public`
-
-This function adds an array of fee addresses provided to the `Fee[]` array and sets the `feeIsRegistered` mappings for those addresses to `true`.
-&nbsp;
-
 `function totalFeeAmount() public view returns (uint total)`
 
 This function returns the total amount of fees incurred for the hub.
-&nbsp;
-
-`function rewardFee(Fee fee) public`
-
-This function creates shares commensurate with the fee provided.
 &nbsp;
 
 `function rewardAllFees() public`
@@ -984,11 +988,21 @@ This function creates shares commensurate with the fee provided.
 This function creates shares commensurate with all fees stored in the `Fee[]` state variable array.
 &nbsp;
 
-## FixedManagementFee.sol
+`function rewardManagementFee() public`
+
+This public function calculates, creates and allocates the quantity of shares currently due as the management fee.
+&nbsp;
+
+`function performanceFeeAmount() public view returns (uint)`
+
+This public view function calculates and returns the quantity of shares currently due as the performance fee.
+&nbsp;
+
+## ManagementFee.sol
 
 #### Description
 
-The FixedManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
+The ManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
 &nbsp;
 
 #### Inherits from
@@ -1049,11 +1063,11 @@ This function calculates and returns the number of shares to be created given th
 This function sets `lastPayoutTime` to the current block timestamp.
 &nbsp;
 
-## FixedPerformanceFee.sol
+## PerformanceFee.sol
 
 #### Description
 
-The FixedPerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
+The PerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
 
 #### Inherits from
 
@@ -1086,24 +1100,43 @@ None.
 An integer defining the performance fee percentage rate.
 &nbsp;
 
-`uint public DIVISOR`
+`uint public constant DIVISOR = 10 ** 18`
 
-An integer defining the standard divisor.
+A constant integer defining the standard divisor.
 &nbsp;
 
-`uint public highWaterMark`
+`uint public constant INITIAL_SHARE_PRICE = 10 ** 18`
 
-An integer defining the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
+A constant integer defining the initial share price to "1".
 &nbsp;
 
-`uint public lastPayoutTime`
+`mapping(address => uint) public highWaterMark`
 
-An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+A public mapping associating the Melon fund address to the Melon fund's `highWaterMark`, which defines the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
+&nbsp;
+
+`mapping(address => uint) public lastPayoutTime`
+
+A public mapping associating the Melon fund address to the Melon fund's last previous time a performance fee calculation and payout was executed. It is an integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+&nbsp;
+
+`mapping(address => uint) public performanceFeeRate`
+
+A public mapping associating the Melon fund address to the Melon fund's configured performance fee rate.
+&nbsp;
+
+`mapping(address => uint) public performanceFeePeriod`
+
+A public mapping associating the Melon fund address to the Melon fund's configured performance measurement period. This integer express the performance measurement period in seconds.
 &nbsp;
 
 #### Public Functions
 
-`function feeAmount(address hub) public view returns (uint feeInShares)`
+`function initializeForUser(uint feeRate, uint feePeriod) external`
+
+This external function is execution once at the initialization of the Melon fund. The function sets the Melon fund's performance fee rate, the performance measurement period, the initial high-watermark and the `lastPayoutTime`.
+
+`function feeAmount() public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
 &nbsp;
@@ -1231,10 +1264,17 @@ A public compound mapping associating an exchange address to open make orders fr
 A public mapping indicating that the specified token asset is currently offered in an open make order on an exchange.
 &nbsp;
 
+`mapping (bytes32 => LibOrder.Order) public orderIdToZeroExOrder`
+
+A public mapping a ZeroEx order identifier to a ZeroEx Order struct.
+&nbsp;
+
 `uint public constant ORDER_LIFESPAN = 1 days`
 
 A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
 &nbsp;
+
+
 
 #### Modifiers
 
@@ -1269,9 +1309,9 @@ This is an internal function which is called for each exchange address passed to
     bytes makerAssetData,
     bytes takerAssetData,
     bytes signature
-) public`
+) public onlyInitialized`
 
-This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund.
+This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund. This function implements the `onlyInitialized` modifier. Finally, the function emits the `ExchangeMethodCall()` event, logging the specified parameters.
 &nbsp;
 
 `function addOpenMakeOrder(
@@ -1313,9 +1353,39 @@ This function returns the sum of the quantity of the provided asset token addres
 This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
 &nbsp;
 
-`function returnToVault(ERC20[] _tokens) public`
+`function returnAssetToVault(address _token) public`
 
 This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
+&nbsp;
+
+`function addZeroExOrderData(bytes32 orderId, LibOrder.Order zeroExOrderData) delegateInternal`
+
+This function adds the data provided by the parameters to the orderIdToZeroExOrder mapping state variable.
+&nbsp;
+
+`function returnBatchToVault(address[] _tokens) public`
+
+This public function returns all asset tokens represented by the `_tokens` address array parameter and returns the asset tokens to the Melon fund's vault.
+&nbsp;
+
+`function getExchangeInfo() view returns (address[], address[], bool[])`
+
+This public view function returns two address arrays and one boolean array with all corresponding registered exchange contract addresses, adapter contract addresses and the `takesCustoday` indicators.
+&nbsp;
+
+`function getOpenOrderInfo(address ofExchange, address ofAsset) view returns (uint, uint, uint)`
+
+This public view function takes the exchange contract address and an asset token contract address and returns three integers: the order identifier, the order expiration time and the order index.
+&nbsp;
+
+`function getOrderDetails(uint orderIndex) view returns (address, address, uint, uint)`
+
+This public view function takes the order index as a parameter and returns the maker asset token contract address, the taker asset token contract address, the maker asset token quantity and the taker asset token quantity.
+&nbsp;
+
+`function getZeroExOrderDetails(bytes32 orderId) view returns (LibOrder.Order)`
+
+This public view function takes the order identifier as a parameter and returns the corresponding populated `Order` struct.
 &nbsp;
 
 ## Exchange Adapters
