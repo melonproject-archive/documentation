@@ -1,61 +1,61 @@
-# Melon Engine: buy-and-burn model
+# water<b>melon</b> Engine: buy-and-burn model
 
 For context, please read Melonomics 2: https://medium.com/melonport-blog/melonomics-part-2-the-melon-engine-48bcb0dae65.
 
-The Melon Engine is a contract that collects fees paid in ETH for asset management gas units by the users, buys MLN at a premium to market with the collected ETH and burns the commensurate quantity of MLN. The Melon Engine mechanisms enable the alignment of the token value with the usage of the network, while avoiding the pitfalls of high-velocity token models.
+The water<b>melon</b> Engine is a contract that collects fees paid in ETH for asset management gas units by the users, buys MLN at a premium to market with the collected ETH and burns the commensurate quantity of MLN. The water<b>melon</b> Engine mechanisms enable the alignment of the token value with the usage of the network, while avoiding the pitfalls of high-velocity token models.
 
-## Perspective of a user interacting with the Melon protocol
+## Perspective of a user interacting with the water<b>melon</b> protocol
 
-When a user interacts with an amgu (asset management gas unit) payable function on the Melon protocol, it pays asset management gas in ETH to the Melon network. We are still in the process of defining the functions that are amgu payable. As it stands, the following functions are amgu payable: `setupFund`, `requestInvestment`, `executeRequest` and `claimFees`.
+When a user interacts with an amgu (asset management gas unit) payable function on the water<b>melon</b> protocol, it pays asset management gas in ETH to the water<b>melon</b> network. We are still in the process of defining the functions that are amgu payable. As it stands, the following functions are amgu payable: `setupFund`, `requestInvestment`, `executeRequest` and `claimFees`.
 
-A modifier `amguPayable` is added to certain functions within the Melon protocol. That modifier will apply the logic which grants the user the ability to pay asset management gas.
+A modifier `amguPayable` is added to certain functions within the water<b>melon</b> protocol. That modifier will apply the logic which grants the user the ability to pay asset management gas.
 
 The total asset management gas paid is equal to: Number of amgu consumed * amgu price 
 
-The initial amgu price will be set in MLN terms by Melonport AG before deployment in February. Thereafter, it will then be in the hands of the Melon Council to adjust the amgu price as necessary. According to our modeling, the Melon gas price (amgu price) should not need frequent adjustment. The 2 scenarios where we can expect an adjustment would be: 
+The initial amgu price will be set in MLN terms by Melonport AG before deployment in February. Thereafter, it will then be in the hands of the water<b>melon</b> Council to adjust the amgu price as necessary. According to our modeling, the water<b>melon</b> gas price (amgu price) should not need frequent adjustment. The 2 scenarios where we can expect an adjustment would be: 
 
 - Overnight spike in network usage
 - Extreme volatility on MLN/USD 
 
-The Melon gas price should always be kept at levels which make the Melon protocol competitive to other asset management alternatives. At the same time, the costs incurred must be sufficient to incentivize maintainers and developers compensated in MLN tokens.
+The water<b>melon</b> gas price should always be kept at levels which make the water<b>melon</b> protocol competitive to other asset management alternatives. At the same time, the costs incurred must be sufficient to incentivize maintainers and developers compensated in MLN tokens.
 
 
-## Melon Engine mechanics
+## water<b>melon</b> Engine mechanics
 
-The ETH from the amgu fees paid by users is sent to the Melon Engine.
+The ETH from the amgu fees paid by users is sent to the water<b>melon</b> Engine.
 
-The Melon Engine contract is a unidirectional liquidity contract that sells ETH and buys MLN at a premium over the market price (market price is retrieved through Kyber network).
+The water<b>melon</b> Engine contract is a unidirectional liquidity contract that sells ETH and buys MLN at a premium over the market price (market price is retrieved through Kyber network).
 
-The ETH received by the Melon Engine is frozen for 1 month (thawing delay). After 1 month, the function `thaw()` is publicly callable. Calling that function will render the frozen ETH liquid and available for external actors to buy ETH in exchange for MLN.
+The ETH received by the water<b>melon</b> Engine is frozen for 1 month (thawing delay). After 1 month, the function `thaw()` is publicly callable. Calling that function will render the frozen ETH liquid and available for external actors to buy ETH in exchange for MLN.
 
-As soon as the Melon Engine sells ETH and buys MLN, it burns the acquired MLN.
+As soon as the water<b>melon</b> Engine sells ETH and buys MLN, it burns the acquired MLN.
 
-The premium schedule provided by the Melon Engine is as follows:
-- Ether in the Melon Engine < 1 ETH, premium = 0%
-- 1≤ Ether in the Melon Engine < 5, premium = 5%
-- 5 ≤ Ether in the Melon Engine < 10, premium = 10%
-- Ether in the Melon Engine ≥ 10, premium = 15%
+The premium schedule provided by the water<b>melon</b> Engine is as follows:
+- Ether in the water<b>melon</b> Engine < 1 ETH, premium = 0%
+- 1≤ Ether in the water<b>melon</b> Engine < 5, premium = 5%
+- 5 ≤ Ether in the water<b>melon</b> Engine < 10, premium = 10%
+- Ether in the water<b>melon</b> Engine ≥ 10, premium = 15%
 
 
-## Perspective of an actor interacting with the Melon Engine
+## Perspective of an actor interacting with the water<b>melon</b> Engine
 
-The Melon Engine premium is exclusive to Melon funds. Any Melon fund is eligible to call the `sellAndBurnMln` function on the Melon Engine, and may therefore benefit from the premium offered.
+The water<b>melon</b> Engine premium is exclusive to water<b>melon</b> funds. Any water<b>melon</b> fund is eligible to call the `sellAndBurnMln` function on the water<b>melon</b> Engine, and may therefore benefit from the premium offered.
 
-**Use case**: As soon as ETH in the Melon Engine are liquid, a Melon fund can discretionarily sell MLN to the Melon Engine for ETH. This is done through the Melon Engine exchange adapter.
+**Use case**: As soon as ETH in the water<b>melon</b> Engine are liquid, a water<b>melon</b> fund can discretionarily sell MLN to the water<b>melon</b> Engine for ETH. This is done through the water<b>melon</b> Engine exchange adapter.
 
-Assume a Melon fund owns 10 MLN.
-- Through the Melon Engine exchange adapter, the Melon fund calls `sellAndBurnMln(10)`.
-- The function retrieves the amgu price from the Melon Engine (i.e. number of ETH the Melon Engine is willing to sell for 1 MLN, premium included).
-- The 10 MLN tokens the Melon fund sells are transferred to the Melon Engine contract.
-- The Melon Engine sends (10 * amgu price * (1+premium)) ETH to the Melon fund in exchange for the MLN tokens sold by the Melon fund.
-- The Melon Engine burns the MLN tokens collected in that transaction.
+Assume a water<b>melon</b> fund owns 10 MLN.
+- Through the water<b>melon</b> Engine exchange adapter, the water<b>melon</b> fund calls `sellAndBurnMln(10)`.
+- The function retrieves the amgu price from the water<b>melon</b> Engine (i.e. number of ETH the water<b>melon</b> Engine is willing to sell for 1 MLN, premium included).
+- The 10 MLN tokens the water<b>melon</b> fund sells are transferred to the water<b>melon</b> Engine contract.
+- The water<b>melon</b> Engine sends (10 * amgu price * (1+premium)) ETH to the water<b>melon</b> fund in exchange for the MLN tokens sold by the water<b>melon</b> fund.
+- The water<b>melon</b> Engine burns the MLN tokens collected in that transaction.
 &nbsp;
 
 ## AmguConsumer.sol
 
 #### Description
 
-This contract defines a function modifier which is used with functions where AMG (Asset Management Gas) is designed to be charged. Placing the modifier on a function affects the calculation of the functions gas usage and resulting AMGU charge. The resulting payment and excess refund to the sender is also handled by the functionality of the modifier.  The contract also defines three helper functions to retrieve the contract addresses of the Melon Engine, MLN token and the price source.
+This contract defines a function modifier which is used with functions where AMG (Asset Management Gas) is designed to be charged. Placing the modifier on a function affects the calculation of the functions gas usage and resulting AMGU charge. The resulting payment and excess refund to the sender is also handled by the functionality of the modifier.  The contract also defines three helper functions to retrieve the contract addresses of the water<b>melon</b> Engine, MLN token and the price source.
 &nbsp;
 
 #### Inherits from
@@ -86,7 +86,7 @@ None.
 
 `modifier amguPayable()`
 
-This modifier determines the initial gas amount. The functionality in the function implementing this modifier is then executed. Thereafter, the AMGU (Asset Management Gas Unit) price and the MLN token market price is retrieved from the Melon Engine and the price feed, respectively. The modifier calculates the amount of ETH required for the payment of AMGU. Transactions with insufficient ETH amounts to pay the AMGU are reverted. ETH due as AMGU is paid to the Melon Engine and any excess ETH above the Ethereum gas costs and AMGU costs are refunded to the `msg.sender`.
+This modifier determines the initial gas amount. The functionality in the function implementing this modifier is then executed. Thereafter, the AMGU (Asset Management Gas Unit) price and the MLN token market price is retrieved from the water<b>melon</b> Engine and the price feed, respectively. The modifier calculates the amount of ETH required for the payment of AMGU. Transactions with insufficient ETH amounts to pay the AMGU are reverted. ETH due as AMGU is paid to the water<b>melon</b> Engine and any excess ETH above the Ethereum gas costs and AMGU costs are refunded to the `msg.sender`.
 &nbsp;
 
 #### Events
@@ -105,7 +105,7 @@ None.
 
 `function engine() view returns (address)`
 
-This public view function returns the address of the Melon Engine contract.
+This public view function returns the address of the water<b>melon</b> Engine contract.
 &nbsp;
 
 `function mlnToken() view returns (address)`
@@ -122,7 +122,7 @@ This public view function returns the address of the price feed contract.
 
 #### Description
 
-This contract is a Melon fund exclusive, unidirectional exchange for Melon funds to exchange MLN tokens for ETH at a premium to market prices. The Melon Engine then reduces the total supply of the MLN token by burning all received MLN tokens.
+This contract is a water<b>melon</b> fund exclusive, unidirectional exchange for water<b>melon</b> funds to exchange MLN tokens for ETH at a premium to market prices. The water<b>melon</b> Engine then reduces the total supply of the MLN token by burning all received MLN tokens.
 &nbsp;
 
 #### Inherits from
@@ -176,12 +176,12 @@ This event is triggered when the `thaw()` function is called, logging the thawed
 
 `uint public frozenEther`
 
-This public state variable represents the quantity of ETH held by the Melon Engine which is currently frozen.
+This public state variable represents the quantity of ETH held by the water<b>melon</b> Engine which is currently frozen.
 &nbsp;
 
 `uint public liquidEther`
 
-This public state variable represents the quantity of ETH held by the Melon Engine which is not currently frozen.
+This public state variable represents the quantity of ETH held by the water<b>melon</b> Engine which is not currently frozen.
 &nbsp;
 
 `uint public lastThaw`
@@ -239,7 +239,7 @@ This public view function returns the value of the `amguPrice` state variable.
 
 `function premiumPercent() view returns (uint)`
 
-This public view function determines the market price premium to be offered when the Melon Engine buys MLN tokens. Please see the premium schedule above. The function returns an integer representing the premium percentage, e.g. a return value of "5" represents "5%".
+This public view function determines the market price premium to be offered when the water<b>melon</b> Engine buys MLN tokens. Please see the premium schedule above. The function returns an integer representing the premium percentage, e.g. a return value of "5" represents "5%".
 &nbsp;
 
 `function payAmguInEther() public payable`
@@ -254,15 +254,15 @@ This public function allocates frozen ETH (`frozenEther`) to liquid ETH (`liquid
 
 `function enginePrice() public view returns (uint)`
 
-This public view function returns the premium-adjusted ETH/MLN rate based on the quantity of ETH accumulated by the Melon Engine. The function first retrieves the MLN token price denominated in ETH. The calculated ETH-quantity scaled premium is then added to the market price and returned.
+This public view function returns the premium-adjusted ETH/MLN rate based on the quantity of ETH accumulated by the water<b>melon</b> Engine. The function first retrieves the MLN token price denominated in ETH. The calculated ETH-quantity scaled premium is then added to the market price and returned.
 &nbsp;
 
 `function ethPayoutForMlnAmount(uint mlnAmount) public view returns (uint)`
 
-This public view function returns the premium-adjusted quantity of ETH to be delivered to the Melon fund in return for selling the `mlnAmount` quantity of the MLN token.
+This public view function returns the premium-adjusted quantity of ETH to be delivered to the water<b>melon</b> fund in return for selling the `mlnAmount` quantity of the MLN token.
 &nbsp;
 
 `function sellAndBurnMln(uint mlnAmount) public`
 
-This public function requires that the fund is the msg.sender, ensuring that only Melon funds may transact with the Melon Engine and benefit from the MLN token premium. The function then requires that approved MLN tokens be transferred from the Melon fund to the Melon Engine. The function calls `ethPayoutForMlnAmount()` to get the current quantity of ETH to send to the transacting Melon fund. This quantity is required to be positive and that a sufficient quantity of liquid ETH is held by the Melon Engine. Finally, the Melon Engine transfers the ETH to the transacting Melon fund and burns the received MLN tokens.
+This public function requires that the fund is the msg.sender, ensuring that only water<b>melon</b> funds may transact with the water<b>melon</b> Engine and benefit from the MLN token premium. The function then requires that approved MLN tokens be transferred from the water<b>melon</b> fund to the water<b>melon</b> Engine. The function calls `ethPayoutForMlnAmount()` to get the current quantity of ETH to send to the transacting water<b>melon</b> fund. This quantity is required to be positive and that a sufficient quantity of liquid ETH is held by the water<b>melon</b> Engine. Finally, the water<b>melon</b> Engine transfers the ETH to the transacting water<b>melon</b> fund and burns the received MLN tokens.
 &nbsp;

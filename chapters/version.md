@@ -2,7 +2,7 @@
 
 ## General
 
-The Version contract is a singleton contract for all funds deployed under a specific Melon protocol version. All Factory contracts are exclusive to the Version contract and cannot be changed once set.
+The Version contract is a singleton contract for all funds deployed under a specific water<b>melon</b> protocol version. All Factory contracts are exclusive to the Version contract and cannot be changed once set.
 
 &nbsp;
 
@@ -10,7 +10,7 @@ The Version contract is a singleton contract for all funds deployed under a spec
 
 #### Description
 
-The Version contract inherits from FundFactory and is the single, exclusive FundFactory contract for a specific Melon Protocol version. The Version contract is the contract creator for all funds of the specific Melon Protocol version.
+The Version contract inherits from FundFactory and is the single, exclusive FundFactory contract for a specific water<b>melon</b> Protocol version. The Version contract is the contract creator for all funds of the specific water<b>melon</b> Protocol version.
 
 #### Inherits from
 
@@ -29,9 +29,9 @@ The following contract addresses are provided as parameters:
 `address _tradingFactory` - The address of the TradingFactory contract.
 `address _vaultFactory` - The address of the VaultFactory contract.
 `address _policyManagerFactory` - The address of the PolicyManagerFactory contract.
-`address _engine` - The address of the Melon Engine contract.
+`address _engine` - The address of the water<b>melon</b> Engine contract.
 `address _priceSource` - The address of the PriceSource contract.
-`address _mlnAddress` - The address of the Melon Token contract.
+`address _mlnAddress` - The address of the water<b>melon</b> Token contract.
 `address _registry` - The address of the Registry contract.
 
 These address parameters set the corresponding state variables as defined in the inherited definition of  `FundFactory`. The constructor then directly sets the `registry` state variable with the address of the registry contract.
@@ -69,11 +69,11 @@ None.
 
 `uint public amguPrice`
 
-A public state variable specifying the current setting for the Asset Management Gas Unit (AMGU) price. This setting can be changed at the discretion of the Melon Technical Council (MTC).
+A public state variable specifying the current setting for the Asset Management Gas Unit (AMGU) price. This setting can be changed at the discretion of the water<b>melon</b> Technical Council (MTC).
 
 `bool public isShutDown`
 
-A public state variable specifying the operating state of this specific Melon Protocol version.
+A public state variable specifying the operating state of this specific water<b>melon</b> Protocol version.
 
 &nbsp;
 

@@ -2,7 +2,7 @@
 
 ## General
 
-The Melon funds receive current pricing data from the Kyber Network, which in turn aggregates Kyber Reserve Managers providing markets for individual asset tokens. Asset prices are derived from the best price offered among participating reserve managers.
+The water<b>melon</b> funds receive current pricing data from the Kyber Network, which in turn aggregates Kyber Reserve Managers providing markets for individual asset tokens. Asset prices are derived from the best price offered among participating reserve managers.
 
 The PriceSource interface definition is provided below. KyberPriceFeed.sol implements the PriceSource.i.sol interface.
 &nbsp;
@@ -69,7 +69,7 @@ This public view function returns a boolean indicating whether a recent price ex
 
 #### Description
 
-The KyberPriceFeed contract provides the interface from the version-specific Melon platform to the Kyber network for the purposes of receiving pricing data.
+The KyberPriceFeed contract provides the interface from the version-specific water<b>melon</b> platform to the Kyber network for the purposes of receiving pricing data.
 
 #### Inherits from
 
