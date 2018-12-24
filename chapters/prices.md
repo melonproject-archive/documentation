@@ -1,80 +1,240 @@
-# Prices
+# Pricing
 
-In true decentralized fashion, the ability to provide services to the water<b>melon</b> Protocol is permissionless and open to parties willing and capable to reliably provide such services.
+## General
 
-However, precisely because such services are permissionless, they must be subject to review by the community and stakeholders. These parties must have tools at their disposal to take corrective action should malicious or negligent behavior be detected.
+The water<b>melon</b> funds receive current pricing data from the Kyber Network, which in turn aggregates Kyber Reserve Managers providing markets for individual asset tokens. Asset prices are derived from the best price offered among participating reserve managers.
 
-Data which is exogenous to the blockchain must be actively provided by a third party. Asset price data is critical to fund management and water<b>melon</b> Funds. Current and accurate price data enables real-time valuation and indispensable context for investment management decisions. As such, careful attention must be taken to _how_ this exogenous data enters the water<b>melon</b> Smart Contracts.
+The PriceSource interface definition is provided below. KyberPriceFeed.sol implements the PriceSource.i.sol interface.
+&nbsp;
 
-Independent parties wishing to provide the service of an asset price feed may do so by running software which gathers asset price data (corresponding to the water<b>melon</b> Asset Universe set forth in the water<b>melon</b> Asset Registrar) and reliably feeding this data in a specified format to the water<b>melon</b> Smart Contracts.
+## PriceSource.i.sol
 
-## Operator Staking
+#### Description
 
-Prospective Price Feed Operators (candidates) must offer a deposit or "stake" in water<b>melon</b> Tokens (MLN). Individual Price Feed Operators are then "selected" by the water<b>melon</b> Smart Contracts solely on the level of their stake. The staked MLN is held securely in custody by a smart contract which also determines which of the candidates is actually feeding price data to the water<b>melon</b> ecosystem.
+The PriceSource.i.sol is an interface definition intended to generalize the implementation of any concrete price source provider.
 
-Price Feed Operator selection occurs solely on the basis of the relative amount of MLN staked, with the highest staking candidates awarded the ability to submit price data.
+#### Interface Functions
 
-As previously stated, high-quality and reliable price data is crucial to the operation of the water<b>melon</b> ecosystem. To mitigate the risk that corrupt or irregular data (be the data malicious or negligent) enters the water<b>melon</b> environment, price feed operation has been designed to sample price data across multiple price feed operators. The water<b>melon</b> Protocol specifies a minimum- and maximum number of Price Feed Operators. In this way, candidate Price Feed Operators can "self-select" by staking the requisite amount of MLN Tokens which ranks them among the top _n_ MLN stakers as specified by the maximum number of Price Feed Operators. This ranking may change at each block depending on how each Price Feed Operator changes their staked amount of MLN Tokens.
+`function getPriceInfo(address _asset) view returns (uint price, uint decimals)`
 
-It should be explicitly stated that once a candidate ranks as a Price Feed Operator, the magnitude of their amount has no impact on whether their price data point is selected to canonically represent the specific asset's market price at that point in time. That is to say, Price Feed Operators cannot influence the selection of the price data point, but only their ability to _be_ an active Price Feed Operator.
+This public view function returns the asset token price and the asset token decimal precision given the `_asset` address parameter provided.
+&nbsp;
 
-The sampling of the price feed data is implemented as the statistical median for a given asset's price feed update. The median observation for a specific asset's market price for a specific point in time is selected by the water<b>melon</b> Protocol to canonically represent that price point. Should the number of active Price Feed Operators be even at the time of a given Price Feed Update, the standard practice of taking the arithmetic average of the middle two ranked observations applies.
+`function getInvertedPriceInfo(address ofAsset) view returns (uint price, uint decimals)`
 
-## Price Feed Update
+This public view function returns the asset token price provided by the `ofAsset` address parameter in terms of the `ofAsset` asset and decimal precision of the asset token address provided.  
+&nbsp;
 
-The Price Feed Update establishes, on the blockchain, the performance track record of individual assets over time. Once selected by the water<b>melon</b> Protocol and written to state, the price point is a permanent part of the historical track record of the asset. The frequency of the Price Feed Update is defined by the Price Feed Interval.
+`function getQuoteAsset() public view returns (address)`
 
-## Price Feed Interval
+This public view function returns the address of asset token contract which was configured to be the base- or quote asset of the fund. The quote asset is the asset in which the fund's value is denominated.
+&nbsp;
 
-The Price Feed Interval is the time interval or period defined by the water<b>melon</b> Protocol between two Price Feed Updates.
+`function hasValidPrice(address) public view returns (bool)`
 
-## Current Governance
+This public view function returns a boolean indicating whether the asset represented by the address parameter provided is valid. A return value of `true` indicates that the asset has a valid price. A return value of `false` indicates that the asset does not have a valid price.
+&nbsp;
 
-Staking value only has effective economic incentive if the value can be lost. The current iteration of the water<b>melon</b> Protocol provides a mechanism to penalize staking Price Feed Operators for perceived misconduct or negligence. The mechanism allows the Melonport AG multi-signature wallet to specifically and discretionarily "burn" staked MLN Tokens, effectively appropriating and removing the offending Price Operator's stake, in a provable way, from the MLN Token supply.
+`function hasValidPrices(address[]) public view returns (bool)`
 
-## Future Governance
+This public view function returns a boolean indicating whether all of the assets represented by the `address[]` array parameter provided are valid. A return value of `true` indicates that all asset tokens have valid prices. A return value of `false` indicates that one or more of the asset tokens do not have a valid price.
+&nbsp;
 
-It is the intention provide a more decentralized governance mechanism which can be applied to different domains of the water<b>melon</b> Protocol, including Price Feed Operator Governance. This envisions the creation of a "Technical Council" to adjudicate. For further details on the Technical Council, please refer to the Governance section.
+`function getPrice(address _asset) public view returns (uint price, uint timestamp)`
 
-## Public Functions
+This public view function returns the price and price timestamp of the asset token given by the asset token address provided. The timestamp represents the time of the price quote.
+&nbsp;
 
-`update()` only owner
-Function callable only by contract `owner` which updates price of asset(s) relative to the quote asset. An array of asset addresses and an equal length array of asset prices are sent as parameters to the function call.
+`function getPrices(address[] _assets) public view returns (uint[] prices, uint[] timestamps)`
 
-## Public View Functions
+This public view function returns an array of prices and a corresponding array of price timestamps of the asset tokens given by the array of asset token addresses provided. The timestamps represent the times of the price quote.
+&nbsp;
 
-`getQuoteAsset()`
-Function which returns the address of the quote asset.
+`function getReferencePriceInfo(address _base, address _quote) public view returns (uint referencePrice, uint decimal)`
 
-`getInterval()`
-Function which returns the frequency of asset price updates in seconds.
+This public view function takes two address parameters: the base asset (the object of the pricing information) and the quote asset (the asset in which the price is denominated). The function returns the asset price provided by the `ofBase` address parameter in terms of the quote asset, and the specified asset token's `decimals` property.
+&nbsp;
 
-`getValidity()`
-Function which returns the time in seconds for which price data is considered current; the `VALIDITY` parameter.
+`function getOrderPriceInfo(address sellAsset, address buyAsset, uint sellQuantity, uint buyQuantity) public view returns (uint orderPrice)`
 
-`getLastUpdateId()`
-Function which returns the Id of the last update. Can be viewed as an update counter.
+This public view function returns a price given the provided sell asset and corresponding quantity, and the buy asset and corresponding quantity.
+&nbsp;
 
-`hasRecentPrice()`
-Function which returns a boolean indicating whether a specific asset has had a current price update. Current is determined by the number of seconds specified by the `VALIDITY` parameter.
+`function existsPriceOnAssetPair(address sellAsset, address buyAsset) public view returns (bool isExistent)`
 
-`hasRecentPrices()`
-Function which returns a boolean indicating whether an array of assets has had a current prices update. Current is determined by the number of seconds specified by the `VALIDITY` parameter.
+This public view function returns a boolean indicating whether a recent price exists for the asset pair provided by the `sellAsset` and `buyAsset` address parameters.
+&nbsp;
 
-`getPrice()`
-Function which returns the validity, price and decimals of a specific asset.
+## KyberPriceFeed.sol
 
-`getPrices()`
-Function which returns the validity, price and decimals of an array of assets.
+#### Description
 
-`getInvertedPrice()`
-Function which returns the validity, inverted price and number of decimals of the quote asset.
+The KyberPriceFeed contract provides the interface from the version-specific water<b>melon</b> platform to the Kyber network for the purposes of receiving pricing data.
 
-`getReferencePrice()`
-Function which returns the validity, reference price and number of decimals for the asset given the address of the base asset and the address of the quote asset.
+#### Inherits from
 
-`getOrderPrice()`
-Function which returns the implicit price of an order given the sell asset address, buy asset address, sell quantity and buy quantity. CHECK: buyAsset not used.
+PriceSourceInterface, DSThing (link)
 
-`existsPriceOnAssetPair()`
-Function which returns a boolean indicating whether current price data for a specific buy/sell asset pair exists. One of the specified assets must be the quote asset.
+&nbsp;
+
+#### On Construction
+
+The `KyberPriceFeed` contract requires the following parameters on construction:
+
+`address ofRegistrar` - The address of the Version's Registrar contract.
+`address ofKyberNetworkProxy` - The address of the Kyber network proxy contract.
+`uint ofMaxSpread` - The the maximum spread between bid- and ask prices for the price to be considered valid.
+`address ofQuoteAsset` - The address of the asset token contract which is the fund's base- or quote asset. All asset prices will be denominated or based in this asset token across all funds for the purposes of pricing.
+
+These parameters are used to set the the following public state variables on the contract:
+
+`KYBER_NETWORK_PROXY`
+`MAX_SPREAD`
+`QUOTE_ASSET`
+`REGISTRY`
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+None.
+
+&nbsp;
+
+
+#### Events
+
+None.
+
+&nbsp;
+
+
+#### Public State Variables
+
+`address public KYBER_NETWORK_PROXY`
+
+The address of the Kyber network proxy contract.
+&nbsp;
+
+`address public QUOTE_ASSET`
+
+The address of the asset token contract which is the fund's base- or quote asset.
+&nbsp;
+
+`Registry public REGISTRY`
+
+A public state variable which is the Registry contract of version under which the fund was deployed.
+&nbsp;
+
+`uint public MAX_SPREAD`
+
+A public state variable which represents the maximum spread between derived bid- and ask prices for specific asset pairs. `MAX_SPREAD` represents the maximum acceptable tolerance for a price to be valid. `MAX_SPREAD` is specified as a percentage and formatted in 10^18 terms. For example, 1.0% (0.01) would be represented 1x10^16 or 10000000000000000.
+&nbsp;
+
+`address public constant KYBER_ETH_TOKEN = 0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`
+
+A constant public state variable which represents the token contract address of the ETH asset token.
+&nbsp;
+
+`uint public constant KYBER_PRECISION = 18`
+
+A constant public state variable which represents the divisibility precision of asset tokens...
+&nbsp;
+
+`uint public constant VALIDITY_INTERVAL = 2 days`
+
+A constant public state variable which represents the maximum validity of price feed prices and is set to "2 days".
+
+`uint public lastUpdate`
+
+An integer representing the time of the last price feed update.
+&nbsp;
+
+`mapping (address => uint) public prices`
+
+A public mapping associating an asset token contract address to the most recent price.
+&nbsp;
+
+#### Public Functions
+
+`function update()`
+
+This public function ensures that is can only be called by the `REGISTRY` owner. The function updates the `prices` mapping and the `lastUpdate` state variable. A price of "0" indicates an invalid price.
+&nbsp;
+
+`function getQuoteAsset() view returns (address)`
+
+This public view function returns the address of asset token contract which was configured to be the base- or quote asset of the fund. The quote asset is the asset in which the fund's value is denominated.
+&nbsp;
+
+`function getPrice(address _asset) view returns (uint price, uint timestamp)`
+
+This public view function returns the price and price timestamp of the asset token given by the asset token address provided. The price integer returned is formatted as the product of the exchange price and ten to the power of the asset's specified decimals property. The timestamp represents the time of the price quote.
+&nbsp;
+
+`function getPrices(address[] _assets) view returns (uint[], uint[])`
+
+This public view function returns an array of prices and a corresponding array of price timestamps of the asset tokens given by the array of asset token addresses provided. The price integers returned are formatted as the product of the exchange price and ten to the power of the asset's specified decimals property. The timestamps represent the times of the price quote.
+&nbsp;
+
+`function hasValidPrice(address _asset) view returns (bool)`
+
+This public view function returns a boolean indicating whether the asset represented by the `_asset` parameter provided is recent. The function first requires that the asset is registered in the registry. Passing the address of the quote asset will return `true`. If the price provided by the Kyber reserve manager is not 0, the price is assumed to be recent and will return `true`.
+&nbsp;
+
+`function hasValidPrices(address[] _assets) view returns (bool)`
+This public view function returns a boolean indicating whether the assets represented by the `_assets` address array parameter provided are all recent. The function requires that all assets passed in address array `_assets` parameter are registered in the registry. If any single asset in the array of asset addresses is not recent, the function will return `false`.
+&nbsp;
+
+`function getPriceInfo(address ofAsset) view returns (bool isRecent, uint price, uint assetDecimals)`
+
+This public view function calls the `getReferencePriceInfo()` function and returns a boolean indicating the validity of the price, the asset price provided by the `ofAsset` address parameter in terms of the quote asset, and the specified asset token's `decimals` property.
+&nbsp;
+
+`function getRawReferencePriceInfo(address _baseAsset, address _quoteAsset) view
+returns (bool isValid, uint referencePrice, uint decimals)`
+
+This public view function takes the `_baseAsset` and `_quoteAsset` token contract addresses and returns a boolean indicating price validity, the reference price and the asset token's decimal precision.
+&nbsp;
+
+`function getInvertedPriceInfo(address ofAsset) view returns (bool isRecent, uint invertedPrice, uint assetDecimals)`
+
+This public view function calls the `getReferencePriceInfo()` function and returns a boolean indicating the validity of the price, the asset price provided by the `ofAsset` address parameter in terms of the `ofAsset` asset, and the specified asset token's `decimals` property.
+&nbsp;
+
+`function getReferencePriceInfo(address _baseAsset, address _quoteAsset) view returns (bool isRecent, uint referencePrice, uint decimals)`
+
+This public view function takes two address parameters: the base asset (the object of the pricing information) and the quote asset (the asset in which the price is denominated). [CHECK: function will we re-worked...]
+&nbsp;
+
+`function getOrderPriceInfo(address sellAsset, address buyAsset, uint sellQuantity, uint buyQuantity) view returns (uint orderPrice)`
+
+This public view function returns a price given the provided sell asset and corresponding quantity, and the buy asset and corresponding quantity.
+&nbsp;
+
+`function existsPriceOnAssetPair(address sellAsset, address buyAsset) view returns (bool isExistent)`
+
+This public view function returns a boolean indicating whether a recent price exists for the asset pair provided by the `sellAsset` and `buyAsset` address parameters.
+&nbsp;
+
+`function getKyberMaskAsset(address _asset) returns (address)`
+
+This public function returns the address of the Kyber Network representation contract adddress of the asset token contract address provided. If the address provided is ETH, the native token, the function returns `KYBER_ETH_TOKEN`; otherwise `_asset` is returned.
+&nbsp;
+
+`function getKyberPrice(address _baseAsset, address _quoteAsset) public view
+returns (bool isValid, uint kyberPrice)`
+
+This public view function takes the `_baseAsset` and `_quoteAsset` token contract addresses and returns a boolean indicating price validity and the average expected current Kyber Network price.
+&nbsp;

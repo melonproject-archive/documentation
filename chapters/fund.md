@@ -2,13 +2,13 @@
 
 ## Hub & Spoke
 
-### General
+## General
 
 The Hub and Spoke contracts make up the core contract framework of the water<b>melon</b> fund. Hub and Spoke is an architecture design to help reason about all the moving parts of fund as constructed by an interconnected system of linked smart contracts. The Hub will contain all relevant information for all Spokes registered with the Hub. Each Spoke will independently contain all relevant information about the Hub. Individual Spokes will have programmatic access to information in specific other Spokes.
 
 In general, there is one Hub contract and separate, distinct Spoke contracts for each fund. (CHECK: Implementation for shared components as spoke) The Hub forms the core of the individual water<b>melon</b> fund with each Spoke contributing specific services to the fund. The Hub contract stores the manager's address and the fund name permanently in state, and also contains the functionality to permanently and irreversibly shut the water<b>melon</b> fund down.
 
-### Hub.sol
+## Hub.sol
 
 #### Description
 
@@ -17,14 +17,16 @@ The Hub maintains the specific Spoke components of the fund in terms of their ro
 #### Inherits from
 
 DSGuard (link)
+&nbsp;
 
 #### On Construction
 
-The constructor requires and sets the manager address and the fund name.
+The constructor requires and sets the manager address and the fund name as well as the `creator` and `creationTime.
+&nbsp;
 
 #### Structs
 
-`Settings`
+`Routes`
 
 Member variables:
 
@@ -36,114 +38,161 @@ Member variables:
 `address trading`
 `address vault`
 `address priceSource`
-`address canonicalRegistrar`
+`address registry`
 `address version`
 `address engine`
-`address mlnAddress`
+`address mlnToken`
 
 This struct stores the contract addresses of the listed components and spokes.
+&nbsp;
 
 #### Enums
 
 None.
 
+&nbsp;
+
 #### Modifiers
 
-None.
+`modifier onlyCreator()`
+
+A modifier requiring that the `msg.sender` is the `creator`.
+
+&nbsp;
 
 #### Events
 
 None.
 
+&nbsp;
+
 #### Public State Variables
 
-`Settings public settings`
+`Routes public routes`
 
-A `Settings` struct containing Spoke and component addresses.
+A `Routes` struct containing Spoke and component addresses.
+&nbsp;
 
 `address public manager`
 
 The address of the fund manager.
+&nbsp;
 
 `string public name`
 
 The name of the fund as defined by the manager at fund set up.
+&nbsp;
 
 `bool public isShutDown`
 
 A boolean variable defining the operational status of the fund.
+&nbsp;
 
 `bool public spokesSet`
 
 A boolean variable defining the completeness status of all spoke settings.
+&nbsp;
 
 `bool public routingSet`
 
 A boolean variable defining the completeness status of all routing settings.
+&nbsp;
 
 `bool public permissionsSet`
 
 A boolean variable defining the completeness status of all permissions settings.
+&nbsp;
+
+`address public creator`
+
+An address variable defining the creator of the water<b>melon</b> fund, i.e. `msg.sender`.
+&nbsp;
+
+`uint public creationTime`
+
+An integer variable representing the water<b>melon</b> fund's creation time.
+&nbsp;
+
+mapping (address => bool) public isSpoke
+
+`A public mapping associating an address to a boolean indicating that the address is a Spoke of the water<b>melon</b> fund.`
+&nbsp;
 
 #### Public Functions
 
 `function shutDownFund() public`
 
 This function sets the `ìsShutDown` state variable to `true`, effectively disabling the fund for all activities except investor redemptions. This function can only be successfully called by the manager address. The function's actions are permanent and irreversible.
+&nbsp;
 
-`function setSpokes(address[12] _spokes)`
+`function setSpokes(address[12] _spokes) onlyCreator`
 
-This function takes an array of addresses and sets all member variables of the `settings` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`.
+This function takes an array of addresses and sets all member variables of the `routes` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+&nbsp;
 
-`function setRouting()`
+`function setRouting() onlyCreator`
 
-This function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`.
+This function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+&nbsp;
 
-`function setPermissions()`
+`function setPermissions() onlyCreator`
 
-This function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`.
+This function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+&nbsp;
 
 `function vault() view returns (address)`
 
 This view function returns the vault Spoke address.
+&nbsp;
 
 `function accounting() view returns (address)`
 
 This view function returns the accounting Spoke address.
+&nbsp;
 
 `function priceSource() view returns (address)`
 
 This view function returns the priceSource contract address.
+&nbsp;
 
 `function participation() view returns (address)`
 
 This view function returns the participation Spoke address.
+&nbsp;
 
 `function trading() view returns (address)`
 
 This view function returns the trading Spoke address.
+&nbsp;
 
 `function shares() view returns (address)`
 
 This view function returns the shares Spoke address.
+&nbsp;
 
 `function policyManager() view returns (address)`
 
 This view function returns the policyManager Spoke address.
+&nbsp;
 
-### Spoke.sol
+## Spoke.sol
 
 #### Description
 
 All Spoke contracts are registered with only one Hub and are initialized, storing the routes to all other Spokes registered with the Hub. Spokes serve as an abstraction of functionality and each Spoke has distinct and separate business logic domains, but may pragmatically access other Spokes registered with their Hub.
+&nbsp;
 
 #### Inherits from
 
 DSAuth (link)
 
+&nbsp;
+
 #### On Construction
 
-Sets the `hub` state variable and sets the the `hub` as the `authority` as defined for permissioning within DSAuth.
+Sets the `hub` state variable and sets the the `hub` as the `authority` and `owner` as defined for permissioning within DSAuth.
+
+&nbsp;
 
 #### Structs
 
@@ -165,54 +214,75 @@ Member variables:
 `address mlnAddress`
 
 This struct stores the contract addresses of the listed components and spokes.
+&nbsp;
 
 #### Enums
 
 None.
 
+&nbsp;
+
 #### Modifiers
 
-None.
+`modifier notShutDown()`
+
+This modifier requires that the fund is not shut down and is evaluated prior to the execution of the functionality of the implementing function.
+&nbsp;
+
+`modifier onlyInitialized()`
+
+This modifier requires that the `initialized` state variable is set to `true`.
+&nbsp;
 
 #### Events
 
 None.
+
+&nbsp;
 
 #### Public State Variables
 
 `Hub public hub`
 
 A variable of type `Hub`, defining the specific Hub contract to which the Spoke is connected.
+&nbsp;
 
 `Routes public routes`
 
 A `Routes` struct storing all initialized Spoke and component addresses.
+&nbsp;
 
 `bool public initialized`
 
 A boolean variable defining the initialization status of the Spoke.
+&nbsp;
 
 #### Public Functions
 
-`function initialize(address[10] _spokes)`
+`function initialize(address[12] _spokes) public auth`
 
-This function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true`.
+This function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true` and the `owner` to address "0".
+&nbsp;
 
 `function engine() view returns (address)`
 
 This view function returns the engine component contract address.
+&nbsp;
 
-`function mlnAddress() view returns (address)`
+`function mlnToken() view returns (address)`
 
 This view function returns the MLN token contract address.
+&nbsp;
 
 `function priceSource() view returns (address)`
 
 This view function returns the priceSource component contract address.
+&nbsp;
 
 `function version() view returns (address)`
 
 This view function returns the version component contract address.
+&nbsp;
 
 ---
 
@@ -273,7 +343,7 @@ Example Ethereum Address:
 Example Ethereum Private Key:
 `d43689ae52d6a4e0e95d41bc638e95a66c4e7d0852f6db83d44c234ce9267d0d`
 
-### Participation.sol
+## Participation.sol
 
 #### Description
 
@@ -281,7 +351,7 @@ The Participation contract encompasses the entire water<b>melon</b> fund interfa
 
 #### Inherits from
 
-DSMath, AmguConsumer, Spoke (links)
+ParticipationInterface, DSMath, AmguConsumer, Spoke (links)
 
 #### On Construction
 
@@ -305,65 +375,65 @@ Member variables:
 
 None.
 
+&nbsp;
+
 #### Modifiers
 
 None.
 
+&nbsp;
+
 #### Events
 
-`RequestExecuted()`
+None.
 
-    `address investmentAsset` - The address of the asset token with which the subscription is made.
-    `uint investmentAmount` - The quantity of tokens of the `investmentAsset`
-    `uint requestedShares` - The calculated quantity of fund shares created for the subscription
-    `uint timestamp` - The timestamp of the block containing the subscription transaction
-    `uint atUpdateId` - [CHECK]
-
-This event is triggered when a subscription is successfully executed by the fund.
-
-`SuccessfulRedemption()`
-
-    `uint quantity` - The quantity of shares successfully redeemed
-
-This event is triggered when a redemption is successfully executed by the fund.
+&nbsp;
 
 #### Public State Variables
 
 `mapping (address => Request) public requests`
 
 A public mapping which assigns an investor's address to a `Request` struct.
+&nbsp;
 
 `mapping (address => bool) public investAllowed`
 
 A public mapping which specifies all asset tokens which have been enabled for subscription to the water<b>melon</b> fund.
+&nbsp;
 
-`uint public SHARES_DECIMALS`
+`uint constant public SHARES_DECIMALS = 18`
 
-An integer which specifies the decimal precision of a single share. The value is set to 18.
+An integer constant which specifies the decimal precision of a single share. The value is set to 18.
+&nbsp;
+
+`uint constant public INVEST_DELAY = 10 minutes`
+
+An integer constant which specifies the the number of seconds a valid subscription request must be delayed before a subscription is executed.
+&nbsp;
 
 #### Public Functions
 
 `function enableInvestment(address[] _assets) public auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the water<b>melon</b> fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping.
+This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the water<b>melon</b> fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping. Finally the function emits the `EnableInvestment()` event, logging the `_assets`.
+&nbsp;
 
 `function disableInvestment(address[] _assets) public auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping.
+This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
+&nbsp;
 
-`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external payable amguPayable`
+`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable onlyInitialized`
 
-This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine. [CHECK: Further explantation and detail][check: add compliance when implemented]
+This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
+&nbsp;
 
 `function cancelRequest() external`
 
-This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address.
+This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requres the request timestamp to be greater than "0", then emits the `CancelRequest` event.
+&nbsp;
 
-`function executeRequest() public payable`
-
-This function calls `executeRequestFor()` on behalf of `msg.sender`.
-
-`function executeRequestFor(address requestOwner) public`
+`function executeRequestFor(address requestOwner) public notShutDown amguPayable payable`
 
 This function:
 ensures that the fund is not shutDown,
@@ -372,25 +442,29 @@ ensures that a request corresponding to `msg.sender` exists in the `requests` ma
 ensures that subscription is permitted in the subscribing asset token,
 ensures that the price for the subscribing asset token is recent,
 ensures that management fee shares have been calculated and allocated immediately prior to subscription,
-calculates the cost of the share quantity requested (in quote asset terms),
+calculates the cost of the share quantity requested (in denomination asset terms),
 ensures that the cost of the share quantity requested is sufficiently covered by the `investmentAmount`,
 maintains the `requests` mapping by removing the current `Request` corresponding to `msg.sender`,
 ensures the transfer of the subscription tokens to the fund's vault,
 creates and transfers/allocates the commensurate number of shares for the subscription to the `msg.sender` (investor) address,
 determines if the asset is currently held by the fund; if not, the asset is added to the fund's owned assets,
 and finally, the function emits the RequestExecuted() event, broadcasting the event's parameters (see event specification above). The function reverts all work if any permission, quantity, asset or address are determined to be invalid.
+&nbsp;
 
 `function getOwedPerformanceFees(uint shareQuantity) view returns (uint remainingShareQuantity)`
 
 This view function calculates and returns the quantity of shares owed for payment of accrued performance fees given the provided quantity of shares being redeemed.
+&nbsp;
 
 `function redeem() public`
 
 This function determines the quantity of shares owned by `msg.sender` and calls `redeemQuantity()`. A share-commensurate quantity of all token assets in the fund are transferred to `msg.sender`, i.e. the investor. This function redeems _all_ shares owned by `msg.sender`.
+&nbsp;
 
 `function redeemQuantity(uint shareQuantity) public`
 
 This function allows the investor to redeem a specified quantity of shares held by the `msg.sender`, i.e. the investor.
+&nbsp;
 
 `function redeemWithConstraints(uint shareQuantity, address[] requestedAssets) public`
 
@@ -403,18 +477,23 @@ calculates the proportionate quantity of each token asset owned by the investor 
 destroys the investor's shares and reduces the fund's total share supply by the same amount,
 safely transfers all token assets in the correct quantities to the `msg.sender` (investor) address using the ERC20 `transfer()` function,
 and finally, the function emits the `SuccessfulRedemption()` event along with the quantity of successfully redeemed shares.
+&nbsp;
 
 `function hasRequest(address _who) view returns (bool)`
 
 This view function returns a boolean indicating whether the provided address has a corresponding active request with a positive quantity of requested shares in the `requests` mapping.
+&nbsp;
+
+
+`function hasValidRequest(address _who) public view returns (bool)`
+
+This public view function returns a boolean indicating the `_who` address parameter has a valid request, meaning that either this is the address's first subscription or the INVEST_DELAY is respected, the subscription amount is greater than "0" and the requested share quantity is greater than "0".
 
 ---
 
 ## Shares
 
-### Shares.sol
-
-### General
+## Shares.sol
 
 #### Description
 
@@ -430,65 +509,82 @@ When share tokens are redeemed. A proportionate quantity of the fund's underlyin
 
 Spoke, StandardToken (links)
 
+&nbsp;
+
 #### On construction
 
 The Shares contract requires the address of the `hub` and becomes a `spoke` of the `hub`. The Shares contract describes the water<b>melon</b> fund's shares as _ERC20 tokens_. The share tokens take their name as defined by the `hub`. The share token's symbol and decimals are hardcoded in the contract.
 
 The Shares contract is created from the sharesFactory contract, which creates a new instance of `Shares` given the `hub` address, register the address of the newly created shares contract as a child of the sharesFactory.
+&nbsp;
 
 #### Public State variables
 
 `string public symbol`
 
 A public string variable denoting the water<b>melon</b> fund's share token symbol, currently defaulting to "MLNF".
+&nbsp;
 
 `string public name`
 
 A public string variable denoting the water<b>melon</b> fund's name as specified by the manager at set up.
+&nbsp;
 
 `uint8 public decimals`
 
 A public integer variable storing the decimal precision of the water<b>melon</b> fund's share quantity, currently defaulting to 18, the same decimal precision as ETH and many other ERC20 tokens.
+&nbsp;
 
 #### Structs
 
 None.
 
+&nbsp;
+
 #### Enums
 
 None.
+
+&nbsp;
 
 #### Public Functions
 
 `function createFor(address who, uint amount) auth`
 
 This function requires that the caller is the `owner` or the current contract. This function calls internal function `_mint()`, which increases both `totalSupply` and the `balance` of the address by the same quantity.
+&nbsp;
 
 `function destroyFor(address who, uint amount) auth`
 
 This function requires that the caller is the `owner` or the current contract. This function calls internal function `_burn()`, which decreases both `totalSupply` and the `balance` of the address by the same quantity.
+&nbsp;
 
 #### Reverting functions:
 
 `function transfer(address to, uint amount) public returns (bool)`
+&nbsp;
 
 `function transferFrom(address from, address to, uint amount) public returns (bool)`
+&nbsp;
 
 `function approve(address spender, uint amount) public returns (bool)`
+&nbsp;
 
 `function increaseApproval(address spender, uint amount) public returns (bool)`
+&nbsp;
 
 `function decreaseApproval(address spender, uint amount) public returns (bool)`
+&nbsp;
 
 ---
 
 ## Vault
 
-### General
+## General
 
-### Vault.sol
+## Vault.sol
 
-##### Description
+#### Description
 
 The Vault makes use of the `auth` modifier from the DSAuth dependency. The `auth` functionality ensures the precise provisioning of call permissions, and focuses on granting `owner` or the current contract call permissions.
 
@@ -500,85 +596,83 @@ The Vault contract is created from the vaultFactory contract, which creates a ne
 
 ##### Inherits from
 
-Spoke (link)
+VaultInterface, Spoke (link)
 
 &nbsp;
 
 ##### On construction
 
 Requires the `Hub` address and uses this to instantiate itself as a `Spoke`.
-
 &nbsp;
 
-##### Structures
+#### Structs
 
 None
 
 &nbsp;
 
-##### Modifiers
+#### Modifiers
 
 `onlyUnlocked()`
 
 Before any execution, this modifier requires that the vault contract's `locked` state variable is `false`.
-
 &nbsp;
 
-##### Public State Variables
+#### Events
+
+`event Lock(bool status)`
+
+This event is triggered when the status of the `locked` state variable is changed. The event logs the new status.
+
+#### Public State Variables
 
 `bool public locked`
 
 A public boolean state variable which indicates the lock state of the vault.
-
 &nbsp;
 
-##### Public Functions
-
-&nbsp;
+#### Public Functions
 
 `function lockdown() auth`
 
 This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `true`.
-
 &nbsp;
 
 `function unlock() auth`
 
 This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `false`.
-
-&nbsp;
-
-`function deposit(address token, uint amount) auth`
-
-This function requires that the caller is the `owner` or the current contract. This function calls the `transferFrom()` ERC20 function of the provided asset token contract address, transferring ownership of the provided amount to the custody of the vault contract.
-
 &nbsp;
 
 `function withdraw(address token, uint amount) onlyUnlocked auth`
 
 This function requires that the caller is the `owner` or the current contract, and that the `locked` state of the vault be `false`. This function calls the `transfer()` ERC20 function of the provided asset token contract address, transferring ownership of the provided amount from the vault to the custody of the `owner`.
+&nbsp;
 
 ---
 
 ## Accounting
 
-### General
+## General
 
-### Accounting.sol
+## Accounting.sol
 
 #### Description
 
 The Accounting contract defines the accounting rules implemented by the fund. All operations concerning the underlying fund positions, fund position maintenance, asset token pricing, fees, Gross- and Net Asset value calculations and per-share calculations come together in this contract's business logic.
+&nbsp;
 
 #### Inherits from
 
-Spoke, DSMath (links)
+AccountingInterface, AmguConsumer, Spoke (links)
+
+&nbsp;
 
 #### On Construction
 
-The contract requires the hub address, the quote asset address and an array of default asset addresses. These inputs set the accounting spoke's quote asset, share decimals (18), the default share price (1.0 in quote asset terms) and add all default assets passed in to the `ownedAssets` array state variable.
+The contract requires the hub address, the denomination asset address, the native asset address and an array of default asset addresses. These inputs set the accounting spoke's denomination asset, denomination asset decimals, the default share price (1.0 in denomination asset terms) and add all default assets passed in to the `ownedAssets` array state variable.
 
 The Accounting contract is created from the AccountingFactory contract, which creates a new instance of `Accounting` given the `hub` address, registering the address of the newly created Accounting contract as a child of the AccountingFactory.
+&nbsp;
 
 #### Structs
 
@@ -591,6 +685,7 @@ Member Variables:
  `uint allocatedFees` - Fee shares accrued since the previous fee calculation about to be allocated
 `uint totalSupply` - The quantity of fund shares  
  `uint timestamp` - The timestamp of the current transactions block
+ &nbsp;
 
 #### Enums
 
@@ -602,93 +697,127 @@ None.
 
 #### Public State Variables
 
+`uint constant public MAX_OWNED_ASSETS = 20`
+
+A constant integer determining the maximum quantity of individual asset token positions able to be held at any point in time by a water<b>melon</b> fund. This constant is set to "20".
+&nbsp;
+
 `address[] public ownedAssets`
 
 A pubic array containing the addresses of tokens currently held by the fund.
+&nbsp;
 
 `mapping (address => bool) public isInAssetList`
 
 A mapping defining the status of an asset's membership in the `ownedAssets` array.
+&nbsp;
 
-`address public QUOTE_ASSET`
+`uint public constant SHARES_DECIMALS = 18`
 
-The address of the token defined to be the quote asset, or base currency of the fund. NAV, performance and all fund-level metrics will be denominated in this asset. One unit of the quote asset.
+A public constant representing the decimal precision of water<b>melon</b> fund share token.
+&nbsp;
+
+`address public NATIVE_ASSET`
+
+The address of the asset token native to the platform.
+&nbsp;
+
+`address public DENOMINATION_ASSET`
+
+The address of the token defined to be the denomination asset, or base currency of the fund. NAV, performance and all fund-level metrics will be denominated in this asset.
+&nbsp;
+
+`uint public DENOMINATION_ASSET_DECIMALS`
+
+An integer determining the decimal precision, or the degree of divisibility, of the denomination asset.
+&nbsp;
 
 `uint public DEFAULT_SHARE_PRICE`
 
-An integer determining the initial "sizing" of one share in the fund relative to the quote asset. The share price at fund inception will always be one unit of the quote asset. _rename to INCEPTION_SHARE_PRICE_, _should this be configureable?_
-
-`uint public SHARES_DECIMALS`
-
-An integer determining the number of decimals, or the degree of divisibility, of a fund share. This value is set to 18, which is congruent with the divisibility of ETH and many other tokens. [CHECK Also stored in shares.sol]
+An integer determining the initial "sizing" of one share in the fund relative to the denomination asset. The share price at fund inception will always be one unit of the denomination asset.
+&nbsp;
 
 `Calculations public atLastAllocation`
 
 A `Calculations` structure holding the latest state of the member fund calculations described above.
+&nbsp;
 
 #### Public functions
+
+`function getOwnedAssetsLength() view returns (uint)`
+
+This public view function returns the length of the `ownedAssets` array state variable.
 
 `function getFundHoldings() returns (uint[], address[])`
 
 This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
-
-`function getFundHoldingsLength() view returns (uint)`
-
-This view function returns the number of distinct token assets held by the fund.
+&nbsp;
 
 `function calcAssetGAV(address ofAsset) returns (uint)`
 
-This function calculates and returns the current fund position GAV (in quote asset terms) of the individual asset token as specified by the address provided.
+This function calculates and returns the current fund position GAV (in denomination asset terms) of the individual asset token as specified by the address provided.
+&nbsp;
 
 `function assetHoldings(address _asset) public returns (uint)`
 
 This function returns the fund position quantity of the asset token as specified by the address provided.
+&nbsp;
 
 `function calcGav() public returns (uint gav)`
 
-This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in quote asset terms.
+This function calculates and returns the current Gross Asset Value (GAV) of all fund assets in denomination asset terms.
+&nbsp;
 
-`function calcUnclaimedFees(uint gav) view returns (uint)`
-
-This function calculates and returns all fees due to the manager (in share terms) at the time of execution given the fund Gross Asset Value (GAV).
-
-`function calcNav(uint gav, uint unclaimedFees) pure returns (uint)`
+`function calcNav(uint gav, uint unclaimedFees) public pure returns (uint)`
 
 This function calculates and returns the fund's Net Asset Value (NAV) given the provided fund GAV and current quantity of unclaimed fee shares.
+&nbsp;
 
-`function calcValuePerShare(uint totalValue, uint numShares) view returns (uint)`
+`function valuePerShare(uint totalValue, uint numShares) view returns (uint)`
 
-This function calculates and returns the value (in quote asset terms) of a single share in the fund given the fund total value and the total number of shares.
+This function calculates and returns the value (in denomination asset terms) of a single share in the fund given the fund total value and the total number of shares provided.
+&nbsp;
 
-`function performCalculations() view returns (uint gav, uint unclaimedFees, uint feesShareQuantity, uint nav, uint sharePrice)`
+`function performCalculations() returns (uint gav, uint unclaimedFees, uint feesInShares, uint nav, uint sharePrice)`
 
-This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in quote asset terms).
+This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in denomination asset terms).
+&nbsp;
 
-`function calcSharePrice() view returns (uint sharePrice)`
+`function calcSharePrice() returns (uint sharePrice)`
 
-This function calculates and returns the current price (in quote asset terms) of a single share in the fund.
+This function calculates and returns the current price (in denomination asset terms) of a single share in the fund.
+&nbsp;
 
-`function calcSharePriceAndAllocateFees() public returns (uint)`
+`function getShareCostInAsset(uint _numShares, address _altAsset) returns (uint)`
 
-This function calculates and returns the price of a single share (in quote asset terms) as well as performing the fee share calculation and allocation.
+This public function calculates and returns the quantity of the `_altAsset` asset token commensurate with the value of `_numShares` quantity of the water<b>melon</b> fund's shares.
+&nbsp;
+
+`function triggerRewardAllFees() public amguPayable payable`
+
+This public function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+&nbsp;
 
 `function updateOwnedAssets() public`
 
-This function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing or adding asset addresses as the fund holdings composition changes.
+This function maintains the `ownedAssets` array by removing or adding asset addresses as the fund holdings composition changes.
+&nbsp;
 
 `function addAssetToOwnedAssets(address _asset) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
+&nbsp;
 
 `function removeFromOwnedAssets(address _asset) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
+&nbsp;
 
 ---
 
 ## Fees
 
-### General
+## General
 
 Fees are charges levied against a water<b>melon</b> fund's assets for:
 
@@ -711,20 +840,18 @@ Fees are calculated and allocated when fund actions such as subscribe, redeem or
 
 It is important to note that fee calculations take place before the fund's share quantity is impacted by subscriptions or redemptions. To this end, when a subscription or redemption action is initiated by an investor, the execution order first calculates fee amounts and creates the corresponding share quantity, as the elapsed time and share quantity at the start is known. Essentially, the water<b>melon</b> fund calculates and records a reconciled state immediately and in the same transaction where share quantity changes due subscription/redemption.
 
-### Management Fees
+## Management Fees
 
 Management Fees are earned with the passage of time, irrespective of performance. The order of fee calculations is important. The Management Fee share quantity calculation is a prerequisite to the Performance Fee calculation, as fund performance must be reduced by the Management Fee expense to fairly ascertain net performance.
 
 The Management Fee calculation business logic is fully encapsulated by the Management Fee contract. This logic can be represented as follows.
 
 First, the time-weighted, pre-dilution share quantity is calculated:
-
 &nbsp;
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
-
 &nbsp;
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
@@ -742,10 +869,9 @@ where,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
-
 &nbsp;
 
-### Performance Fees
+## Performance Fees
 
 Performance Fees accrue over time with performance, but can only be harvested after regular, pre-determined points in time. This period is referred to as the Measurement Period and is decided by the fund manager and configured at fund set up.
 
@@ -758,7 +884,6 @@ If the difference to the HWM is positive, performance has been achieved and a Pe
 The calculation of the Performance Fee requires that, at that moment, no Management Fees are due. This will be true as the code structure always invokes the Management Fee calculation and allocation immediately preceding, and in the same transaction, the Performance Fee calculation.
 
 The Performance Fee calculation business logic is fully encapsulated by the Performance Fee contract. This logic can be represented as follows.
-
 &nbsp;
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
@@ -794,7 +919,6 @@ where,
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
 
 &nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
-
 &nbsp;
 
 While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
@@ -805,9 +929,9 @@ In the case where an investor redeems prior to the current Measurement Period's 
 
 The intended behavior is for the Manager to immediately redeem fee shares as they are created. This will ensure a fair and precise share allocation. The implemented code that represents the fee calculations above contain smart contract optimizations for state variable storage. By not immediately redeeming fee shares, a negligible deviation to the manager fee payout will arise due to this optimization.
 
-### FeeManager.sol
+## FeeManager.sol
 
-##### Description
+#### Description
 
 The Fee Manager is a spoke which is initialized and permissioned in the same manner as all other spokes. The Fee Manager registers and administers the execution order of the individual fee contracts.
 
@@ -815,147 +939,212 @@ The Fee Manager is a spoke which is initialized and permissioned in the same man
 
 Spoke, DSMath (link)
 
+&nbsp;
+
 ##### On Construction
 
 Sets the hub of the spoke.
+
+&nbsp;
 
 ##### Structs
 
 None.
 
+&nbsp;
+
 ##### Enums
 
 None.
+
+&nbsp;
 
 ##### Public State Variables
 
 `Fee[] public fees`
 
 An array of type fees storing the defined fees.
+&nbsp;
 
 `mapping (address => bool) public feeIsRegistered`
 
 A mapping storing the registration status of a fee address.
+&nbsp;
 
 ##### Public Functions
 
 `function register(address feeAddress) public`
 
 This function adds the feeAddress provided to the `Fee[]` array and sets the `feeIsRegistered` mapping for that address to `true`.
-
-`function batchRegister(address[] feeAddresses) public`
-
-This function adds an array of fee addresses provided to the `Fee[]` array and sets the `feeIsRegistered` mappings for those addresses to `true`.
+&nbsp;
 
 `function totalFeeAmount() public view returns (uint total)`
 
 This function returns the total amount of fees incurred for the hub.
-
-`function rewardFee(Fee fee) public`
-
-This function creates shares commensurate with the fee provided.
+&nbsp;
 
 `function rewardAllFees() public`
 
 This function creates shares commensurate with all fees stored in the `Fee[]` state variable array.
+&nbsp;
 
-### FixedManagementFee.sol
+`function rewardManagementFee() public`
 
-##### Description
+This public function calculates, creates and allocates the quantity of shares currently due as the management fee.
+&nbsp;
 
-The FixedManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
+`function performanceFeeAmount() public view returns (uint)`
 
-##### Inherits from
+This public view function calculates and returns the quantity of shares currently due as the performance fee.
+&nbsp;
+
+## ManagementFee.sol
+
+#### Description
+
+The ManagementFee contract contains the complete business logic for the creation of fund shares based on assets managed over a specified time period.
+&nbsp;
+
+#### Inherits from
 
 Fee and DSMath (link)
 
-##### On Construction
+&nbsp;
 
-No specified behavior.
-
-##### Structs
+#### On Construction
 
 None.
 
-##### Enums
+&nbsp;
+
+#### Structs
 
 None.
 
-##### Public State Variables
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Public State Variables
 
 `uint public PAYMENT_TERM`
 
 An integer defining the measurement period in seconds.
+&nbsp;
 
 `uint public MANAGEMENT_FEE_RATE`
 
 An integer defining the management fee percentage rate.
+&nbsp;
 
 `uint public DIVISOR`
 
 An integer defining the standard divisor.
+&nbsp;
 
 `uint public lastPayoutTime`
 
 An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+&nbsp;
 
-##### Public Functions
+#### Public Functions
 
 `function feeAmount(address hub) public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the amount of time since the previous fee payment, asset value and the defined management fee rate.
+&nbsp;
 
 `function updateState(address hub) external`
 
 This function sets `lastPayoutTime` to the current block timestamp.
+&nbsp;
 
-### FixedPerformanceFee.sol
+## PerformanceFee.sol
 
-##### Description
+#### Description
 
-The FixedPerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
+The PerformanceFee contract contains the complete business logic for the creation of fund shares based on fund performance over a specified Measurement Period and relative to the fund-internally-defined HWM.
 
-Inherits from Fee and DSMath (link)
+#### Inherits from
 
-##### On Construction
+Fee, DSMath (link)
 
-No specified behavior.
+&nbsp;
 
-##### Structs
-
-None.
-
-##### Enums
+#### On Construction
 
 None.
 
-##### Public State Variables
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Public State Variables
 
 `uint public PERFORMANCE_FEE_RATE`
 
 An integer defining the performance fee percentage rate.
+&nbsp;
 
-`uint public DIVISOR`
+`uint public constant DIVISOR = 10 ** 18`
 
-An integer defining the standard divisor.
+A constant integer defining the standard divisor.
+&nbsp;
 
-`uint public highWaterMark`
+`uint public constant INITIAL_SHARE_PRICE = 10 ** 18`
 
-An integer defining the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
+A constant integer defining the initial share price to "1".
+&nbsp;
 
-`uint public lastPayoutTime`
+`mapping(address => uint) public highWaterMark`
 
-An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+A public mapping associating the water<b>melon</b> fund address to the water<b>melon</b> fund's `highWaterMark`, which defines the asset value which must be exceeded at the measurement period's end to facilitate the determination of the performance fee due to the manager.
+&nbsp;
 
-##### Public Functions
+`mapping(address => uint) public lastPayoutTime`
 
-`function feeAmount(address hub) public view returns (uint feeInShares)`
+A public mapping associating the water<b>melon</b> fund address to the water<b>melon</b> fund's last previous time a performance fee calculation and payout was executed. It is an integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+&nbsp;
+
+`mapping(address => uint) public performanceFeeRate`
+
+A public mapping associating the water<b>melon</b> fund address to the water<b>melon</b> fund's configured performance fee rate.
+&nbsp;
+
+`mapping(address => uint) public performanceFeePeriod`
+
+A public mapping associating the water<b>melon</b> fund address to the water<b>melon</b> fund's configured performance measurement period. This integer express the performance measurement period in seconds.
+&nbsp;
+
+#### Public Functions
+
+`function initializeForUser(uint feeRate, uint feePeriod) external`
+
+This external function is execution once at the initialization of the water<b>melon</b> fund. The function sets the water<b>melon</b> fund's performance fee rate, the performance measurement period, the initial high-watermark and the `lastPayoutTime`.
+
+`function feeAmount() public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
+&nbsp;
 
 `function updateState(address hub) external`
 
 This function sets the `highwatermark` and `lastPayoutTime` if applicable.
+&nbsp;
 
 ***
 
@@ -963,7 +1152,7 @@ This function sets the `highwatermark` and `lastPayoutTime` if applicable.
 
 The water<b>melon</b> Protocol integrates with decentralized exchanges to facilitate the trading of Assets, one of the essential functionalities of a water<b>melon</b> Fund. This means that a water<b>melon</b> Fund must accommodate multiple different decentralized exchanges smart contracts if the fund is to draw from a wider pool of liquidity.
 
-### Trading.sol
+## Trading.sol
 
 Description
 
@@ -990,9 +1179,10 @@ On Construction
 
 The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
 
-Structs
+#### Structs
 
 `Exchange`
+
 Member Variables
 
 `address exchange` - The address of the decentralized exchange smart contact.
@@ -1000,8 +1190,10 @@ Member Variables
 `address adapter` - The address of the corresponding adapter smart contract.
 
 `bool takesCustody` - An flag specifying whether the exchange holds the asset token in its own custody for make orders.
+&nbsp;
 
 `Order`
+
 Member Variables
 
 `address exchangeAddress` - The address of the decentralized exchange smart contact.
@@ -1021,15 +1213,17 @@ Member Variables
 `uint timestamp` - The timestamp of the block in which the submitted order transaction was mined.
 
 `uint fillTakerQuantity` - An integer representing the quantity of the maker asset token traded in the make order. This value is not necessarily the same as the `makerQuantity` because taker participants can choose to only partially execute the order, i.e. take a lower quantity of the `makerAsset` token than specified by the order's `makerQuantity`.
+&nbsp;
 
 `OpenMakeOrder`
+
 Member Variables
 
-    `uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
+`uint id` - An integer originating from the exchange which uniquely identifies the order within the exchange.
 
-    `uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract. CHECK
+`uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract.
 
-Enums
+#### Enums
 
 `UpdateType` - An enum which characterizes the type of update to the order.
 
@@ -1043,106 +1237,158 @@ Member Types
 
 `swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
 
-Public State variables
+#### Public State variables
 
-    `Exchange[] public exchanges`
+`Exchange[] public exchanges`
 
-    A public array of `Exchange` structs which stores all exchanges with which the fund has been initialized.
+A public array of `Exchange` structs which stores all exchanges with which the fund has been initialized.
+&nbsp;
 
+`Order[] public orders`
 
-    `Order[] public orders`
+A public array of `Order` structs which stores all active orders [CHECK] on the
+&nbsp;
 
-    A public array of `Order` structs which stores all active orders [CHECK] on the
+`mapping (address => bool) public exchangeIsAdded`
 
+A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
+&nbsp;
 
-    `mapping (address => bool) public exchangeIsAdded`
+`mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
 
-    A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
+A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
+&nbsp;
 
+`mapping (address => bool) public isInOpenMakeOrder`
 
-    `mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
+A public mapping indicating that the specified token asset is currently offered in an open make order on an exchange.
+&nbsp;
 
-    A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
+`mapping (bytes32 => LibOrder.Order) public orderIdToZeroExOrder`
 
-    `mapping (address => bool) public isInOpenMakeOrder`
+A public mapping a ZeroEx order identifier to a ZeroEx Order struct.
+&nbsp;
 
-    A public mapping indicating that the specified token asset is currently offered in an open make order on an exchange.
+`uint public constant ORDER_LIFESPAN = 1 days`
 
-    `uint public constant ORDER_LIFESPAN = 1 days`
-
-    A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
-
-Modifiers
-
-    `delegateInternal()`
-
-    A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
-
-Public functions
-
-    `function addExchange(address _exchange, address _adapter, bool _takesCustody) internal`
-
-    This is an internal function which is called for each exchange address passed to the constructor, adding the full exchange struct to the exchanges array state variable. The function ensures that an exchange has not previously been registered.
-
-
-    `function callOnExchange(
-        uint exchangeIndex,
-        string methodSignature,
-        address[6] orderAddresses,
-        uint[8] orderValues,
-        bytes32 identifier,
-        bytes makerAssetData,
-        bytes takerAssetData,
-        bytes signature
-    ) public`
-
-
-    This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund.  [Get more detail as melon.js matures]
+A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
+&nbsp;
 
 
 
-    `function addOpenMakeOrder(
-        address ofExchange,
-        address ofSellAsset,
-        uint orderId
-    ) delegateInternal`
+#### Modifiers
 
-    This function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping. [Why require >1 orders??]
+`delegateInternal()`
 
+A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
+&nbsp;
 
-    `function removeOpenMakeOrder(
-        address ofExchange,
-        address ofSellAsset
-    ) delegateInternal`
+#### Public functions
 
-    This function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
+`function() public payable`
 
+The contracts fallback function making the contract able to receive ETH sent to the contract without a funciton call.
+&nbsp;
 
-    `function orderUpdateHook(
-        address ofExchange,
-        bytes32 orderId,
-        UpdateType updateType,
-        address[2] orderAddresses,
-        uint[3] orderValues
-    ) delegateInternal`
+`function isOrderExpired(address exchange, address asset) view returns (bool)`
 
-    This function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
+This public view function returns a boolean indicating whether an order for the asset token and exchange provided is currently expired.
+&nbsp;
 
-    `function updateAndGetQuantityBeingTraded(address _asset) returns (uint)`
+`function addExchange(address _exchange, address _adapter, bool _takesCustody) internal`
 
-    This function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
+This is an internal function which is called for each exchange address passed to the constructor, adding the full exchange struct to the exchanges array state variable. The function ensures that an exchange has not previously been registered.
+&nbsp;
 
+`function callOnExchange(
+    uint exchangeIndex,
+    string methodSignature,
+    address[6] orderAddresses,
+    uint[8] orderValues,
+    bytes32 identifier,
+    bytes makerAssetData,
+    bytes takerAssetData,
+    bytes signature
+) public onlyInitialized`
 
-    `function updateAndGetQuantityHeldInExchange(address ofAsset) returns (uint)`
+This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund. This function implements the `onlyInitialized` modifier. Finally, the function emits the `ExchangeMethodCall()` event, logging the specified parameters.
+&nbsp;
 
-    This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
+`function addOpenMakeOrder(
+    address ofExchange,
+    address sellAsset,
+    uint orderId,
+    uint expirationTime
+) delegateInternal`
 
+This function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. If the `expirationTime` is set to "0", the order's expiration time is set to `ORDER_LIFESPAN`. The expiration time is required to be greater that the current `block.timestamp` and less than or equal to the sum of the `ORDER_LIFESPAN` and `block.timestamp`. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping.
+&nbsp;
 
-    `function returnToVault(ERC20[] _tokens) public`
+`function removeOpenMakeOrder(
+    address exchange,
+    address sellAsset
+) delegateInternal`
 
-    This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
+This function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
+&nbsp;
 
-### Exchange Adapters
+`function orderUpdateHook(
+    address ofExchange,
+    bytes32 orderId,
+    UpdateType updateType,
+    address[2] orderAddresses,
+    uint[3] orderValues
+) delegateInternal`
+
+This function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
+&nbsp;
+
+`function updateAndGetQuantityBeingTraded(address _asset) returns (uint)`
+
+This function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
+&nbsp;
+
+`function updateAndGetQuantityHeldInExchange(address ofAsset) returns (uint)`
+
+This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
+&nbsp;
+
+`function returnAssetToVault(address _token) public`
+
+This public function transfers all token quantities of the provided array of token asset addresses from the current current contract's custody back to the fund's vault.
+&nbsp;
+
+`function addZeroExOrderData(bytes32 orderId, LibOrder.Order zeroExOrderData) delegateInternal`
+
+This function adds the data provided by the parameters to the orderIdToZeroExOrder mapping state variable.
+&nbsp;
+
+`function returnBatchToVault(address[] _tokens) public`
+
+This public function returns all asset tokens represented by the `_tokens` address array parameter and returns the asset tokens to the water<b>melon</b> fund's vault.
+&nbsp;
+
+`function getExchangeInfo() view returns (address[], address[], bool[])`
+
+This public view function returns two address arrays and one boolean array with all corresponding registered exchange contract addresses, adapter contract addresses and the `takesCustoday` indicators.
+&nbsp;
+
+`function getOpenOrderInfo(address ofExchange, address ofAsset) view returns (uint, uint, uint)`
+
+This public view function takes the exchange contract address and an asset token contract address and returns three integers: the order identifier, the order expiration time and the order index.
+&nbsp;
+
+`function getOrderDetails(uint orderIndex) view returns (address, address, uint, uint)`
+
+This public view function takes the order index as a parameter and returns the maker asset token contract address, the taker asset token contract address, the maker asset token quantity and the taker asset token quantity.
+&nbsp;
+
+`function getZeroExOrderDetails(bytes32 orderId) view returns (LibOrder.Order)`
+
+This public view function takes the order identifier as a parameter and returns the corresponding populated `Order` struct.
+&nbsp;
+
+## Exchange Adapters
 
 Exchange Adapters are smart contracts which communicate directly and on-chain with the intended DEX smart contract. They serve as a translation bridge between the water<b>melon</b> Fund and the DEX.
 
@@ -1176,6 +1422,7 @@ The following functions are public view functions:
 - `getOrder()` - Constant view function which returns the order's sell asset address, buy asset address, sell asset quantity and buy asset quantity on a given exchange for a given order Id.
 
 Note that fund is not limited to these functions and can call arbitrary functions on the exchange adapters using delegate calls, provided the function signature is whitelisted by the canonical registrar.
+&nbsp;
 
 ---
 
@@ -1189,9 +1436,9 @@ The policyManager contract is the core of risk management and compliance policie
 The policyManager is embedded into specific function calls in other Spokes of the water<b>melon</b> fund as required through the modifiers described below.
 &nbsp;
 
-#### PolicyManager.sol
+## PolicyManager.sol
 
-##### Description
+#### Description
 
 In many of the functions below an array of address `addresses`, an array of uint `values` and an `identifier` are passed as parameters. For the arrays, the order of the address or value in the array is semantically significant. The individual array positions, [n], are defined within the policyManager contract as follows:
 
@@ -1214,24 +1461,22 @@ Finally, `identifier` and `sig` parameters are described below:
 `bytes32 identifier` - order id for exchanges utilizing a unique, exchange-specific order identifier
 
 `bytes4 sig` - the keccak256 hash of the plain text function signature of the function which triggers the specific policy validation.
-
 &nbsp;
 
-##### Inherits from
+#### Inherits from
 
 Spoke (link)
 
 &nbsp;
 
-##### On Construction
+#### On Construction
 
 The PolicyManager contract is passed the corresponding Hub address and sets this as the hub state variable inherited from Spoke.
 
 The PolicyManager contract is created from the PolicyManagerFactory contract, which creates a new instance of `PolicyManager` given the `hub` address, registering the address of the newly created PolicyManager contract as a child of the PolicyManagerFactory.
-
 &nbsp;
 
-##### Structs
+#### Structs
 
 `Entry`
 
@@ -1240,44 +1485,40 @@ Member variables:
 `Policy[] pre` - An array of Policy contract addresses which are registered to be validated as pre-conditions to defined function calls.
 
 `Policy[] post` - An array of Policy contract addresses which are registered to be validated as post-conditions to defined function calls.
-
 &nbsp;
 
-##### Enums
+#### Enums
 
 None.
 
 &nbsp;
 
-##### Modifiers
+#### Modifiers
 
 `modifier isValidPolicyBySig(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier)`
 
 This modifier ensures that `preValidate()` is called prior to applied function code and that `postValidate()` is called after the applied function code, sending the function signature hash `sig` as provided.
-
 &nbsp;
 
 `modifier isValidPolicy(address[5] addresses, uint[3] values, bytes32 identifier)`
 
 This modifier ensures that `preValidate()` is called prior to applied function code and that `postValidate()` is called after the applied function code, sending the calling function signature hash `msg.sig`.
-
 &nbsp;
 
-##### Events
+#### Events
 
 None.
 
 &nbsp;
 
-##### Public State Variables
+#### Public State Variables
 
 `mapping(bytes4 => Entry) policies`
 
 A mapping of bytes4 to an `Entry` struct.
-
 &nbsp;
 
-##### Public Functions
+#### Public Functions
 
 `function registerBatch(bytes4[] sig, address[] ofPolicies) public`
 
@@ -1307,12 +1548,13 @@ This view function calls the `validate()` function, explicitly passing the `post
 `function validate(Policy[] storage aux, bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) view internal`
 
 This internal view function receives a function-specific filtered array of Policy contract addresses and iterates over the array, calling each Policy's implemented `rule()` function. If the call to a Policy's `rule()` evaluates to `true`, execution and any state transition proceeds. If the call to a Policy's `rule()` evaluates to `false`, all execution and preliminary state transitions are reverted.
+&nbsp;
 
-### Policies
+## Policies
 
 Polices are individual smart contracts which define rule or set of rules to be compared to the state of the water<b>melon</b> fund. Policies simply assess the current state of the water<b>melon</b> fund and resolve to a boolean decision, whether the action may be executed or not, returning `true` for allowed actions and `false` for disallowed actions. The water<b>melon</b> fund-specific Policies are deployed with parameterized values which the defined Policy logic uses to assess the permissibility of the action.
 
-#### Pre- and Post-Conditionality
+### Pre- and Post-Conditionality
 
 Policies are intended to be rules; they are intended to permit or prevent specific behavior or action depending on the _state_ as compared to specified criteria.
 
@@ -1323,32 +1565,32 @@ Other Policies may need to assess the consequence of the behavior or action befo
 On the blockchain and in smart contracts, we can use a fortunate side-effect of the process of mining and block finalization to help determine the validity of post-condition Policies. With post-condition Policies, the action or behavior is executed with the smart contract logic and the changed (but not yet finalized or mined) state is assessed against the logic and defined parameters of the post-condition Policy. In the case where this new state complies with the logic and criteria of the Policy, the action is allowed, meaning the smart contract execution is allowed to run to completion, the block is eventually mined and this new compliant state is finalized in that mined block. In the case where the new state does not comply with the logic and criteria of the Policy, the action is disallowed and the revert() function is called, stopping execution and discarding (or rolling back) all state changes. In calling the revert() function, gas is consumed to arrive at the reference state, but any unused gas is returned to the caller as the reference state is discarded.
 &nbsp;
 
-#### Policy.sol
+## Policy.sol
 
-##### Description
+#### Description
 
 The Policy contract is inherited by implemented Policies. This contract will be changed to an interface when upgraded to Solidity 0.5, as enums and structs are allowed to be defined in interfaces in that version.
 &nbsp;
 
-##### Inherits from
+#### Inherits from
 
 None.
 
 &nbsp;
 
-##### On Construction
+#### On Construction
 
 None.
 
 &nbsp;
 
-##### Structs
+#### Structs
 
 None.
 
 &nbsp;
 
-##### Enums
+#### Enums
 
 `Applied` - An enum which characterizes the conditionality type of the Policy.
 
@@ -1359,7 +1601,7 @@ Member Types
 `post` - Indicates that the Policy will be evaluated after the corresponding function's execution.
 &nbsp;
 
-##### Modifiers
+#### Modifiers
 
 None.
 
@@ -1404,18 +1646,18 @@ Finally, `identifier` and `sig` parameters are described below:
 `bytes32 identifier` - order id for exchanges utilizing a unique, exchange-specific order identifier
 
 `bytes4 sig` - the keccak256 hash of the plain text function signature of the function which triggers the specific policy validation.
-
 &nbsp;
 
 `function position() external view returns (Applied)`
 
 This view function returns the enum `Applied` which is defined for each specific Policy contract. The `Applied` enum indicates whether the Policy logic is applied prior to, or after the corresponding function's execution. This function is called when the Policy contract is registered with the PolicyManager contract.
+&nbsp;
 
 ---
 
 ## Compliance
 
-### General
+## General
 
 The contracts below define the business logic for the screening of investor addresses allowed to- or prevented from subscribing to a water<b>melon</b> fund.
 
@@ -1433,11 +1675,13 @@ Hard Close - A fund refuses all new investment subscriptions, usually due to cap
 
 Soft Close - A fund refuses investment subscriptions new Investors, but accepts investment top-ups from existing Investors (addresses).
 
-### Whitelist.sol
+## Whitelist.sol
 
 #### Inherits from
 
 Policy, DSAuth (link)
+
+&nbsp;
 
 #### Description
 
@@ -1447,21 +1691,31 @@ This contract defines a positive filter list, against which subscribing addresse
 
 Policy, DSAuth (links)
 
+&nbsp;
+
 #### On Construction
 
 The Whitelist contract requires an array of addresses which are added to the `whitelisted` mapping.
+
+&nbsp;
 
 #### Structs
 
 None.
 
+&nbsp;
+
 #### Enums
 
 None.
 
+&nbsp;
+
 #### Modifiers
 
 None.
+
+&nbsp;
 
 #### Public State Variables
 
@@ -1469,103 +1723,130 @@ None.
 
 Mapping which designates an investor address as being eligible to subscribe to the fund.
 
+&nbsp;
+
 #### Public Functions
 
 `function Whitelist(address[] _preApproved) public`
 
 Constructor function which enables the bulk addition of many addresses designated as eligible for subscription to the fund.
+&nbsp;
 
 `function addToWhitelist(address _who) public auth`
 
 This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `true`.
+&nbsp;
 
 `function removeFromWhitelist(address _who) public auth`
 
 This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `false`. Addresses which had previously subscribed and are invested can not subsequently subscribe further amounts.
+&nbsp;
 
 `function batchAddToWhitelist(address[] _members) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `whitelisted` mapping to be set to `true`.
+&nbsp;
 
 `function batchRemoveFromWhitelist(address[] _members) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `whitelisted` mapping to be set to `false`. Addresses which had previously subscribed and are invested can not subsequently subscribe further amounts.
+&nbsp;
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
 This function is called by the Policy Manager when functions registered for this specific policy are called. See further documentation under Policy Manager (link).
+&nbsp;
 
 `function position() external view returns (uint)`
 
 This function is called by the Policy Manager to determine whether the policy should be executed and evaluated as a pre-condition (0) or as a post-condition (1). Compliance contracts are called as a pre-condition to subscription and therefore return 0 during the whitelist compliance check. See further documentation under Policy Manager (link).
+&nbsp;
 
-### Blacklist.sol
+## Blacklist.sol
 
 #### Description
 
 This contract defines a negative filter list, against which subscribing addresses are verified for membership. Member addresses are disallowed for subscription.
+&nbsp;
 
 #### Inherits from
 
 Policy, DSAuth (links)
 
+&nbsp;
+
 #### On Construction
 
 The Blacklist contract requires an array of addresses which are added to the `blacklisted` mapping.
+&nbsp;
 
 #### Structs
 
 None.
 
+&nbsp;
+
 #### Enums
 
 None.
 
+&nbsp;
+
 #### Modifiers
 
 None.
+
+&nbsp;
 
 #### Public State Variables
 
 `mapping (address => bool) blacklisted`
 
 Mapping which designates an investor address as being ineligible to subscribe to the fund.
+&nbsp;
 
 #### Public functions
 
 `function Blacklist(address[] _preBlacklisted) public`
 
 Constructor function which enables the bulk addition of many addresses designated as ineligible for subscription to the fund.
+&nbsp;
 
 `function addToBlacklist(address _who) public auth`
 
 This function requires that the caller is the `owner` or the current contract. This function sets `blacklisted` mapping for the provided address to `true`.
+&nbsp;
 
 `function removeFromBlacklist(address _who) public auth`
 
 This function requires that the caller is the `owner` or the current contract. This function sets the `blacklisted` mapping for the provided address to `false`. Addresses which previously were denied subscription would now be permitted.
+&nbsp;
 
 `function batchAddToBlacklist(address[] _members) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `blacklisted` mapping to be set to `true`.
+&nbsp;
 
 `function batchRemoveFromWhitelist(address[] _members) public auth`
 
 This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `blacklisted` mapping to be set to `false`. Addresses which previously were denied subscription would now be permitted.
+&nbsp;
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
 This function is called by the Policy Manager when functions registered for this specific policy are called. See further documentation under Policy Manager (link).
+&nbsp;
 
 `function position() external view returns (uint)`
 
 This function is called by the Policy Manager to determine whether the policy should be executed and evaluated as a pre-condition (0) or as a post-condition (1). Compliance contracts are called as a pre-condition to subscription and therefore return 0 during the blacklist compliance check. See further documentation under Policy Manager (link).
+&nbsp;
 
 ---
 
 ## Risk Engineering Policies
 
-### General
+## General
 
 ### Risk Management vs Risk Engineering
 
@@ -1781,11 +2062,11 @@ This rule could be implemented by an Investment Manager to cap the overall AuM o
 
 #### Rule 19: Fund Audit
 
-This rule could be implemented by an Investment Manager to enforce fund audits by a pre-determined auditor at defined time intervals. Funds implementing this rule would be restricted from trading (except into the quote asset) when an audit has not been performed within the defined time interval.
+This rule could be implemented by an Investment Manager to enforce fund audits by a pre-determined auditor at defined time intervals. Funds implementing this rule would be restricted from trading (except into the denomination asset) when an audit has not been performed within the defined time interval.
 
-### Implemented Risk Policies
+## Implemented Risk Policies
 
-### AssetBlacklist.sol
+## AssetBlacklist.sol
 
 #### Description
 
@@ -1801,7 +2082,6 @@ Policy, AddressList (Link)
 #### On Construction
 
 The contract requires an array of addresses, where each address is added to the contract's internal list.
-
 &nbsp;
 
 #### Structs
@@ -1851,7 +2131,7 @@ This view function returns `true` if the taker asset address (position [3] in th
 This view function returns the enum `pre`, indicating the the Policy logic be evaluated prior to execution of the Policy's corresponding registered function call.
 &nbsp;
 
-### AssetWhitelist.sol
+## AssetWhitelist.sol
 
 #### Description
 
@@ -1917,7 +2197,7 @@ This view function returns `true` if the taker asset address (position [3] in th
 This view function returns the enum `pre`, indicating the the Policy logic be evaluated prior to execution of the Policy's corresponding registered function call.
 &nbsp;
 
-### MaxConcentration.sol
+## MaxConcentration.sol
 
 #### Description
 
@@ -1970,7 +2250,7 @@ This public variable stores the upper limit, in percentage of fund value, which 
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
-This view function returns `true` if water<b>melon</b> fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum concentration rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade allocation percentage of the position to fund value, returning `true` if the entire fund post-trade position in the taker asset does not exceed the maximum concentration percentage. If the fund's post-trade position in the taker asset does exceed the maximum concentration percentage, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
+This view function returns `true` if water<b>melon</b> fund's denomination asset is the taker asset. The rationale for this is that denomination asset should not be subject to the maximum concentration rule as the denomination asset represents non-exposure to the wider market. In cases where the taker asset is not the denomination asset, the function evaluates the post-trade allocation percentage of the position to fund value, returning `true` if the entire fund post-trade position in the taker asset does not exceed the maximum concentration percentage. If the fund's post-trade position in the taker asset does exceed the maximum concentration percentage, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
 &nbsp;
 
 `function position() external view returns (Applied)`
@@ -1978,11 +2258,11 @@ This view function returns `true` if water<b>melon</b> fund's quote asset is the
 This view function returns the enum `post`, indicating the the Policy logic be evaluated after execution of the Policy's corresponding registered function call.
 &nbsp;
 
-### MaxPositions.sol
+## MaxPositions.sol
 
 #### Description
 
-The Policy explicitly prevents a position from entering the fund if the quantity of non-quote asset token positions exceed the specified `maxPositions` state variable. The rationale for this is to: (i) avoid over-diversification and (ii) avoid excessive rebalancing transactions in the event of a new subscription (or redemption). This Policy is evaluated after execution of the registered corresponding function.
+The Policy explicitly prevents a position from entering the fund if the quantity of non-denomination asset token positions exceed the specified `maxPositions` state variable. The rationale for this is to: (i) avoid over-diversification and (ii) avoid excessive rebalancing transactions in the event of a new subscription (or redemption). This Policy is evaluated after execution of the registered corresponding function.
 &nbsp;
 
 #### Inherits from
@@ -1993,7 +2273,7 @@ Policy (Link)
 
 #### On Construction
 
-The contract requires a parameter representing the maximum number of non-quote asset token positions permitted in the water<b>melon</b> fund. The public state variable `maxPositions` is then set to the value provided by this parameter. A value of 0 means that no non-quote assets positions are permitted.
+The contract requires a parameter representing the maximum number of non-denomination asset token positions permitted in the water<b>melon</b> fund. The public state variable `maxPositions` is then set to the value provided by this parameter. A value of 0 means that no non-denomination assets positions are permitted.
 &nbsp;
 
 #### Structs
@@ -2024,20 +2304,14 @@ None.
 
 `uint public maxPositions`
 
-This public variable stores the upper limit of the number of non-quote asset positions permitted in the water<b>melon</b> fund. For example, `maxPositions` == 5 means that a maximum of five non-quote asset token positions are permitted at any time.
+This public variable stores the upper limit of the number of non-denomination asset positions permitted in the water<b>melon</b> fund. For example, `maxPositions` == 5 means that a maximum of five non-denomination asset token positions are permitted at any time.
 &nbsp;
 
 #### Public Functions
 
 `function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
 
-This view function returns `true` if water<b>melon</b> fund's quote asset is the taker asset. The rationale for this is that quote asset should not be subject to the maximum positions rule as the quote asset represents non-exposure to the wider market. In cases where the taker asset is not the quote asset, the function evaluates the post-trade number of non-quote asset positions in the fund, returning `true` if the post-trade number of non-quote asset positions in the fund does not exceed the maximum positions configuration. If the fund's post-trade position in the taker asset causes the fund's non-quote asset position quantity to exceed the maximum positions quantity, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
-&nbsp;
-
-[CHECK]
-accounting.getFundHoldingsLength() <= maxPositions;
--->
-accounting.getFundHoldingsLength()-1 <= maxPositions;
+This view function returns `true` if water<b>melon</b> fund's denomination asset is the taker asset. The rationale for this is that denomination asset should not be subject to the maximum positions rule as the denomination asset represents non-exposure to the wider market. In cases where the taker asset is not the denomination asset, the function evaluates the post-trade number of non-denomination asset positions in the fund, returning `true` if the post-trade number of non-denomination asset positions in the fund does not exceed the maximum positions configuration. If the fund's post-trade position in the taker asset causes the fund's non-denomination asset position quantity to exceed the maximum positions quantity, the function returns `false` and the transaction is reverted. For a full description of the parameters, please refer to `rule()` in the general Policy contract above.
 &nbsp;
 
 `function position() external view returns (Applied)`
@@ -2045,7 +2319,7 @@ accounting.getFundHoldingsLength()-1 <= maxPositions;
 This view function returns the enum `post`, indicating the the Policy logic be evaluated after execution of the Policy's corresponding registered function call.
 &nbsp;
 
-### PriceTolerance.sol
+## PriceTolerance.sol
 
 #### Description
 
@@ -2125,6 +2399,3 @@ This view function is evaluated prior to executing make orders or take orders on
 
 This view function returns the enum `pre`, indicating the the Policy logic be evaluated prior to execution of the Policy's corresponding registered function call.
 &nbsp;
-
----
-
