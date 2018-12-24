@@ -146,9 +146,9 @@ This event is triggered when the native asset token is migrated to a new contrac
 
 `event EngineChange()`
 
-  `address indexed engine` - The address of the new Melon Engine contract.
+  `address indexed engine` - The address of the new water<b>melon</b> Engine contract.
 
-This event is triggered when the Melon Engine is migrated to a new contract. The parameter listed above are provided with the event.
+This event is triggered when the water<b>melon</b> Engine is migrated to a new contract. The parameter listed above are provided with the event.
 &nbsp;
 
 #### Public State Variables
@@ -185,7 +185,7 @@ This public state variable is an array of addresses which stores each Version co
 
 `mapping (address => address) public fundsToVersions`
 
-This public state variable mapping maps a Version contract `address` to a Melon fund address.
+This public state variable mapping maps a Version contract `address` to a water<b>melon</b> fund address.
 &nbsp;
 
 `uint public constant MAX_REGISTERED_ENTITIES = 20`
@@ -200,7 +200,7 @@ This public state variable is the address of the current, active price source co
 
 `address public mlnToken`
 
-This public state variable is the address of the Melon token contract.
+This public state variable is the address of the water<b>melon</b> token contract.
 &nbsp;
 
 `address public nativeAsset`
@@ -210,7 +210,7 @@ This public state variable is the address of the native asset token contract.
 
 `address public engine`
 
-This public state variable is the address of the Melon Engine contract.
+This public state variable is the address of the water<b>melon</b> Engine contract.
 &nbsp;
 
 `address public ethfinexWrapperRegistry`  
@@ -424,7 +424,7 @@ This public view function returns an exhaustive array of addresses of all regist
 
 `function isFund(address _who) view returns (bool)`
 
-This public view function returns a boolean indicating whether the address provided is a Melon fund contract.
+This public view function returns a boolean indicating whether the address provided is a water<b>melon</b> fund contract.
 &nbsp;
 
 `function isFundFactory(address _who) view returns (bool)`

@@ -2,7 +2,7 @@
 
 ## General
 
-Exchanges are each integrated into the Melon protocol through exchange adapter contracts. Exchange adapter contracts each inherit from the standard contract ExchangeAdapter.sol. Each adapter then maps this functionality to the specific exchange contract's defined functionality, overriding the base contract's public methods.
+Exchanges are each integrated into the water<b>melon</b> protocol through exchange adapter contracts. Exchange adapter contracts each inherit from the standard contract ExchangeAdapter.sol. Each adapter then maps this functionality to the specific exchange contract's defined functionality, overriding the base contract's public methods.
 &nbsp;
 
 ## ExchangeAdapter.sol
@@ -208,7 +208,7 @@ This public view function is meant to return the relevant order information (mak
 
 #### Description
 
-This contract is the exchange adapter to the Melon Engine and serves as the interface from a Melon fund to the Melon Engine for the express purposes of the Melon fund trading MLN to the Melon Engine in exchange for WETH.
+This contract is the exchange adapter to the water<b>melon</b> Engine and serves as the interface from a water<b>melon</b> fund to the water<b>melon</b> Engine for the express purposes of the water<b>melon</b> fund trading MLN to the water<b>melon</b> Engine in exchange for WETH.
 &nbsp;
 
 #### Inherits from
@@ -267,12 +267,12 @@ None.
 
 The following parameters are used by the function:
 
-`targetExchange` - The address of the Melon Engine exchange contract.
+`targetExchange` - The address of the water<b>melon</b> Engine exchange contract.
 `orderAddresses[0]` - The address of the MLN token contract (maker asset token).
 `orderAddresses[1]` - The address of the WETH token contract (taker asset token).
 `orderValues[0]` - The quantity of the MLN token, expressed in 18 decimal precision.
 
-This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the Melon fund. The function calls the Melon Engine to get the corresponding quantity of ETH. The Melon Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the Melon fund and transferred to the Melon fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
+This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the water<b>melon</b> fund. The function calls the water<b>melon</b> Engine to get the corresponding quantity of ETH. The water<b>melon</b> Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the water<b>melon</b> fund and transferred to the water<b>melon</b> fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
 &nbsp;
 
 `function () payable`
@@ -285,7 +285,7 @@ This function is the adapter contract's fallback function, which makes the contr
 
 #### Description
 
-This contract is the exchange adapter to the Ethfinex Exchange contract and serves as the interface from a Melon fund to the Ethfinex Exchange for purposes of exchange of asset tokens listed on the Ethfinex Exchange.
+This contract is the exchange adapter to the Ethfinex Exchange contract and serves as the interface from a water<b>melon</b> fund to the Ethfinex Exchange for purposes of exchange of asset tokens listed on the Ethfinex Exchange.
 &nbsp;
 
 #### Inherits from
@@ -344,7 +344,7 @@ None.
 
 Please see parameter descriptions above.
 
-This public function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function creates a make order on the Ethfinex exchange contract. It ensures that the maker asset token is not currently listed in any other open make order the Melon fund may have on any exchange. The function signs the order and ensures the signature is valid. The taker asset token is preliminarily added to the Melon fund's owned assets and an open make order is added to the Melon fund's internal order tracking. Finally, the order is added to the Ethfinex exchange contract.
+This public function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function creates a make order on the Ethfinex exchange contract. It ensures that the maker asset token is not currently listed in any other open make order the water<b>melon</b> fund may have on any exchange. The function signs the order and ensures the signature is valid. The taker asset token is preliminarily added to the water<b>melon</b> fund's owned assets and an open make order is added to the water<b>melon</b> fund's internal order tracking. Finally, the order is added to the Ethfinex exchange contract.
 &nbsp;
 
 `function cancelOrder(
@@ -359,7 +359,7 @@ This public function requires that the `msg.sender` is the fund manager and that
 
 Please see parameter descriptions above.
 
-This public function cancels an existing order on the Ethfinex exchange contract by calling the Ethfinex exchange contract's `cancelOrder()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the Melon fund's internal order tracking.
+This public function cancels an existing order on the Ethfinex exchange contract by calling the Ethfinex exchange contract's `cancelOrder()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the water<b>melon</b> fund's internal order tracking.
 &nbsp;
 
 `function withdrawTokens(
@@ -373,7 +373,7 @@ This public function cancels an existing order on the Ethfinex exchange contract
 
 Please see parameter descriptions above.
 
-This public function withdraws all asset tokens held by the Ethfinex exchange in open make orders, then removes the make order form the Melon fund's internal order tracking by calling the Trading contract's `removeOpenMakeOrder()`. Finally, the function returns the asset tokens to the vault and adds the asset token to `ownedAssets`.
+This public function withdraws all asset tokens held by the Ethfinex exchange in open make orders, then removes the make order form the water<b>melon</b> fund's internal order tracking by calling the Trading contract's `removeOpenMakeOrder()`. Finally, the function returns the asset tokens to the vault and adds the asset token to `ownedAssets`.
 &nbsp;
 
 `function getOrder(
@@ -398,7 +398,7 @@ This public view function returns the relevant order information (maker asset to
   uint orderExpirationTime)
 internal`
 
-This internal function withdraws the maker asset token from the Melon fund's vault, wrapping the maker token according to Ethfinex's wrapper registry.
+This internal function withdraws the maker asset token from the water<b>melon</b> fund's vault, wrapping the maker token according to Ethfinex's wrapper registry.
 &nbsp;        
 
 `function constructOrderStruct(
@@ -445,7 +445,7 @@ This internal view function returns the address of the Ethfinex-specified wrappe
 
 #### Description
 
-This contract is the exchange adapter to the Kyber Network contract and serves as the interface from a Melon fund to the Kyber Network contract for purposes of exchange of asset tokens listed on the Kyber Network.
+This contract is the exchange adapter to the Kyber Network contract and serves as the interface from a water<b>melon</b> fund to the Kyber Network contract for purposes of exchange of asset tokens listed on the Kyber Network.
 &nbsp;
 
 #### Inherits from
@@ -519,7 +519,7 @@ This public function must ensure that:
   applicable risk policies are evaluated,
   asset tokens to be traded are approved (if required),
   the swap order on the Kyber exchange contract is performed,
-  the acquired asset token, if not already held, is added to `ownedAssets`. Finally, the acquired asset tokens are returned to the Melon fund's vault and the order status is updated.
+  the acquired asset token, if not already held, is added to `ownedAssets`. Finally, the acquired asset tokens are returned to the water<b>melon</b> fund's vault and the order status is updated.
 
 Finally, the function returns acquired token assets to the fund's vault and updates the fund's internal order tracking.
 &nbsp;
@@ -559,7 +559,7 @@ The function returns the quantity of the asset token to be received by the fund.
 internal
     returns (uint receivedAmount)`
 
-This internal function initiates the trade where the Melon fund delivers ETH for the receiving asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of ETH from the fund's vault sends the ETH quantity to the Kyber Network exchange contract calling its `swapEtherToToken()` function.
+This internal function initiates the trade where the water<b>melon</b> fund delivers ETH for the receiving asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of ETH from the fund's vault sends the ETH quantity to the Kyber Network exchange contract calling its `swapEtherToToken()` function.
 
 The function takes the following parameters:
 
@@ -581,7 +581,7 @@ The function returns the quantity of the `destToken` received. The Kyber Network
 internal
     returns (uint receivedAmount)`
 
-This internal function initiates the trade where the Melon fund delivers the asset token specified by the `srcToken` address parameter for receiving ETH. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Kyber Network exchange contract calling its `swapTokenToEther()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
+This internal function initiates the trade where the water<b>melon</b> fund delivers the asset token specified by the `srcToken` address parameter for receiving ETH. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Kyber Network exchange contract calling its `swapTokenToEther()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
 
 The function takes the following parameters:
 
@@ -603,7 +603,7 @@ The function returns the quantity of the `nativeAsset` received, ETH. The Kyber 
 internal
     returns (uint receivedAmount)`
 
-This internal function initiates the trade where the Melon fund delivers the asset token specified by the `srcToken` address parameter for receiving the asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Kyber Network exchange contract calling its `swapTokenToToken()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
+This internal function initiates the trade where the water<b>melon</b> fund delivers the asset token specified by the `srcToken` address parameter for receiving the asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Kyber Network exchange contract calling its `swapTokenToToken()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
 
 The function takes the following parameters:
 
@@ -637,7 +637,7 @@ This internal view function returns the minimum acceptable exchange quantity for
 
 #### Description
 
-This contract is the exchange adapter to the OasisDex Matching Market exchange contract and serves as the interface from a Melon fund to the OasisDex Matching Market for purposes of exchange of asset tokens listed on the OasisDex Matching Market.
+This contract is the exchange adapter to the OasisDex Matching Market exchange contract and serves as the interface from a water<b>melon</b> fund to the OasisDex Matching Market for purposes of exchange of asset tokens listed on the OasisDex Matching Market.
 &nbsp;
 
 #### Inherits from
@@ -710,7 +710,7 @@ This public function must ensure that:
   the acquired asset token, if not already held, is added to `ownedAssets`.
 
 The function creates a make order on the OasisDex Matching Market exchange contract specifying the asset tokens to exchange and the corresponding quantities (implicit price) required for the order.
-An `orderID > 0` signifies that the order was successfully submitted to the OasisDex Matching Market exchange contract and the open make order is added to the Melon fund's internal order tracking. Finally, the function emits the `OrderCreated()` with the order's `orderID`.
+An `orderID > 0` signifies that the order was successfully submitted to the OasisDex Matching Market exchange contract and the open make order is added to the water<b>melon</b> fund's internal order tracking. Finally, the function emits the `OrderCreated()` with the order's `orderID`.
 &nbsp;
 
 `function takeOrder(
@@ -759,7 +759,7 @@ Please see parameter descriptions above. Of note are the parameters:
   `orderAddresses[2]` - The order maker asset token.
   `identifier` - The active order's orderID.
 
-This public function cancels an existing order on the OasisDex Matching Market exchange contract by calling the  OasisDex Matching Market contract's `cancel()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the Melon fund's internal order tracking and the maker asset token is returned to the Melon fund's vault.
+This public function cancels an existing order on the OasisDex Matching Market exchange contract by calling the  OasisDex Matching Market contract's `cancel()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the water<b>melon</b> fund's internal order tracking and the maker asset token is returned to the water<b>melon</b> fund's vault.
 &nbsp;
 
 `function getOrder(

@@ -2,7 +2,7 @@
 
 ## General
 
-Factory contracts are utilities for the creation of the many component contracts and infrastructure providing services to Melon funds.
+Factory contracts are utilities for the creation of the many component contracts and infrastructure providing services to water<b>melon</b> funds.
 &nbsp;
 
 ## Factory.sol
@@ -69,7 +69,7 @@ This public function returns a boolean indicating whether the address provided c
 
 #### Description
 
-This contract manages and executes the orderly creation of a new Melon fund, linking all aspects of components, settings, routings and permissions.
+This contract manages and executes the orderly creation of a new water<b>melon</b> fund, linking all aspects of components, settings, routings and permissions.
 &nbsp;
 
 #### Inherits from
@@ -100,16 +100,16 @@ The contract constructor requires the following address parameters and sets the 
 
   Member variables:
 
-  `string name` - The name of the Melon fund.
-  `address[] exchanges` - An array of exchange contract addresses registered for the Melon fund.
-  `address[] adapters` - An array of exchange adapter contract addresses registered for the Melon fund.
-  `address denominationAsset` - The address of the asset token in which the Melon fund is denominated.
-  `address nativeAsset` - The address of the asset token designated as the Melon fund's native asset, i.e. the Melon fund's native network token.
-  `address[] defaultAssets` - An array of addresses designating the Melon fund's accepted asset tokens for subscription.
+  `string name` - The name of the water<b>melon</b> fund.
+  `address[] exchanges` - An array of exchange contract addresses registered for the water<b>melon</b> fund.
+  `address[] adapters` - An array of exchange adapter contract addresses registered for the water<b>melon</b> fund.
+  `address denominationAsset` - The address of the asset token in which the water<b>melon</b> fund is denominated.
+  `address nativeAsset` - The address of the asset token designated as the water<b>melon</b> fund's native asset, i.e. the water<b>melon</b> fund's native network token.
+  `address[] defaultAssets` - An array of addresses designating the water<b>melon</b> fund's accepted asset tokens for subscription.
   `bool[] takesCustody` - An array of booleans mirroring an exchange contract's `takesCustody` state variable.
-  `address priceSource` - The address of the Melon fund's price source.
-  `address[] fees` - An array of addresses of the Melon fund's registered `fee` contracts.
-  `uint[] feeRates` - An array of integers representing the fee rates registered for the Melon fund.
+  `address priceSource` - The address of the water<b>melon</b> fund's price source.
+  `address[] fees` - An array of addresses of the water<b>melon</b> fund's registered `fee` contracts.
+  `uint[] feeRates` - An array of integers representing the fee rates registered for the water<b>melon</b> fund.
   `uint[] feePeriods` - An array of integer representing the the duration of a fee performance measurement period in seconds.
 &nbsp;
 
@@ -130,9 +130,9 @@ This modifier enables a function to enforce the single execution of the implemen
 
 NewFund()
 
-    `address manager` - The address of the Melon fund's manager.
-    `address hub` - The address of the Melon fund's `hub`.
-    `address[12] routes` - An array of 12 address representing relevant Melon fund component addresses.
+    `address manager` - The address of the water<b>melon</b> fund's manager.
+    `address hub` - The address of the water<b>melon</b> fund's `hub`.
+    `address[12] routes` - An array of 12 address representing relevant water<b>melon</b> fund component addresses.
 
 This event is emitted when the FundFactory creates a new fund. The event logs the parameters listed above.
 &nbsp;
@@ -156,7 +156,7 @@ This public state variable represents the Version contract.
 
 `address public engine`
 
-This public state variable represents the Version's Melon Engine contract.
+This public state variable represents the Version's water<b>melon</b> Engine contract.
 &nbsp;
 
 `address public registry`
@@ -237,70 +237,70 @@ This public state variable mapping maps an address to `Settings` struct, creatin
     address _priceSource
 ) componentNotSet(managersToHubs[msg.sender])`
 
-This public function takes the following parameters and initiates the set up process of a Melon fund. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the `managersToRoutes` mapping by mapping the `msg.sender` (manager) address to the following individual `Routes` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
+This public function takes the following parameters and initiates the set up process of a water<b>melon</b> fund. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the `managersToRoutes` mapping by mapping the `msg.sender` (manager) address to the following individual `Routes` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
 &nbsp;
 
 `function createAccounting()
 componentNotSet(managersToRoutes[msg.sender].accounting) amguPayable payable`
 
-This public function creates the Accounting spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Accounting spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createFeeManager()
 componentNotSet(managersToRoutes[msg.sender].feeManager) amguPayable payable`
 
-This public function creates the FeeManager spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the FeeManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createParticipation()
 componentNotSet(managersToRoutes[msg.sender].participation) amguPayable payable`
 
-This public function creates the Participation spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Participation spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createPolicyManager()
 componentNotSet(managersToRoutes[msg.sender].policyManager) amguPayable payable`
 
-This public function creates the PolicyManager spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the PolicyManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createShares()
 componentNotSet(managersToRoutes[msg.sender].shares) amguPayable payable`
 
-This public function creates the Shares spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Shares spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createTrading()
 componentNotSet(managersToRoutes[msg.sender].trading) amguPayable payable`
 
-This public function creates the Trading spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Trading spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function createVault()
 componentNotSet(managersToRoutes[msg.sender].vault) amguPayable payable`
 
-This public function creates the Vault spoke of a Melon fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Vault spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function completeSetup()
 amguPayable payable`
 
-This public function completes the set up of a Melon fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new Melon fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the Melon fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function completes the set up of a water<b>melon</b> fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new water<b>melon</b> fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
 &nbsp;
 
 `function getFundById(uint withId) public view returns (address)`
 
-This public view function returns the address of the Melon fund given the `withId` value provided, which is the index of of the `funds` address array state variable.
+This public view function returns the address of the water<b>melon</b> fund given the `withId` value provided, which is the index of of the `funds` address array state variable.
 &nbsp;
 
 `function getLastFundId() public view returns (uint)`
 
-This public view function returns the index position of the most recently added Melon fund to the `funds` array state variable.
+This public view function returns the index position of the most recently added water<b>melon</b> fund to the `funds` array state variable.
 &nbsp;
 
 `function engine() view returns (address)`
 
-This public view function returns the address of the Melon Engine contract.
+This public view function returns the address of the water<b>melon</b> Engine contract.
 &nbsp;
 
 `function mlnToken() view returns (address)`
@@ -322,7 +322,7 @@ This public view function returns the address of the Version contract.
 
 #### Description
 
-The contract defines a function which returns specified information on each Melon fund created under a specific Version.
+The contract defines a function which returns specified information on each water<b>melon</b> fund created under a specific Version.
 &nbsp;
 
 #### Inherits from
@@ -379,11 +379,11 @@ returns(
   string[],
   address[])`
 
-This public view function gathers and returns the following Melon platform details for a specific Version, given the FundFactory address provided:
+This public view function gathers and returns the following water<b>melon</b> platform details for a specific Version, given the FundFactory address provided:
 
-`address[]` - An exhaustive array of Hub (i.e. Melon fund) addresses.
-`uint[]` - An exhaustive array of each Melon fund's current share price.
-`uint[]` - An exhaustive array of each Melon fund's creation time.
-`string[]` - An exhaustive array of each Melon funds' name.
-`address[]` - An exhaustive array of each Melon fund's denomination asset token address.
+`address[]` - An exhaustive array of Hub (i.e. water<b>melon</b> fund) addresses.
+`uint[]` - An exhaustive array of each water<b>melon</b> fund's current share price.
+`uint[]` - An exhaustive array of each water<b>melon</b> fund's creation time.
+`string[]` - An exhaustive array of each water<b>melon</b> funds' name.
+`address[]` - An exhaustive array of each water<b>melon</b> fund's denomination asset token address.
 &nbsp;
