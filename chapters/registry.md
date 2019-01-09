@@ -195,7 +195,7 @@ This public state variable mapping maps the Version name to a boolean indicating
 
 `mapping (bytes32 => address) public fundNameHashToOwner`
 
-This public state variable mapping maps...
+This public state variable mapping maps the hash of the fund name to the fund owner. A `bytes32` type is used, as dynamic-length types cannot be used as keys in mappings and a hash of the fund name allows for names longer than 32 bytes.
 &nbsp;
 
 `uint public constant MAX_REGISTERED_ENTITIES = 20`
