@@ -58,7 +58,7 @@ Version
   Member variables:  
 
   `bool exists` -  A boolean to conveniently and clearly indicate existence in a mapping.
-  `string name` - A string to represent the name of the Version.
+  `bytes32 name` - A 32 byte value type to represent the name of the Version.
 
 This struct stores all relevant information pertaining to the Version.
 &nbsp;
@@ -188,9 +188,24 @@ This public state variable is an array of addresses which stores each Version co
 This public state variable mapping maps a Version contract `address` to a water<b>melon</b> fund address.
 &nbsp;
 
+`mapping (bytes32 => bool) public versionNameExists`
+
+This public state variable mapping maps the Version name to a boolean indicating the Version name existence.
+&nbsp;
+
+`mapping (bytes32 => address) public fundNameHashToOwner`
+
+This public state variable mapping maps...
+&nbsp;
+
 `uint public constant MAX_REGISTERED_ENTITIES = 20`
 
-This public constant state variable represent the maximum quantity of registered entities and is set to "20". This constant applies to Exchanges registered and Assets registered.
+This public constant state variable represents the maximum quantity of registered entities and is set to "20". This constant applies to Exchanges registered and Assets registered.
+&nbsp;
+
+`uint public constant MAX_FUND_NAME_BYTES = 66`
+
+This public constant state variable represents the maximum water<b>melon</b> fund name size in bytes. The maximum is set to 66 bytes.
 &nbsp;
 
 `address public priceSource`
@@ -380,11 +395,9 @@ This public view function returns an array of whitelisted exchange function sign
 This public view function returns a boolean indicating whether a specific exchange function is whitelisted given the provided exchange address and the function's signature hash. A return value of `true` indicates that the function is whitelisted. A return value of `false` indicates that the function is not whitelisted.
 &nbsp;
 
+`function registerVersion(address _version, bytes32 _name) auth`
 
-
-`function registerVersion(address _version, string _name) auth`
-
-This function requires that the caller is the `owner` or the current contract. The function sets the `versionInformation` mapping to `true` and pushes the Version address on to the `registeredVersions` array. Finally, the `VersionRegistration()` event is emitted, logging the Version address. Versions cannot be removed from the registry.
+This function requires that the caller is the `owner` or the current contract. The function sets the `versionInformation` mapping `exists` to `true`, `name` to `_name` and pushes the Version address on to the `registeredVersions` array. The `versionNameExists` mapping for this Version name is set to `true`. Finally, the `VersionRegistration()` event is emitted, logging the Version address. Versions cannot be removed from the registry.
 &nbsp;
 
 `function setPriceSource(address _priceSource) auth`
@@ -432,7 +445,17 @@ This public view function returns a boolean indicating whether the address provi
 This public view function returns a boolean indicating whether the address provided is a FundFactory. The function check the existence of the `_who` address in the `versionInformation` mapping. Note that Version inherits FundFactory.
 &nbsp;
 
-`function registerFund(address _fund)`
+`function registerFund(address _fund, address _owner, string _name)`
 
-This public function ensures that `msg.sender` is a Version, as only Versions can register funds. The function then adds an entry to the `fundsToVersions` mapping, associating `_fund` to `msg.sender`, i.e. the Version address.
+This public function ensures that `msg.sender` is a Version, as only Versions can register funds. The function requires that the fund name is valid. The function then adds an entry to the `fundsToVersions` mapping, associating `_fund` to `msg.sender`, i.e. the Version address. Finally, the function adds an entry to the `fundNameHashToOwner` mapping, associating the keccak256 hash of the fund name to the `owner` address.
+&nbsp;
+
+`function isValidFundName(string _name) public view returns (bool)`
+
+This public function ensures that the fund name provided does not exceed `MAX_FUND_NAME_BYTES` nor contain restricted characters. Legal characters are "0-9", "a-z", "A-Z", " ", "-", ".", "\_" and "\*".
+&nbsp;
+
+`function canUseFundName(address _user, string _name) public view returns (bool)`
+
+This public function ensures that the fund name provided adheres to the rules set forth in `isValidFundName()`, and that the name is not already in use by a fund or is used by the provided `_user` address (to enable fund name reuse across Versions by the same `_user`).
 &nbsp;
