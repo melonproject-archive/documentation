@@ -14,7 +14,7 @@ The contract is a base contract which defines base elements below. It is inherit
 
 #### Inherits from
 
-None.
+None. 
 &nbsp;
 
 #### On Construction
@@ -241,51 +241,51 @@ This public function takes the following parameters and initiates the set up pro
 &nbsp;
 
 `function createAccounting()
-componentNotSet(managersToRoutes[msg.sender].accounting) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].accounting) amguPayable(0) payable`
 
-This public function creates the Accounting spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Accounting spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createFeeManager()
-componentNotSet(managersToRoutes[msg.sender].feeManager) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].feeManager) amguPayable(0) payable`
 
-This public function creates the FeeManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the FeeManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createParticipation()
-componentNotSet(managersToRoutes[msg.sender].participation) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].participation) amguPayable(0) payable`
 
-This public function creates the Participation spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Participation spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createPolicyManager()
-componentNotSet(managersToRoutes[msg.sender].policyManager) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].policyManager) amguPayable(0) payable`
 
-This public function creates the PolicyManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the PolicyManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createShares()
-componentNotSet(managersToRoutes[msg.sender].shares) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].shares) amguPayable(0) payable`
 
-This public function creates the Shares spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Shares spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createTrading()
-componentNotSet(managersToRoutes[msg.sender].trading) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].trading) amguPayable(0) payable`
 
-This public function creates the Trading spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Trading spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createVault()
-componentNotSet(managersToRoutes[msg.sender].vault) amguPayable payable`
+componentNotSet(managersToRoutes[msg.sender].vault) amguPayable(0) payable`
 
-This public function creates the Vault spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function creates the Vault spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function completeSetup()
-amguPayable payable`
+amguPayable(0) payable`
 
-This public function completes the set up of a water<b>melon</b> fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new water<b>melon</b> fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function completes the set up of a water<b>melon</b> fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new water<b>melon</b> fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function getFundById(uint withId) public view returns (address)`

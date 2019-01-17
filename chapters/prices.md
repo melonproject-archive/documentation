@@ -213,7 +213,7 @@ This public view function takes the `_baseAsset` and `_quoteAsset` token contrac
 This public view function calls the `getReferencePriceInfo()` function and returns a boolean indicating the validity of the price, the asset price provided by the `ofAsset` address parameter in terms of the `ofAsset` asset, and the specified asset token's `decimals` property.
 &nbsp;
 
-`function getReferencePriceInfo(address _baseAsset, address _quoteAsset) view returns (bool isRecent, uint referencePrice, uint decimals)`
+`function getReferencePriceInfo(address _baseAsset, address _quoteAsset) view returns (uint referencePrice, uint decimals)`
 
 This public view function takes two address parameters: the base asset (the object of the pricing information) and the quote asset (the asset in which the price is denominated). [CHECK: function will we re-worked...]
 &nbsp;
@@ -237,4 +237,15 @@ This public function returns the address of the Kyber Network representation con
 returns (bool isValid, uint kyberPrice)`
 
 This public view function takes the `_baseAsset` and `_quoteAsset` token contract addresses and returns a boolean indicating price validity and the average expected current Kyber Network price.
+&nbsp;
+
+`function convertQuantity(uint fromAssetQuantity, address fromAsset, address toAsset)
+public view returns (uint)`
+
+This public view function calculates and returns the quantity of the `toAsset` token which has a current value equal to the `fromAssetQuantity` of the `fromAsset` token.
+&nbsp;
+
+`function getLastUpdate() public view returns (uint)`
+
+This public view function returns the blocktime timestamp of the last price update, `lastUpdate`.
 &nbsp;

@@ -1,7 +1,5 @@
 # Assets
 
-Assets are the underlying constituent members of a water<b>melon</b> Fund. Assets are exclusively Tokens on the Ethereum blockchain implementing the ERC20 or ERC223 standard token interfaces.
-
 Token assets are the underlying constituent members of a water<b>melon</b> Fund. These token assets are exclusively Ethereum blockchain tokens implementing the ERC20 standard token interface.
 
 ## Asset Eligibility
