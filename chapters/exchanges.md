@@ -508,7 +508,7 @@ Please see parameter descriptions above. In the context of the Kyber exchange co
   `orderAddresses[2]` - The Src token address.
   `orderAddresses[3]` - The Dest token address.
   `orderValues[0]` - The Src token quantity.
-  `orderValues[0]` - The Dest token quantity.
+  `orderValues[1]` - The Dest token quantity.
 
 This public function must ensure that:
 
