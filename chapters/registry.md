@@ -29,9 +29,9 @@ None.
   Member variables:  
 
   `bool exists` - A boolean to conveniently and clearly indicate existence in a mapping.
-  `string name` - The human-readable name of the asset token as per the ERC223 token standard.
-  `string symbol` - The human-readable symbol of the asset token as per ERC223 token standard.
-  `uint decimals` -  The divisibility precision of the token as per the ERC223 token standard.
+  `string name` - The human-readable name of the asset token.
+  `string symbol` - The human-readable symbol of the asset token.
+  `uint decimals` -  The divisibility precision of the token.
   `string url` - The URL for extended information of the asset token.
   `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
   `uint[] standards` - An array of integers representing EIP standards to which this asset token conforms.
@@ -81,9 +81,9 @@ None.
 `AssetUpsert()`
 
   `address indexed asset` - The address of the asset token contract registered.
-  `string name` - The human-readable name of the asset token as per the ERC223 token standard.
-  `string symbol` - The human-readable symbol of the asset token as in ERC223 token standard
-  `uint decimals` - The divisibility precision of the token as per the ERC223 token standard.
+  `string name` - The human-readable name of the asset token.
+  `string symbol` - The human-readable symbol of the asset token.
+  `uint decimals` - The divisibility precision of the token.
   `string url` - The URL for extended information of the asset token.
   `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
   `uint[] standards` - An array of integers representing EIP standards to which this asset token conforms.
@@ -234,9 +234,9 @@ This public state variable is the address of the Ethfinex Wrapper Registry contr
 This function requires that the caller is the `owner` or the current contract. It then requires that the asset token's information not be previously registered. The asset token's address is then appended to the `registeredAssets` array state variable. The function then registers the following information for a specific asset token within the Registry contract as per the following parameters:
 
 `address _asset` - The address of the asset token contract to be registered.
-`string _name` - The human-readable name of the asset token as per the ERC223 token standard.
-`string _symbol` - The human-readable symbol of the asset token as in ERC223 token standard
-`uint _decimals` - The divisibility precision of the token as per the ERC223 token standard.
+`string _name` - The human-readable name of the asset token.
+`string _symbol` - The human-readable symbol of the asset token.
+`uint _decimals` - The divisibility precision of the token.
 `string _url` - The URL for extended information of the asset token.
 `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
 `uint[] _standards` - An array of integers representing EIP standards to which this asset token conforms.
@@ -276,9 +276,9 @@ Finally, the function ensures that the exchange's information exists in the `exc
 This function requires that the caller is the `owner` or the current contract. It then requires that the asset token's information be previously registered. The function then updates the following information for a specific asset token within the Registry contract as per the following parameters:
 
 `address _asset` - The address of the asset token contract to be registered.
-`string _name` - The human-readable name of the asset token as per the ERC223 token standard.
-`string _symbol` - The human-readable symbol of the asset token as in ERC223 token standard
-`uint _decimals` - The divisibility precision of the token as per the ERC223 token standard.
+`string _name` - The human-readable name of the asset token.
+`string _symbol` - The human-readable symbol of the asset token.
+`uint _decimals` - The divisibility precision of the token.
 `string _url` - The URL for extended information of the asset token.
 `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
 `uint[] _standards` - An array of integers representing EIP standards to which this asset token conforms.

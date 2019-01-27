@@ -26,7 +26,7 @@ The ETH from the amgu fees paid by users is sent to the water<b>melon</b> Engine
 
 The water<b>melon</b> Engine contract is a unidirectional liquidity contract that sells ETH and buys MLN at a premium over the market price (market price is retrieved through Kyber network).
 
-The ETH received by the water<b>melon</b> Engine is frozen for 1 month (thawing delay). After 1 month, the function `thaw()` is publicly callable. Calling that function will render the frozen ETH liquid and available for external actors to buy ETH in exchange for MLN.
+The water<b>melon</b> Engine maintains consecutive 1 month (60\*60\*24\*30 seconds) freeze periods. ETH received by the water<b>melon</b> Engine during a freeze period is held frozen in the water<b>melon</b> Engine until that freeze period ends. After 1 month, the function `thaw()` is publicly callable. Calling that function will render all frozen ETH liquid and available for external actors to buy ETH in exchange for MLN.
 
 As soon as the water<b>melon</b> Engine sells ETH and buys MLN, it burns the acquired MLN.
 
@@ -84,7 +84,7 @@ None.
 
 #### Modifiers
 
-`modifier amguPayable()`
+`modifier amguPayable(uint deductFromRefund)`
 
 This modifier determines the initial gas amount. The functionality in the function implementing this modifier is then executed. Thereafter, the AMGU (Asset Management Gas Unit) price and the MLN token market price is retrieved from the water<b>melon</b> Engine and the price feed, respectively. The modifier calculates the amount of ETH required for the payment of AMGU. Transactions with insufficient ETH amounts to pay the AMGU are reverted. ETH due as AMGU is paid to the water<b>melon</b> Engine and any excess ETH above the Ethereum gas costs and AMGU costs are refunded to the `msg.sender`.
 &nbsp;

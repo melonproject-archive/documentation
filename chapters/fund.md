@@ -303,9 +303,11 @@ Once the water<b>melon</b> Fund is set up, it will be open for investment from I
 
 The critical point about a water<b>melon</b> Fund is that Investors retain control of their investment in the fund, while delegating asset management activity to the Investment Manager, who has the fine-grained trade and asset management authority, but no ability to remove asset tokens from the segregated safety of the water<b>melon</b> Fund's smart contact custody.
 
+The Investment Manager address can only be the Investment Manager for a single water<b>melon</b> Fund per protocol Version, i.e. one address cannot manage multiple water<b>melon</b> Funds on a Version.
+
 ### Fund Interaction
 
-The Investment Manager in the capacity of `owner` of the water<b>melon</b> Fund smart contract can as the ability to interact with the following smart contract functions:
+The Investment Manager in the capacity of `owner` of the water<b>melon</b> Fund smart contract has the ability to interact with the following smart contract functions:
 
 - `enableInvestment()`
 
@@ -391,16 +393,6 @@ None.
 
 #### Public State Variables
 
-`mapping (address => Request) public requests`
-
-A public mapping which assigns an investor's address to a `Request` struct.
-&nbsp;
-
-`mapping (address => bool) public investAllowed`
-
-A public mapping which specifies all asset tokens which have been enabled for subscription to the water<b>melon</b> fund.
-&nbsp;
-
 `uint constant public SHARES_DECIMALS = 18`
 
 An integer constant which specifies the decimal precision of a single share. The value is set to 18.
@@ -408,10 +400,40 @@ An integer constant which specifies the decimal precision of a single share. The
 
 `uint constant public INVEST_DELAY = 10 minutes`
 
-An integer constant which specifies the the number of seconds a valid subscription request must be delayed before a subscription is executed.
+An integer constant which specifies the number of seconds a valid subscription request must be delayed before a subscription is executed.
+&nbsp;
+
+`uint constant public REQUEST_LIFESPAN = 1 days`
+
+An integer constant which specifies the time duration where an investment subscription request is live. This constant is set to 1 day in seconds.
+&nbsp;
+
+`uint constant public REQUEST_INCENTIVE = 10 finney`
+
+An integer constant which specifies the amount for the subscription request provided as an incentive for triggering the delayed subscription request.
+&nbsp;
+
+`mapping (address => Request) public requests`
+
+A public mapping associating an investor’s address to a `Request` struct.
+&nbsp;
+
+`mapping (address => bool) public investAllowed`
+
+A public mapping which specifies all asset token addresses which have been enabled for subscription to the water<b>melon</b> fund.
+&nbsp;
+
+`mapping (address => mapping (address => uint)) public lockedAssetsForInvestor`
+
+A public (compound) mapping associating a subscription asset token address to an investor address to a quantity of the asset token. This mapping is used by the contract to lock and hold the investor's subscription token until the request can be either executed or cancelled.
+
 &nbsp;
 
 #### Public Functions
+
+`function() public payable`
+
+This public function is the contract's fallback function enabling the contract to receive ETH sent directly to the contract for the `REQUEST_INCENTIVE`.
 
 `function enableInvestment(address[] _assets) public auth`
 
@@ -423,32 +445,33 @@ This function requires that the caller is the `owner` or the current contract. T
 This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
 &nbsp;
 
-`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable onlyInitialized`
+`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable(REQUEST_INCENTIVE) onlyInitialized`
 
-This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
+This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine and `REQUEST_INCENTIVE` quantity of ETH to provide the investment request execution incentive. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
 &nbsp;
 
-`function cancelRequest() external`
+`function cancelRequest() external payable amguPayable(0)`
 
-This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requres the request timestamp to be greater than "0", then emits the `CancelRequest` event.
+This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requires that a request exists and that at least one of the conditions to cancel an investment request are met: invalid investment asset price, expired request or fund is shut down. Investment asset tokens are transferred back to the investor address. Finally, the function emits the `CancelRequest` event, logging `msg.sender`. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
-`function executeRequestFor(address requestOwner) public notShutDown amguPayable payable`
+`function executeRequestFor(address requestOwner) public notShutDown amguPayable(0) payable`
 
 This function:
 ensures that the fund is not shutDown,
-ensures that the investor address is permitted to carry out the action,
-ensures that a request corresponding to `msg.sender` exists in the `requests` mapping,
-ensures that subscription is permitted in the subscribing asset token,
-ensures that the price for the subscribing asset token is recent,
-ensures that management fee shares have been calculated and allocated immediately prior to subscription,
-calculates the cost of the share quantity requested (in denomination asset terms),
-ensures that the cost of the share quantity requested is sufficiently covered by the `investmentAmount`,
-maintains the `requests` mapping by removing the current `Request` corresponding to `msg.sender`,
-ensures the transfer of the subscription tokens to the fund's vault,
-creates and transfers/allocates the commensurate number of shares for the subscription to the `msg.sender` (investor) address,
-determines if the asset is currently held by the fund; if not, the asset is added to the fund's owned assets,
-and finally, the function emits the RequestExecuted() event, broadcasting the event's parameters (see event specification above). The function reverts all work if any permission, quantity, asset or address are determined to be invalid.
+ensures that `requestOwner` has a valid subscription request,
+ensures that the subscription asset has a valid price,
+triggers a management fee calculation and reward,
+gets the current share cost in terms of the subscription asset,
+ensures that the total share cost <= subscription amount,
+transfers the subscription assets to the fund vault,
+calculates change (remainder value) and returns any non-zero asset quantity to the investor address,
+reset the `lockedAssetsForInvestor` mapping to "0" for the investor address,
+transfers the REQUEST_INCENTIVE to `msg.sender`,
+creates the new shares and allocates them to the investor address,
+adds the subscription asset token to the water<b>melon</b> fund's list of owned assets,
+emits the RequestExecution() event logging `requstOwner`, `msg.sender`, `investmentAsset`, `investmentAmount` and `requestedShares`.
+Finally, the function removes the `Request` from the `requests` mapping for the `requestOwner` address. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function getOwedPerformanceFees(uint shareQuantity) view returns (uint remainingShareQuantity)`
@@ -484,10 +507,15 @@ and finally, the function emits the `SuccessfulRedemption()` event along with th
 This view function returns a boolean indicating whether the provided address has a corresponding active request with a positive quantity of requested shares in the `requests` mapping.
 &nbsp;
 
-
 `function hasValidRequest(address _who) public view returns (bool)`
 
 This public view function returns a boolean indicating the `_who` address parameter has a valid request, meaning that either this is the address's first subscription or the INVEST_DELAY is respected, the subscription amount is greater than "0" and the requested share quantity is greater than "0".
+&nbsp;
+
+`function hasExpiredRequest(address _who) view returns (bool)`
+
+This view function returns a boolean indicating that the address provided has a `requests` entry which is currently older than `REQUEST_LIFESPAN`.
+&nbsp;
 
 ---
 
@@ -623,6 +651,7 @@ Before any execution, this modifier requires that the vault contract's `locked` 
 `event Lock(bool status)`
 
 This event is triggered when the status of the `locked` state variable is changed. The event logs the new status.
+&nbsp;
 
 #### Public State Variables
 
@@ -753,7 +782,7 @@ This public view function returns the length of the `ownedAssets` array state va
 This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
 &nbsp;
 
-`function calcAssetGAV(address ofAsset) returns (uint)`
+`function calcAssetGAV(address _queryAsset) returns (uint)`
 
 This function calculates and returns the current fund position GAV (in denomination asset terms) of the individual asset token as specified by the address provided.
 &nbsp;
@@ -788,14 +817,19 @@ This view function returns bundled calculations for GAV, NAV, unclaimed fees, fe
 This function calculates and returns the current price (in denomination asset terms) of a single share in the fund.
 &nbsp;
 
+`calcGavPerShareNetManagementFee() returns (uint gavPerShareNetManagementFee)`
+
+This function calculates and returns the GAV (in denomination asset terms) of a single share in the fund net of the Management Fee due.
+&nbsp;
+
 `function getShareCostInAsset(uint _numShares, address _altAsset) returns (uint)`
 
 This public function calculates and returns the quantity of the `_altAsset` asset token commensurate with the value of `_numShares` quantity of the water<b>melon</b> fund's shares.
 &nbsp;
 
-`function triggerRewardAllFees() public amguPayable payable`
+`function triggerRewardAllFees() public amguPayable(0) payable`
 
-This public function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment.
+This public function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function updateOwnedAssets() public`
@@ -943,7 +977,7 @@ Spoke, DSMath (link)
 
 ##### On Construction
 
-Sets the hub of the spoke.
+The FeeManager contract constructor requires the hub address, the denomination asset token contract address, an array of addresses representing fee contract addresses, an array of integers representing corresponding fee rates and an array of integers representing corresponding performance fee periods.
 
 &nbsp;
 
@@ -957,6 +991,18 @@ None.
 
 None.
 
+&nbsp;
+
+##### Events
+
+FeeReward(uint shareQuantity)
+
+This event is triggered when a Fee has been successfully allocated to the fund manager. The event logs the quantity of new fee shares created.
+&nbsp;
+
+FeeRegistration(address fee)
+
+This event is triggered when a Fee contract is registered with the FeeManager contract. The event logs the Fee contract address.
 &nbsp;
 
 ##### Public State Variables
@@ -973,9 +1019,9 @@ A mapping storing the registration status of a fee address.
 
 ##### Public Functions
 
-`function register(address feeAddress) public`
+`function register(address feeAddress, uint feeRate, uint feePeriod, address denominationAsset) internal`
 
-This function adds the feeAddress provided to the `Fee[]` array and sets the `feeIsRegistered` mapping for that address to `true`.
+This function adds the feeAddress provided to the `fees` array and sets the `feeIsRegistered` mapping for that address to `true`. The fee contract is initialized with the `feeRate`, `feePeriod` and `denominationAsset` token address. Finally, the FeeRegistration event is emitted.
 &nbsp;
 
 `function totalFeeAmount() public view returns (uint total)`
@@ -991,6 +1037,11 @@ This function creates shares commensurate with all fees stored in the `Fee[]` st
 `function rewardManagementFee() public`
 
 This public function calculates, creates and allocates the quantity of shares currently due as the management fee.
+&nbsp;
+
+`function managementFeeAmount() public view returns (uint)`
+
+This public view function calculates and returns the quantity of shares currently due as the management fee.
 &nbsp;
 
 `function performanceFeeAmount() public view returns (uint)`
@@ -1031,24 +1082,19 @@ None.
 
 #### Public State Variables
 
-`uint public PAYMENT_TERM`
+`uint public DIVISOR = 10 ** 18`
 
-An integer defining the measurement period in seconds.
+An integer defining the standard divisor. The variable is set to 10^18.
 &nbsp;
 
-`uint public MANAGEMENT_FEE_RATE`
+`mapping (address => uint) public managementFeeRate`
 
-An integer defining the management fee percentage rate.
+An public mapping associating fund address with the management fee percentage rate.
 &nbsp;
 
-`uint public DIVISOR`
+`mapping (address => uint) public lastPayoutTime`
 
-An integer defining the standard divisor.
-&nbsp;
-
-`uint public lastPayoutTime`
-
-An integer defining the block time in UNIX epoch seconds when the previous fee payout was executed.
+An public mapping associating fund address with the block time in UNIX epoch seconds when the previous fee payout was executed for this fund.
 &nbsp;
 
 #### Public Functions
@@ -1056,6 +1102,11 @@ An integer defining the block time in UNIX epoch seconds when the previous fee p
 `function feeAmount(address hub) public view returns (uint feeInShares)`
 
 This function calculates and returns the number of shares to be created given the amount of time since the previous fee payment, asset value and the defined management fee rate.
+&nbsp;
+
+`function initializeForUser(uint feeRate, uint feePeriod, address denominationAsset) external`
+
+This function ensures that no previous fee payout to the manager address on this Version has been affected. The manager address then receives a fee rate- and timestamp entry in the `managementFeeRate` and `lastPayoutTime` mappings, respectively.
 &nbsp;
 
 `function updateState(address hub) external`
@@ -1093,12 +1144,14 @@ None.
 
 &nbsp;
 
-#### Public State Variables
+#### Events
 
-`uint public PERFORMANCE_FEE_RATE`
+`HighWaterMarkUpdate(uint hwm)`
 
-An integer defining the performance fee percentage rate.
+This event is triggered when the water<b>melon</b> fund's high-watermark is updated with a new value. The event logs the new high-watermark value.
 &nbsp;
+
+#### Public State Variables
 
 `uint public constant DIVISOR = 10 ** 18`
 
@@ -1108,6 +1161,21 @@ A constant integer defining the standard divisor.
 `uint public constant INITIAL_SHARE_PRICE = 10 ** 18`
 
 A constant integer defining the initial share price to "1".
+&nbsp;
+
+`uint public constant REDEEM_WINDOW = 1 weeks`
+
+A constant integer defining a window of time after a measurement period where a performance fee due can be harvested. The constant is set to one week (in seconds).
+&nbsp;
+
+`mapping(address => uint) public initialSharePrice`
+
+A public mapping associating the water<b>melon</b> fund address address to the water<b>melon</b> fund's initial share price.
+&nbsp;
+
+`mapping(address => uint) public initializeTime`
+
+A public mapping associating the water<b>melon</b> fund address address to the water<b>melon</b> fund's initialization block time.
 &nbsp;
 
 `mapping(address => uint) public highWaterMark`
@@ -1132,9 +1200,9 @@ A public mapping associating the water<b>melon</b> fund address to the water<b>m
 
 #### Public Functions
 
-`function initializeForUser(uint feeRate, uint feePeriod) external`
+`function initializeForUser(uint feeRate, uint feePeriod, address denominationAsset) external`
 
-This external function is execution once at the initialization of the water<b>melon</b> fund. The function sets the water<b>melon</b> fund's performance fee rate, the performance measurement period, the initial high-watermark and the `lastPayoutTime`.
+This external function is executed once at the initialization of the water<b>melon</b> fund. The function sets the water<b>melon</b> fund's performance fee rate, the performance measurement period, the fund denomination asset, the initial high-watermark, the `initializeTime` and the `lastPayoutTime`.
 
 `function feeAmount() public view returns (uint feeInShares)`
 
@@ -1143,7 +1211,12 @@ This function calculates and returns the number of shares to be created given th
 
 `function updateState(address hub) external`
 
-This function sets the `highwatermark` and `lastPayoutTime` if applicable.
+This function sets the `highwatermark` and `lastPayoutTime` if applicable. The function requires the `canUpdate()` function to return `true`.
+&nbsp;
+
+`function canUpdate(address _who) public view returns (bool)`
+
+This public view function returns a boolean indicating whether conditions are met to trigger the collection of a performance fee. Theses conditions are: the current time is within the update window and that an update has not already been performed for the current measurement period.
 &nbsp;
 
 ***
@@ -2075,7 +2148,7 @@ The Policy explicitly prohibits the water<b>melon</b> fund from investing in or 
 
 #### Inherits from
 
-Policy, AddressList (Link)
+TradingSignatures, Policy, AddressList (Link)
 
 &nbsp;
 
@@ -2140,7 +2213,7 @@ The Policy explicitly permits the water<b>melon</b> fund to invest in and hold a
 
 #### Inherits from
 
-Policy, AddressList (Link)
+TradingSignatures, Policy, AddressList (Link)
 
 &nbsp;
 
@@ -2206,7 +2279,7 @@ The Policy explicitly prevents a position from actively exceeding the specified 
 
 #### Inherits from
 
-DSMath, Policy (Link)
+TradingSignatures, DSMath, Policy (Link)
 
 &nbsp;
 
@@ -2241,6 +2314,11 @@ None.
 
 #### Public State Variables
 
+`uint internal constant ONE_HUNDRED_PERCENT = 10 ** 18`
+
+This constant is used to correctly represent 100%. It is set to 10^18.
+&nbsp;
+
 `uint public maxConcentration`
 
 This public variable stores the upper limit, in percentage of fund value, which an individual asset token position can have. The value is stored using 18 decimal precision, i.e. 100000000000000000 would represent a maximum concentration for any individual token asset position of 10% of fund value.
@@ -2267,7 +2345,7 @@ The Policy explicitly prevents a position from entering the fund if the quantity
 
 #### Inherits from
 
-Policy (Link)
+TradingSignatures, Policy (Link)
 
 &nbsp;
 
@@ -2328,13 +2406,13 @@ The PriceTolerance Policy explicitly prevents a make order from being submitted 
 
 #### Inherits from
 
-Policy, DSMath (Link)
+TradingSignatures, Policy, DSMath (Link)
 
 &nbsp;
 
 #### On Construction
 
-The contract requires a parameter representing the maximum price feed deviation of an asset trade to the detriment of fund investors. The `tolerance` state variable is then set to this value. A parameter value of 10 would represent a maximum order price deviation to the current reference price of 10%.
+The contract requires a parameter representing the maximum price feed deviation of an asset trade to the detriment of fund investors. The `tolerance` state variable is then set to this value. A parameter value of 10 would represent a maximum order price deviation to the current reference price of 10%. The contract constructor requires the `_tolerancePercent` parameter to range between "0" and "100".
 &nbsp;
 
 #### Structs
@@ -2366,6 +2444,16 @@ None.
 `uint tolerance`
 
 This state variable stores the permitted deviation in percentage of the order price to the current reference price. A value of 10 would represent a maximum order price deviation to the current reference price of 10%.
+&nbsp;
+
+`uint constant MULTIPLIER = 10 ** 16`
+
+This constant is used to scale the `_tolerancePercent` parameter to correctly represent a percentage. It is set to 10^16.
+&nbsp;
+
+`uint constant DIVISOR = 10 ** 18`
+
+This constant is used to correctly represent token quantities/prices. It is set to 10^18.
 &nbsp;
 
 #### Public Functions
