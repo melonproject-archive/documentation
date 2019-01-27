@@ -505,10 +505,12 @@ onlyManager notShutDown`
 
 Please see parameter descriptions above. In the context of the Kyber exchange contract's nomenclature (swapToken() function), the following parameters take the specified mappings:
 
-  `orderAddresses[2]` - The Src token address.
-  `orderAddresses[3]` - The Dest token address.
-  `orderValues[0]` - The Src token quantity.
-  `orderValues[0]` - The Dest token quantity.
+  `orderAddresses[2]` - The Src (maker asset) token address.
+  `orderAddresses[3]` - The Dest (taker asset) token address.
+  `orderValues[0]` - The Src (maker asset) token quantity.
+  `orderValues[0]` - The Dest (taker asset) token quantity.
+
+It should be noted that the Kyber adapter only publicly exposes the `takeOrder()` function. As an order `taker`, the maker/taker perspective is inverted.
 
 This public function must ensure that:
 
