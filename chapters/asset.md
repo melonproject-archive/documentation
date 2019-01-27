@@ -6,7 +6,7 @@ Token assets are the underlying constituent members of a water<b>melon</b> Fund.
 
 In its governance capacity, the Technical Council determines the water<b>melon</b> Fund asset universe, in that it periodically analyzes the broader Ethereum token universe, seeking eligible tokens given their exchange membership, liquidity and underlying use in the context of asset management.
 
-Technically, a water<b>melon</b> Fund can hold any ERC20 complaint token. However, not all ERC20 compliant tokens are appropriate for water<b>melon</b> Funds to hold due to lack of a market, current pricing, exchange listing, liquidity, etc.
+Technically, a water<b>melon</b> Fund can hold any ERC20 compliant token. However, not all ERC20 compliant tokens are appropriate for water<b>melon</b> Funds to hold due to lack of a market, current pricing, exchange listing, liquidity, etc.
 
 ## ETH is not ERC20
 
