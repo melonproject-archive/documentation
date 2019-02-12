@@ -29,10 +29,8 @@ The following contract addresses are provided as parameters:
 `address _tradingFactory` - The address of the TradingFactory contract.
 `address _vaultFactory` - The address of the VaultFactory contract.
 `address _policyManagerFactory` - The address of the PolicyManagerFactory contract.
-`address _engine` - The address of the water<b>melon</b> Engine contract.
-`address _priceSource` - The address of the PriceSource contract.
-`address _mlnAddress` - The address of the water<b>melon</b> Token contract.
 `address _registry` - The address of the Registry contract.
+`address _postDeployOwner` - The address of the Version contract owner.
 
 These address parameters set the corresponding state variables as defined in the inherited definition of  `FundFactory`. The constructor then directly sets the `registry` state variable with the address of the registry contract.
 
@@ -67,42 +65,13 @@ None.
 
 #### Public State Variables
 
-`uint public amguPrice`
-
-A public state variable specifying the current setting for the Asset Management Gas Unit (AMGU) price. This setting can be changed at the discretion of the water<b>melon</b> Technical Council (MTC).
-
-`bool public isShutDown`
-
-A public state variable specifying the operating state of this specific water<b>melon</b> Protocol version.
+None.
 
 &nbsp;
 
 #### Public Functions
 
-`function setAmguPrice(uint _price) auth`
-
-This function requires that the caller is the `owner` or the current contract. The function sets the `amguPrice` state variable with the provided parameter.
-
-
-`function shutDown() external auth`
-
-[Wait for final functionality]
-
 `function shutDownFund(address _fund) external`
 
-This function first requires that either the Version contract is shut down or that `msg.sender` the target fund's address. The function calls the target fund's `shutDownFund()` function. When the Version contract is shut down, any external call may shut down a specific fund.
-
-
-`function getAmguPrice() returns (uint)`
-
-This function returns the current setting of the `amguPrice` state variable.
-
-
-`function isFund(address _who) returns (bool)`
-
-This function returns `true` if the address parameter provided is a fund contract created under the specific Version contract. The function returns `false` otherwise.
-
-
-`function isFundFactory(address _who) returns (bool)`
-
-This function returns `true` if the address parameter provided is the specific Version contract. The function returns `false` otherwise.
+This function first requires that `msg.sender` is the target fund's address. The function calls the target fund's `shutDownFund()` function. When the Version contract is shut down, any external call may shut down a specific fund.
+&nbsp;

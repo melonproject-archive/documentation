@@ -132,6 +132,11 @@ The address of the Kyber network proxy contract.
 The address of the asset token contract which is the fund's base- or quote asset.
 &nbsp;
 
+`address public UPDATER`
+
+The address granted permission to update the price feed.
+&nbsp;
+
 `Registry public REGISTRY`
 
 A public state variable which is the Registry contract of version under which the fund was deployed.
@@ -168,7 +173,7 @@ A public mapping associating an asset token contract address to the most recent 
 
 #### Public Functions
 
-`function update()`
+`function update() external`
 
 This public function ensures that is can only be called by the `REGISTRY` owner. The function updates the `prices` mapping and the `lastUpdate` state variable. A price of "0" indicates an invalid price.
 &nbsp;
@@ -248,4 +253,9 @@ This public view function calculates and returns the quantity of the `toAsset` t
 `function getLastUpdate() public view returns (uint)`
 
 This public view function returns the blocktime timestamp of the last price update, `lastUpdate`.
+&nbsp;
+
+`function setUpdater(address _updater) external`
+
+This external function requires that msg.sender is the registry owner then sets the `UPDATER` state variable to `_updater`.
 &nbsp;

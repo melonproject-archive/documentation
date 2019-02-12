@@ -14,7 +14,7 @@ The contract is a base contract which defines base elements below. It is inherit
 
 #### Inherits from
 
-None. 
+None.
 &nbsp;
 
 #### On Construction
@@ -88,10 +88,8 @@ The contract constructor requires the following address parameters and sets the 
 `address _tradingFactory` - The address of the Version's `TradingFactory` contract.
 `address _vaultFactory` - The address of the Version's `VaultFactory` contract.
 `address _policyManagerFactory` - The address of the Version's `PolicyManagerFactory` contract.
+`address _registry` - The address of the Version's `Registry` contract.
 `address _version` - The address of the `Version` contract.
-`address _engine` - The address of the Version's `Engine` contract.
-`address _factoryPriceSource` - The address of the Version's `FactoryPriceSource` contract.
-`address _mlnToken` - The address of the MLN Token contract.
 &nbsp;
 
 #### Structs
@@ -107,7 +105,6 @@ The contract constructor requires the following address parameters and sets the 
   `address nativeAsset` - The address of the asset token designated as the water<b>melon</b> fund's native asset, i.e. the water<b>melon</b> fund's native network token.
   `address[] defaultAssets` - An array of addresses designating the water<b>melon</b> fund's accepted asset tokens for subscription.
   `bool[] takesCustody` - An array of booleans mirroring an exchange contract's `takesCustody` state variable.
-  `address priceSource` - The address of the water<b>melon</b> fund's price source.
   `address[] fees` - An array of addresses of the water<b>melon</b> fund's registered `fee` contracts.
   `uint[] feeRates` - An array of integers representing the fee rates registered for the water<b>melon</b> fund.
   `uint[] feePeriods` - An array of integer representing the the duration of a fee performance measurement period in seconds.
@@ -123,7 +120,12 @@ None.
 
 `modifier componentNotSet(address _component)`  
 
-This modifier enables a function to enforce the single execution of the implementing function and is evaluated prior the executing the implementing function's functionality.
+This modifier enables a function to enforce the condition that a `_component` address has been created and set.
+&nbsp;
+
+`modifier componentSet(address _component)`  
+
+This modifier enables a function to enforce the condition that a `_component` address has not been created and set.
 &nbsp;
 
 #### Events
@@ -139,24 +141,9 @@ This event is emitted when the FundFactory creates a new fund. The event logs th
 
 #### Public State Variables
 
-`address public factoryPriceSource`
-
-This public state variable represents the Version's price source contract.
-&nbsp;
-
-`address public mlnToken`
-
-This public state variable represents MLN token contract.
-&nbsp;
-
 `VersionInterface public version`
 
 This public state variable represents the Version contract.
-&nbsp;
-
-`address public engine`
-
-This public state variable represents the Version's water<b>melon</b> Engine contract.
 &nbsp;
 
 `address public registry`
@@ -223,8 +210,6 @@ This public state variable mapping maps an address to `Settings` struct, creatin
 
 `function beginSetup(
     string _name,
-    // address _compliance,
-    // address[] _policies,
     address[] _fees,
     uint[] _feeRates,
     uint[] _feePeriods,
@@ -233,89 +218,121 @@ This public state variable mapping maps an address to `Settings` struct, creatin
     address _denominationAsset,
     address _nativeAsset,
     address[] _defaultAssets,
-    bool[] _takesCustody,
-    address _priceSource
-) componentNotSet(managersToHubs[msg.sender])`
+    bool[] _takesCustody
+) public componentNotSet(managersToHubs[msg.sender])`
 
 This public function takes the following parameters and initiates the set up process of a water<b>melon</b> fund. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function requires that the Version is not shut down. The function then creates a new `Hub` owned by `msg.sender` with the `name` provided. The `Hub` is then added to the `managersToHubs` mapping, mapped to the `msg.sender` (manager). A `Settings` struct is constructed from the requisite parameter values and is added to the `managersToSettings` mapping, mapped to the `msg.sender` (manager). Finally, the function the proceeds to populate the `managersToRoutes` mapping by mapping the `msg.sender` (manager) address to the following individual `Routes` elements: `priceSource`, `registry`, `version`, `engine` and `mlnToken`.
 &nbsp;
 
 `function createAccounting()
-componentNotSet(managersToRoutes[msg.sender].accounting) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].accounting)
+amguPayable(false)
+payable`
 
-This public function creates the Accounting spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the Accounting spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createFeeManager()
-componentNotSet(managersToRoutes[msg.sender].feeManager) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].feeManager)
+amguPayable(false)
+payable`
 
-This public function creates the FeeManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the FeeManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createParticipation()
-componentNotSet(managersToRoutes[msg.sender].participation) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].participatio )
+amguPayable(false)
+payable`
 
-This public function creates the Participation spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the Participation spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). TThe function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createPolicyManager()
-componentNotSet(managersToRoutes[msg.sender].policyManager) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].policyManager)
+amguPayable(false)
+payable`
 
-This public function creates the PolicyManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the PolicyManager spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createShares()
-componentNotSet(managersToRoutes[msg.sender].shares) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].shares)
+amguPayable(false)
+payable`
 
-This public function creates the Shares spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the Shares spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createTrading()
-componentNotSet(managersToRoutes[msg.sender].trading) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].trading)
+amguPayable(false)
+payable`
 
-This public function creates the Trading spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the Trading spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function createVault()
-componentNotSet(managersToRoutes[msg.sender].vault) amguPayable(0) payable`
+external
+componentSet(managersToHubs[msg.sender])
+componentNotSet(managersToRoutes[msg.sender].vault)
+amguPayable(false)
+payable`
 
-This public function creates the Vault spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function creates the Vault spoke of a water<b>melon</b> fund and adds the resulting contract address to the `managersToRoutes` mapping, mapped to the `msg.sender` (manager). The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
 `function completeSetup()
-amguPayable(0) payable`
+external amguPayable(false) payable`
 
-This public function completes the set up of a water<b>melon</b> fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new water<b>melon</b> fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function completes the set up of a water<b>melon</b> fund. The function ensure the `childExists` mapping does not contain the `hub` address, then adds the `hub` address. The function then sets all of the `hub`'s spokes, routing, permissions and then adds the `hub` address to the `funds` state variable address array. The new water<b>melon</b> fund is then registered with the Version Registry. The function finally emits the `NewFund()` event, logging all parameter values as specified above. The function implements the `componentNotSet()` modifier ensuring its one-time execution in the water<b>melon</b> fund setup process. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
 &nbsp;
 
-`function getFundById(uint withId) public view returns (address)`
+`function getFundById(uint withId) external view returns (address)`
 
-This public view function returns the address of the water<b>melon</b> fund given the `withId` value provided, which is the index of of the `funds` address array state variable.
+This external view function returns the address of the water<b>melon</b> fund given the `withId` value provided, which is the index of of the `funds` address array state variable.
 &nbsp;
 
-`function getLastFundId() public view returns (uint)`
+`function getLastFundId() external view returns (uint)`
 
-This public view function returns the index position of the most recently added water<b>melon</b> fund to the `funds` array state variable.
+This external view function returns the index position of the most recently added water<b>melon</b> fund to the `funds` array state variable.
 &nbsp;
 
-`function engine() view returns (address)`
+`function engine() public view returns (address)`
 
 This public view function returns the address of the water<b>melon</b> Engine contract.
 &nbsp;
 
-`function mlnToken() view returns (address)`
+`function mlnToken() public view returns (address)`
 
 This public view function returns the address of the MLN token contract.
 &nbsp;
 
-`function priceSource() view returns (address)`
+`function priceSource() public view returns (address)`
 
 This public view function returns the address of the PriceSource contract.
 &nbsp;
 
-`function version() view returns (address)`
+`function version() public view returns (address)`
 
 This public view function returns the address of the Version contract.
+&nbsp;
+
+`function registry() public view returns (address)`
+
+This public view function returns the address of the Registry contract.
 &nbsp;
 
 ## FundRanking.sol

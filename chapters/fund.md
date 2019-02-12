@@ -120,59 +120,64 @@ mapping (address => bool) public isSpoke
 
 #### Public Functions
 
-`function shutDownFund() public`
+`function shutDownFund() external`
 
-This function sets the `ìsShutDown` state variable to `true`, effectively disabling the fund for all activities except investor redemptions. This function can only be successfully called by the manager address. The function's actions are permanent and irreversible.
+This external function sets the `ìsShutDown` state variable to `true`, effectively disabling the fund for all activities except investor redemptions. This function can only be successfully called by the manager address. The function's actions are permanent and irreversible.
 &nbsp;
 
-`function setSpokes(address[12] _spokes) onlyCreator`
+`function setSpokes(address[12] _spokes) external onlyCreator`
 
-This function takes an array of addresses and sets all member variables of the `routes` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+This external function takes an array of addresses and sets all member variables of the `routes` state variable struct if they have not already been set as part of the fund initialization sequence. The function then sets the `spokesSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
-`function setRouting() onlyCreator`
+`function setRouting() external onlyCreator`
 
-This function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+This external function requires that the Spokes and Routings have been set. It then initializes (see Spoke `initialize()` below) all registered Spokes and finally sets the `routingSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
-`function setPermissions() onlyCreator`
+`function setPermissions() external onlyCreator`
 
-This function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`. This function implements the `onlyCreator` modifier.
+This external function requires that the Spokes and Routings have been set, but that permissions have not been set. Next, the functions _explicitly_ sets specific, design-intended permissions between the calling contracts and called contracts' functions. The function then finally sets the `permissionsSet` state variable to `true`. This function implements the `onlyCreator` modifier.
 &nbsp;
 
-`function vault() view returns (address)`
+`function vault() external view returns (address)`
 
-This view function returns the vault Spoke address.
+This external view function returns the vault Spoke address.
 &nbsp;
 
-`function accounting() view returns (address)`
+`function accounting() external view returns (address)`
 
-This view function returns the accounting Spoke address.
+This external view function returns the accounting Spoke address.
 &nbsp;
 
-`function priceSource() view returns (address)`
+`function priceSource() external view returns (address)`
 
-This view function returns the priceSource contract address.
+This external view function returns the priceSource contract address.
 &nbsp;
 
-`function participation() view returns (address)`
+`function participation() external view returns (address)`
 
-This view function returns the participation Spoke address.
+This external view function returns the participation Spoke address.
 &nbsp;
 
-`function trading() view returns (address)`
+`function trading() external view returns (address)`
 
-This view function returns the trading Spoke address.
+This external view function returns the trading Spoke address.
 &nbsp;
 
-`function shares() view returns (address)`
+`function shares() external view returns (address)`
 
-This view function returns the shares Spoke address.
+This external view function returns the shares Spoke address.
 &nbsp;
 
-`function policyManager() view returns (address)`
+`function registry() external view returns (address)`
 
-This view function returns the policyManager Spoke address.
+This external view function returns the registry Spoke address.
+&nbsp;
+
+`function policyManager() external view returns (address)`
+
+This external view function returns the policyManager Spoke address.
 &nbsp;
 
 ## Spoke.sol
@@ -259,9 +264,9 @@ A boolean variable defining the initialization status of the Spoke.
 
 #### Public Functions
 
-`function initialize(address[12] _spokes) public auth`
+`function initialize(address[12] _spokes) external auth`
 
-This function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true` and the `owner` to address "0".
+This external function requires firstly that the Spoke not be initialized, then takes an array of addresses of all Spoke- and component contracts, sets all members of the `routes` struct state variable and finally sets `initialized` = `true` and the `owner` to address "0".
 &nbsp;
 
 `function engine() view returns (address)`
@@ -371,7 +376,7 @@ Member variables:
 `uint investmentAmount` - The quantity of tokens of the `investmentAsset`
 `uint requestedShares` - The quantity of fund shares for the request
 `uint timestamp` - The timestamp of the block containing the subscription transaction
-`uint atUpdateId` - [CHECK]
+&nbsp;
 
 #### Enums
 
@@ -398,11 +403,6 @@ None.
 An integer constant which specifies the decimal precision of a single share. The value is set to 18.
 &nbsp;
 
-`uint constant public INVEST_DELAY = 10 minutes`
-
-An integer constant which specifies the number of seconds a valid subscription request must be delayed before a subscription is executed.
-&nbsp;
-
 `uint constant public REQUEST_LIFESPAN = 1 days`
 
 An integer constant which specifies the time duration where an investment subscription request is live. This constant is set to 1 day in seconds.
@@ -423,11 +423,14 @@ A public mapping associating an investor’s address to a `Request` struct.
 A public mapping which specifies all asset token addresses which have been enabled for subscription to the water<b>melon</b> fund.
 &nbsp;
 
-`mapping (address => mapping (address => uint)) public lockedAssetsForInvestor`
+`mapping (address => bool) public hasInvested`
 
-A public (compound) mapping associating a subscription asset token address to an investor address to a quantity of the asset token. This mapping is used by the contract to lock and hold the investor's subscription token until the request can be either executed or cancelled.
-
+A public mapping which indicates whether an address has previously subscribed to the fund. This mapping is for informational purposes only.
 &nbsp;
+
+address[] public historicalInvestors
+
+A public array of addresses listing all addresses which have ever subscribed to the fund. This mapping is for informational purposes only.
 
 #### Public Functions
 
@@ -435,14 +438,14 @@ A public (compound) mapping associating a subscription asset token address to an
 
 This public function is the contract's fallback function enabling the contract to receive ETH sent directly to the contract for the `REQUEST_INCENTIVE`.
 
-`function enableInvestment(address[] _assets) public auth`
+`function enableInvestment(address[] _assets) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the water<b>melon</b> fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping. Finally the function emits the `EnableInvestment()` event, logging the `_assets`.
+This external function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses, ensuring each is registered with the water<b>melon</b> fund's PriceFeed, and ensures that registered asset token addresses are set to `true` in the `investAllowed` mapping. Finally the function emits the `EnableInvestment()` event, logging the `_assets`.
 &nbsp;
 
-`function disableInvestment(address[] _assets) public auth`
+`function disableInvestment(address[] _assets) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
+This external function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
 &nbsp;
 
 `function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable(REQUEST_INCENTIVE) onlyInitialized`
@@ -450,14 +453,14 @@ This function requires that the caller is the `owner` or the current contract. T
 This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine and `REQUEST_INCENTIVE` quantity of ETH to provide the investment request execution incentive. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
 &nbsp;
 
-`function cancelRequest() external payable amguPayable(0)`
+`function cancelRequest() external payable amguPayable(false)`
 
-This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requires that a request exists and that at least one of the conditions to cancel an investment request are met: invalid investment asset price, expired request or fund is shut down. Investment asset tokens are transferred back to the investor address. Finally, the function emits the `CancelRequest` event, logging `msg.sender`. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This function removes the request from the `requests` mapping for the request corresponding to the `msg.sender` address. The function requires that a request exists and that at least one of the conditions to cancel an investment request are met: invalid investment asset price, expired request or fund is shut down. Investment asset tokens are transferred back to the investor address. Finally, the function emits the `CancelRequest` event, logging `msg.sender`. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `false`.
 &nbsp;
 
-`function executeRequestFor(address requestOwner) public notShutDown amguPayable(0) payable`
+`function executeRequestFor(address requestOwner) external notShutDown amguPayable(false) payable`
 
-This function:
+This external function:
 ensures that the fund is not shutDown,
 ensures that `requestOwner` has a valid subscription request,
 ensures that the subscription asset has a valid price,
@@ -466,12 +469,11 @@ gets the current share cost in terms of the subscription asset,
 ensures that the total share cost <= subscription amount,
 transfers the subscription assets to the fund vault,
 calculates change (remainder value) and returns any non-zero asset quantity to the investor address,
-reset the `lockedAssetsForInvestor` mapping to "0" for the investor address,
 transfers the REQUEST_INCENTIVE to `msg.sender`,
 creates the new shares and allocates them to the investor address,
 adds the subscription asset token to the water<b>melon</b> fund's list of owned assets,
 emits the RequestExecution() event logging `requstOwner`, `msg.sender`, `investmentAsset`, `investmentAmount` and `requestedShares`.
-Finally, the function removes the `Request` from the `requests` mapping for the `requestOwner` address. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+Finally, the function removes the `Request` from the `requests` mapping for the `requestOwner` address. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `false`.
 &nbsp;
 
 `function getOwedPerformanceFees(uint shareQuantity) view returns (uint remainingShareQuantity)`
@@ -479,9 +481,9 @@ Finally, the function removes the `Request` from the `requests` mapping for the 
 This view function calculates and returns the quantity of shares owed for payment of accrued performance fees given the provided quantity of shares being redeemed.
 &nbsp;
 
-`function redeem() public`
+`function redeem() external`
 
-This function determines the quantity of shares owned by `msg.sender` and calls `redeemQuantity()`. A share-commensurate quantity of all token assets in the fund are transferred to `msg.sender`, i.e. the investor. This function redeems _all_ shares owned by `msg.sender`.
+This external function determines the quantity of shares owned by `msg.sender` and calls `redeemQuantity()`. A share-commensurate quantity of all token assets in the fund are transferred to `msg.sender`, i.e. the investor. This function redeems _all_ shares owned by `msg.sender`.
 &nbsp;
 
 `function redeemQuantity(uint shareQuantity) public`
@@ -515,6 +517,11 @@ This public view function returns a boolean indicating the `_who` address parame
 `function hasExpiredRequest(address _who) view returns (bool)`
 
 This view function returns a boolean indicating that the address provided has a `requests` entry which is currently older than `REQUEST_LIFESPAN`.
+&nbsp;
+
+`function getHistoricalInvestors() external view returns (address[])`
+
+This external view function returns the `historicalInvestors` state variable array.
 &nbsp;
 
 ---
@@ -641,9 +648,8 @@ None
 
 #### Modifiers
 
-`onlyUnlocked()`
+None
 
-Before any execution, this modifier requires that the vault contract's `locked` state variable is `false`.
 &nbsp;
 
 #### Events
@@ -672,7 +678,7 @@ This function requires that the caller is the `owner` or the current contract. T
 This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `false`.
 &nbsp;
 
-`function withdraw(address token, uint amount) onlyUnlocked auth`
+`function withdraw(address token, uint amount) external auth`
 
 This function requires that the caller is the `owner` or the current contract, and that the `locked` state of the vault be `false`. This function calls the `transfer()` ERC20 function of the provided asset token contract address, transferring ownership of the provided amount from the vault to the custody of the `owner`.
 &nbsp;
@@ -773,18 +779,18 @@ A `Calculations` structure holding the latest state of the member fund calculati
 
 #### Public functions
 
-`function getOwnedAssetsLength() view returns (uint)`
+`function getOwnedAssetsLength() external view returns (uint)`
 
-This public view function returns the length of the `ownedAssets` array state variable.
+This external view function returns the length of the `ownedAssets` array state variable.
 
-`function getFundHoldings() returns (uint[], address[])`
+`function getFundHoldings() external returns (uint[], address[])`
 
-This function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
+This external function returns the current quantities and corresponding addresses of the funds token positions as two distinct order-dependent arrays.
 &nbsp;
 
-`function calcAssetGAV(address _queryAsset) returns (uint)`
+`function calcAssetGAV(address _queryAsset) external returns (uint)`
 
-This function calculates and returns the current fund position GAV (in denomination asset terms) of the individual asset token as specified by the address provided.
+This external function calculates and returns the current fund position GAV (in denomination asset terms) of the individual asset token as specified by the address provided.
 &nbsp;
 
 `function assetHoldings(address _asset) public returns (uint)`
@@ -812,9 +818,9 @@ This function calculates and returns the value (in denomination asset terms) of 
 This view function returns bundled calculations for GAV, NAV, unclaimed fees, fee share quantity and current share price (in denomination asset terms).
 &nbsp;
 
-`function calcSharePrice() returns (uint sharePrice)`
+`function calcSharePrice() external returns (uint sharePrice)`
 
-This function calculates and returns the current price (in denomination asset terms) of a single share in the fund.
+This external function calculates and returns the current price (in denomination asset terms) of a single share in the fund.
 &nbsp;
 
 `calcGavPerShareNetManagementFee() returns (uint gavPerShareNetManagementFee)`
@@ -822,14 +828,14 @@ This function calculates and returns the current price (in denomination asset te
 This function calculates and returns the GAV (in denomination asset terms) of a single share in the fund net of the Management Fee due.
 &nbsp;
 
-`function getShareCostInAsset(uint _numShares, address _altAsset) returns (uint)`
+`function getShareCostInAsset(uint _numShares, address _altAsset) external returns (uint)`
 
-This public function calculates and returns the quantity of the `_altAsset` asset token commensurate with the value of `_numShares` quantity of the water<b>melon</b> fund's shares.
+This external function calculates and returns the quantity of the `_altAsset` asset token commensurate with the value of `_numShares` quantity of the water<b>melon</b> fund's shares.
 &nbsp;
 
-`function triggerRewardAllFees() public amguPayable(0) payable`
+`function triggerRewardAllFees() external amguPayable(false) payable`
 
-This public function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `0`.
+This external function updates `ownedAssets` and rewards all fees accrued to the current point in time. The function then updates the `atLastAllocation` struct state variable. The function is `payable` and also implements the `amguPayable` modifier, requiring amgu payment. Here, the `deductFromRefund` parameter is set to `false`.
 &nbsp;
 
 `function updateOwnedAssets() public`
@@ -837,14 +843,14 @@ This public function updates `ownedAssets` and rewards all fees accrued to the c
 This function maintains the `ownedAssets` array by removing or adding asset addresses as the fund holdings composition changes.
 &nbsp;
 
-`function addAssetToOwnedAssets(address _asset) public auth`
+`function addAssetToOwnedAssets(address _asset) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
+This external function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by adding asset addresses as the fund holdings composition changes.
 &nbsp;
 
-`function removeFromOwnedAssets(address _asset) public auth`
+`function removeFromOwnedAssets(address _asset) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
+This external function requires that the caller is the `owner` or the current contract. The function maintains the `ownedAssets` array and the `isInOwedAssets` mapping by removing asset addresses as the fund holdings composition changes.
 &nbsp;
 
 ---
@@ -1322,7 +1328,7 @@ A public array of `Exchange` structs which stores all exchanges with which the f
 A public array of `Order` structs which stores all active orders [CHECK] on the
 &nbsp;
 
-`mapping (address => bool) public exchangeIsAdded`
+`mapping (address => bool) public adapterIsAdded`
 
 A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
 &nbsp;
