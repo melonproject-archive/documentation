@@ -71,8 +71,9 @@ None.
 
 #### Modifiers
 
-None.
+`modifier only_version()`
 
+A modifier which requires `msg.sender` be a Version contract.
 &nbsp;
 
 
@@ -168,9 +169,9 @@ This public state variable is an array of addresses which stores each asset toke
 This public state variable mapping maps an exchange contract `address` to an `Exchange` strut containing the exchange information described above.
 &nbsp;
 
-`address[] public registeredExchanges`
+`address[] public registeredExchangeAdapters`
 
-This public state variable is an array of addresses which stores each exchange contract `address` which is registered.
+This public state variable is an array of addresses which stores each exchange adapter contract `address` which is registered.
 &nbsp;
 
 `mapping (address => Version) public versionInformation`
@@ -181,6 +182,11 @@ This public state variable mapping maps a Version contract `address` to a `Versi
 `address[] public registeredVersions`
 
 This public state variable is an array of addresses which stores each Version contract `address` which is registered.
+&nbsp;
+
+`mapping (address => bool) public isFeeRegistered`
+
+This public state variable mapping maps a Fee contract `address` to a boolean indicating that the Fee contract is registered.
 &nbsp;
 
 `mapping (address => address) public fundsToVersions`
@@ -233,25 +239,28 @@ This public state variable is the address of the water<b>melon</b> Engine contra
 This public state variable is the address of the Ethfinex Wrapper Registry contract.
 &nbsp;
 
+`uint public incentive = 10 finney`
+
+This public state variable defines the incentive amount in ETH. The variable is set to 10 finney.
+&nbsp;
+
 #### Public Functions
 
 `function registerAsset(
         address _asset,
         string _name,
         string _symbol,
-        uint _decimals,
         string _url,
         uint _reserveMin,
         uint[] _standards,
         bytes4[] _sigs
-    ) auth`
+    ) external auth`
 
-This function requires that the caller is the `owner` or the current contract. It then requires that the asset token's information not be previously registered. The asset token's address is then appended to the `registeredAssets` array state variable. The function then registers the following information for a specific asset token within the Registry contract as per the following parameters:
+This external function requires that the caller is the `owner` or the current contract. It then requires that the asset token's information not be previously registered. The asset token's address is then appended to the `registeredAssets` array state variable. The function then registers the following information for a specific asset token within the Registry contract as per the following parameters:
 
 `address _asset` - The address of the asset token contract to be registered.
 `string _name` - The human-readable name of the asset token.
 `string _symbol` - The human-readable symbol of the asset token.
-`uint _decimals` - The divisibility precision of the token.
 `string _url` - The URL for extended information of the asset token.
 `uint reserveMin` - An integer representing the Kyber Network reserve minimum.
 `uint[] _standards` - An array of integers representing EIP standards to which this asset token conforms.
@@ -260,14 +269,14 @@ This function requires that the caller is the `owner` or the current contract. I
 Finally, the function ensures that the asset token's information exists in the `assetInformation` mapping state variable.
 &nbsp;
 
-`function registerExchange(
+`function registerExchangeAdapter(
     address _exchange,
     address _adapter,
     bool _takesCustody,
     bytes4[] _sigs
-) auth`
+) external auth`
 
-This function requires that the caller is the `owner` or the current contract. It then requires that the exchange's information not be previously registered. The exchange's address is then appended to the `registeredExchanges` array state variable. The function then registers the following information for a specific exchange within the Registry contract as per the following parameters:
+This external function requires that the caller is the `owner` or the current contract. It then requires that the exchange's information not be previously registered. The exchange's address is then appended to the `registeredExchanges` array state variable. The function then registers the following information for a specific exchange within the Registry contract as per the following parameters:
 
 `address _exchange` - The address of the exchange contract to be registered.
 `address _adapter` - The address of the exchange's corresponding adapter contract to be registered.
@@ -365,9 +374,9 @@ This public view function indicates whether the address provided is that of a re
 This public view function returns an array of all registered asset token addresses.
 &nbsp;
 
-`function assetMethodIsAllowed(address _asset, bytes4 _sig) returns (bool)`
+`function assetMethodIsAllowed(address _asset, bytes4 _sig) external view returns (bool)`
 
-This public view function returns a boolean indicating whether a specific asset token function is whitelisted given the provided asset token address and the function's signature hash. A return value of `true` indicates that the function is whitelisted. A return value of `false` indicates that the function is not whitelisted.
+This external view function returns a boolean indicating whether a specific asset token function is whitelisted given the provided asset token address and the function's signature hash. A return value of `true` indicates that the function is whitelisted. A return value of `false` indicates that the function is not whitelisted.
 &nbsp;
 
 `function exchangeIsRegistered(address _exchange) view returns (bool)`
@@ -445,9 +454,9 @@ This public view function returns a boolean indicating whether the address provi
 This public view function returns a boolean indicating whether the address provided is a FundFactory. The function check the existence of the `_who` address in the `versionInformation` mapping. Note that Version inherits FundFactory.
 &nbsp;
 
-`function registerFund(address _fund, address _owner, string _name)`
+`function registerFund(address _fund, address _owner, string _name) external only_version`
 
-This public function ensures that `msg.sender` is a Version, as only Versions can register funds. The function requires that the fund name is valid. The function then adds an entry to the `fundsToVersions` mapping, associating `_fund` to `msg.sender`, i.e. the Version address. Finally, the function adds an entry to the `fundNameHashToOwner` mapping, associating the keccak256 hash of the fund name to the `owner` address.
+This external function ensures that `msg.sender` is a Version, as only Versions can register funds. The function requires that the fund name is valid. The function then adds an entry to the `fundsToVersions` mapping, associating `_fund` to `msg.sender`, i.e. the Version address.
 &nbsp;
 
 `function isValidFundName(string _name) public view returns (bool)`
@@ -458,4 +467,19 @@ This public function ensures that the fund name provided does not exceed `MAX_FU
 `function canUseFundName(address _user, string _name) public view returns (bool)`
 
 This public function ensures that the fund name provided adheres to the rules set forth in `isValidFundName()`, and that the name is not already in use by a fund or is used by the provided `_user` address (to enable fund name reuse across Versions by the same `_user`).
+&nbsp;
+
+`function reserveFundName(address _owner, string _name) external only_version`
+
+This external function requires that that `msg.sender` is a Version and that `_name` passes all conditions of `canUseFundName()`, then adds `_name` to the `fundNameHashToOwner` mapping.
+&nbsp;
+
+`function registerFees(address[] _fees) external auth`
+
+This external function requires that the caller is the `owner` or the current contract. The Fee contract addresses provided are then added as entries to the `isFeeRegistered` mapping with the value of `true`.
+&nbsp;
+
+`function deregisterFees(address[] _fees) external auth`
+
+This external function requires that the caller is the `owner` or the current contract. The Fee contract addresses provided are then deleted from the  `isFeeRegistered` mapping.
 &nbsp;

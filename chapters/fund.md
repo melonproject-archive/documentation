@@ -353,7 +353,7 @@ The Participation contract encompasses the entire water<b>melon</b> fund interfa
 
 #### Inherits from
 
-ParticipationInterface, DSMath, AmguConsumer, Spoke (links)
+ParticipationInterface, TokenUser, AmguConsumer, Spoke (links)
 
 #### On Construction
 
@@ -445,9 +445,9 @@ This function requires that the caller is the `owner` or the current contract. T
 This function requires that the caller is the `owner` or the current contract. The function iterates over an array of provided asset token addresses and ensures that asset token addresses are set to `false` in the `investAllowed` mapping. Finally the function emits the `DisableInvestment()` event, logging the `_assets`.
 &nbsp;
 
-`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable(REQUEST_INCENTIVE) onlyInitialized`
+`function requestInvestment(uint requestedShares, uint investmentAmount, address investmentAsset) external notShutDown payable amguPayable(true) onlyInitialized`
 
-This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine and `REQUEST_INCENTIVE` quantity of ETH to provide the investment request execution incentive. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
+This function ensures that the fund is not shutdown and that subscription is permitted in the provided `ìnvestmentAsset`. The function then creates and populates a `Request` struct (see details above) from the function parameters provided and adds this to the `requests` mapping corresponding to the `msg.sender`. Finally, this function emits the `InvestmentRequest` event. Execution of this functions requires payment of AMGU ETH to the water<b>melon</b> Engine to provide the investment request execution incentive. This function implements the `notShutDown`, `payable`, `amguPayable` and `onlyInitialized` modifiers.
 &nbsp;
 
 `function cancelRequest() external payable amguPayable(0)`
@@ -616,15 +616,13 @@ This function requires that the caller is the `owner` or the current contract. T
 
 The Vault makes use of the `auth` modifier from the DSAuth dependency. The `auth` functionality ensures the precise provisioning of call permissions, and focuses on granting `owner` or the current contract call permissions.
 
-The contract provides extra security around ERC20 deposit and withdraw functionality, into- and from the vault, respectively. This is achieved by ensuring that only the owner can withdraw from the vault when the vault's `locked` state is `false`.
-
 The Vault contract is created from the vaultFactory contract, which creates a new instance of the `Vault` given the `hub` address, register the address of the newly created vault contract as a child of the vaultFactory and finally emits an event, broadcasting the creation event along with the address of the vault contract.
 
 &nbsp;
 
 ##### Inherits from
 
-VaultInterface, Spoke (link)
+VaultInterface, TokenUser, Spoke (link)
 
 &nbsp;
 
@@ -641,40 +639,27 @@ None
 
 #### Modifiers
 
-`onlyUnlocked()`
+None.
 
-Before any execution, this modifier requires that the vault contract's `locked` state variable is `false`.
 &nbsp;
 
 #### Events
 
-`event Lock(bool status)`
+None.
 
-This event is triggered when the status of the `locked` state variable is changed. The event logs the new status.
 &nbsp;
 
 #### Public State Variables
 
-`bool public locked`
+None.
 
-A public boolean state variable which indicates the lock state of the vault.
 &nbsp;
 
 #### Public Functions
 
-`function lockdown() auth`
+`function withdraw(address token, uint amount) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `true`.
-&nbsp;
-
-`function unlock() auth`
-
-This function requires that the caller is the `owner` or the current contract. The function only sets the `locked` state variable to `false`.
-&nbsp;
-
-`function withdraw(address token, uint amount) onlyUnlocked auth`
-
-This function requires that the caller is the `owner` or the current contract, and that the `locked` state of the vault be `false`. This function calls the `transfer()` ERC20 function of the provided asset token contract address, transferring ownership of the provided amount from the vault to the custody of the `owner`.
+This external function requires that the caller is the `owner` or the current contract. This function calls the `safeTransfer()` function from `TokenUser.sol`, safely transferring ownership of the provided amount from the vault to the custody of `msg.sender`.
 &nbsp;
 
 ---
@@ -977,7 +962,7 @@ Spoke, DSMath (link)
 
 ##### On Construction
 
-The FeeManager contract constructor requires the hub address, the denomination asset token contract address, an array of addresses representing fee contract addresses, an array of integers representing corresponding fee rates and an array of integers representing corresponding performance fee periods.
+The FeeManager contract constructor requires the hub address, the denomination asset token contract address, an array of addresses representing fee contract addresses, an array of integers representing corresponding fee rates, an array of integers representing corresponding performance fee periods and the address of the registry contract.
 
 &nbsp;
 
@@ -1146,9 +1131,9 @@ None.
 
 #### Events
 
-`HighWaterMarkUpdate(uint hwm)`
+`HighWaterMarkUpdate(address indexed feeManager, uint indexed hwm)`
 
-This event is triggered when the water<b>melon</b> fund's high-watermark is updated with a new value. The event logs the new high-watermark value.
+This event is triggered when the water<b>melon</b> fund's high-watermark is updated with a new value. The event logs the fee manager contract address and the new high-watermark value.
 &nbsp;
 
 #### Public State Variables
@@ -1166,11 +1151,6 @@ A constant integer defining the initial share price to "1".
 `uint public constant REDEEM_WINDOW = 1 weeks`
 
 A constant integer defining a window of time after a measurement period where a performance fee due can be harvested. The constant is set to one week (in seconds).
-&nbsp;
-
-`mapping(address => uint) public initialSharePrice`
-
-A public mapping associating the water<b>melon</b> fund address address to the water<b>melon</b> fund's initial share price.
 &nbsp;
 
 `mapping(address => uint) public initializeTime`
@@ -1209,9 +1189,9 @@ This external function is executed once at the initialization of the water<b>mel
 This function calculates and returns the number of shares to be created given the fund performance since the previous measurement period payment, asset value and the defined performance fee rate.
 &nbsp;
 
-`function updateState(address hub) external`
+`function updateState() external`
 
-This function sets the `highwatermark` and `lastPayoutTime` if applicable. The function requires the `canUpdate()` function to return `true`.
+This function sets the `highwatermark` and `lastPayoutTime` if applicable. The function requires the `canUpdate()` function to return `true`. Finally, the function emits the `HighWaterMarkUpdate()` event logging the fee manager address and the fund's new high-watermakr, i.e. the new GAV per share value.
 &nbsp;
 
 `function canUpdate(address _who) public view returns (bool)`
@@ -1227,7 +1207,7 @@ The water<b>melon</b> Protocol integrates with decentralized exchanges to facili
 
 ## Trading.sol
 
-Description
+#### Description
 
 The Trading contract is created by the tradingFactory, which holds a queryable array of all created Trading contracts and emits the `instanceCreated` event along with the trading contract's address.
 
@@ -1246,11 +1226,12 @@ The trading contract:
 The contract has a fallback function to retrieve ETH.
 
 Inherits from
-Spoke, DSMath, TradingInterface (link)
+Spoke, DSMath, TradingInterface, TokenUser (link)
 
 On Construction
 
-The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses and an array of booleans indicating if an exchange takes custody of tokens for make orders. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
+The contract requires the hub address, an array of exchange addresses, an array of exchange adapter addresses, an array of booleans indicating if an exchange takes custody of tokens for make orders and the address of the Registry contract. The contract becomes a spoke to the hub. The constructor of the trading contract requires that the length of the exchange array matches the length of exchange adapter array and the length of the exchange array matches the length of boolean custody status array. Finally, the constructor builds the public variable `exchanges[]` array of `Exchange` structs.
+&nbsp;
 
 #### Structs
 
@@ -1296,6 +1277,11 @@ Member Variables
 
 `uint expiresAt` - An integer representing the time when the order expires. The timestamp is represented by the Ethereum blockchain as a UNIX Epoch. After order expiration, the order will no longer [exist/be active] on the exchange and custody, if the exchange held custody, returns from the exchange contract to the fund contract.
 
+`uint orderIndex` - An integer representing the index of the order in the `orders` array.
+
+`address buyAsset` - An address representing the token contract of the buy asset in the order.
+&nbsp;
+
 #### Enums
 
 `UpdateType` - An enum which characterizes the type of update to the order.
@@ -1307,8 +1293,7 @@ Member Types
 `take` - Indicates a take order type, where the offered quantity (or less) of a specific asset is accepted at the specified price by the counterparty. Taking less than the offered quantity in the order would be considered a "partial fill" of the order.
 
 `cancel` - A type indicating that the update performed will cancel the order.
-
-`swap`- A type specific to the Kyber exchange adapter, similar in functionality to `take` described above.
+&nbsp;
 
 #### Public State variables
 
@@ -1322,14 +1307,19 @@ A public array of `Exchange` structs which stores all exchanges with which the f
 A public array of `Order` structs which stores all active orders [CHECK] on the
 &nbsp;
 
-`mapping (address => bool) public exchangeIsAdded`
+`mapping (address => bool) public adapterIsAdded`
 
-A public mapping which indicates that a specific exchange (as identified by the exchange address) is registered for the fund.
+A public mapping which indicates that a specific exchange adapter (as identified by the adapter address) is registered for the fund.
 &nbsp;
 
 `mapping (address => mapping(address => OpenMakeOrder)) public exchangesToOpenMakeOrders`
 
 A public compound mapping associating an exchange address to open make orders from the fund on the specific exchange.
+&nbsp;
+
+`mapping (address => uint) public openMakeOrdersAgainstAsset`
+
+A public mapping associating an asset token contract address to the quantity of open make orders for that asset token.
 &nbsp;
 
 `mapping (address => bool) public isInOpenMakeOrder`
@@ -1347,13 +1337,11 @@ A public mapping a ZeroEx order identifier to a ZeroEx Order struct.
 A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
 &nbsp;
 
-
-
 #### Modifiers
 
 `delegateInternal()`
 
-A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol`. This ensures that only the current contract can call a function implementing this modifier.
+A modifier which requires that the caller (`msg.sender`) is the current contract `Trading.sol` before the implementing function executes its functionality. This ensures that only the current contract can call a function implementing this modifier.
 &nbsp;
 
 #### Public functions
@@ -1363,7 +1351,7 @@ A modifier which requires that the caller (`msg.sender`) is the current contract
 The contracts fallback function making the contract able to receive ETH sent to the contract without a funciton call.
 &nbsp;
 
-`function isOrderExpired(address exchange, address asset) view returns (bool)`
+`function isOrderExpired(address exchange, address asset) public view returns (bool)`
 
 This public view function returns a boolean indicating whether an order for the asset token and exchange provided is currently expired.
 &nbsp;
@@ -1390,19 +1378,20 @@ This is the fund's general interface to each registered exchange for trading ass
 `function addOpenMakeOrder(
     address ofExchange,
     address sellAsset,
+    address buyAsset,
     uint orderId,
     uint expirationTime
-) delegateInternal`
+) public delegateInternal`
 
-This function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. If the `expirationTime` is set to "0", the order's expiration time is set to `ORDER_LIFESPAN`. The expiration time is required to be greater that the current `block.timestamp` and less than or equal to the sum of the `ORDER_LIFESPAN` and `block.timestamp`. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping.
+This public function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. If the `expirationTime` is set to "0", the order's expiration time is set to `ORDER_LIFESPAN`. The expiration time is required to be greater that the current `block.timestamp` and less than or equal to the sum of the `ORDER_LIFESPAN` and `block.timestamp`. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping.
 &nbsp;
 
 `function removeOpenMakeOrder(
     address exchange,
     address sellAsset
-) delegateInternal`
+) public delegateInternal`
 
-This function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
+This public function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
 &nbsp;
 
 `function orderUpdateHook(
@@ -1411,19 +1400,19 @@ This function can only be called from within the current contract. The function 
     UpdateType updateType,
     address[2] orderAddresses,
     uint[3] orderValues
-) delegateInternal`
+) public delegateInternal`
 
-This function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
+This public function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
 &nbsp;
 
-`function updateAndGetQuantityBeingTraded(address _asset) returns (uint)`
+`function updateAndGetQuantityBeingTraded(address _asset) public returns (uint)`
 
-This function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
+This public function returns the sum of the quantity of the provided asset token address held by the current contract and the quantity of the provided asset token held across all registered exchanges in the fund's make orders. The sum returned excluded quantities in make orders where the exchange does not take custody of the tokens.
 &nbsp;
 
-`function updateAndGetQuantityHeldInExchange(address ofAsset) returns (uint)`
+`function updateAndGetQuantityHeldInExchange(address ofAsset) public returns (uint)`
 
-This function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
+This public function sums and returns all quantities of the provided asset token address in make orders across all registered exchanges, excluding, however, quantities in make orders where the exchange does not take custody of the tokens, but uses the ERC-20 "approve" functionality. The rationale is that token quantities in "approve" status are not actually held by the exchange. The function also maintains the `exchangesToOpenMakeOrders` and `isInOpenMakeOrder` mappings.
 &nbsp;
 
 `function returnAssetToVault(address _token) public`
@@ -1441,22 +1430,22 @@ This function adds the data provided by the parameters to the orderIdToZeroExOrd
 This public function returns all asset tokens represented by the `_tokens` address array parameter and returns the asset tokens to the water<b>melon</b> fund's vault.
 &nbsp;
 
-`function getExchangeInfo() view returns (address[], address[], bool[])`
+`function getExchangeInfo() public view returns (address[], address[], bool[])`
 
 This public view function returns two address arrays and one boolean array with all corresponding registered exchange contract addresses, adapter contract addresses and the `takesCustoday` indicators.
 &nbsp;
 
-`function getOpenOrderInfo(address ofExchange, address ofAsset) view returns (uint, uint, uint)`
+`function getOpenOrderInfo(address ofExchange, address ofAsset) public view returns (uint, uint, uint)`
 
 This public view function takes the exchange contract address and an asset token contract address and returns three integers: the order identifier, the order expiration time and the order index.
 &nbsp;
 
-`function getOrderDetails(uint orderIndex) view returns (address, address, uint, uint)`
+`function getOrderDetails(uint orderIndex) public view returns (address, address, uint, uint)`
 
 This public view function takes the order index as a parameter and returns the maker asset token contract address, the taker asset token contract address, the maker asset token quantity and the taker asset token quantity.
 &nbsp;
 
-`function getZeroExOrderDetails(bytes32 orderId) view returns (LibOrder.Order)`
+`function getZeroExOrderDetails(bytes32 orderId) public view returns (LibOrder.Order)`
 
 This public view function takes the order identifier as a parameter and returns the corresponding populated `Order` struct.
 &nbsp;
@@ -1593,14 +1582,14 @@ A mapping of bytes4 to an `Entry` struct.
 
 #### Public Functions
 
-`function registerBatch(bytes4[] sig, address[] ofPolicies) public`
+`function registerBatch(bytes4[] sig, address[] _policies) public auth`
 
-This function requires equal length of both array parameters. The function then iterates over the `sig` array calling the register() function, providing each function signature hash and the corresponding Policy contract address.  
+This function requires that the caller is the `owner` or the current contract. This public function requires equal length of both array parameters. The function then iterates over the `sig` array calling the register() function, providing each function signature hash and the corresponding Policy contract address.  
 &nbsp;
 
-`function register(bytes4 sig, address ofPolicy) public`
+`function register(bytes4 sig, address _policy) public auth`
 
-This function first ascertains whether the Policy being registered with the PolicyManager is to be executed as a pre- or post condition and then pushes the Policy with the corresponding signature hash on to the respective pre or post Policy array within the policies mapping. Once a Policy is registered, the condition defined within the Policy will be the standard against which the policy-registered function's consequential state changes will be tested. If the state changes pass the policy test, the function will continue execution unhindered and the state changes, e.g. a trade and the respective changes to token allocation) will become final as part of a transaction in a mined block. If the state changes do not pass the policy test, the transaction will revert and no state change will be affected.
+This function requires that the caller is the `owner` or the current contract. This public function first ascertains whether the Policy being registered with the PolicyManager is to be executed as a pre- or post condition and then pushes the Policy with the corresponding signature hash on to the respective pre or post Policy array within the policies mapping. Once a Policy is registered, the condition defined within the Policy will be the standard against which the policy-registered function's consequential state changes will be tested. If the state changes pass the policy test, the function will continue execution unhindered and the state changes, e.g. a trade and the respective changes to token allocation) will become final as part of a transaction in a mined block. If the state changes do not pass the policy test, the transaction will revert and no state change will be affected.
 &nbsp;
 
 `function getPoliciesBySig(bytes4 sig) public view returns (address[], address[])`
@@ -1738,7 +1727,7 @@ In the water<b>melon</b> Protocol, the term "Compliance" revolves around the spe
 
 The main use case for the water<b>melon</b> Fund Compliance module is the ability to create and maintain a whitelist for specific addresses. That is, the Investment Manager can explicitly define specific addresses which will then have the ability to subscribe to the water<b>melon</b> Fund.
 
-Note that any listing of an address on the Compliance module whitelist only impacts the Investor's _ability_ to subscribe to the water<b>melon</b> Fund. An existing investment from a specific address will remain invested irrespective of any change in that address's whitelist status. The current implementation does not affect an address status after the fact. Blacklisting does not affect an invested address's current invested status or ability to redeem, but will prevent future subscriptions. The whitelist can be seen as a positive filter, creating a known universe of allowed investor addresses. Investor addresses can be added to- or removed from either list, individually or in batch by the fund manager (`owner`).
+Note that any listing of an address on the Compliance module whitelist only impacts the Investor's _ability_ to subscribe to the water<b>melon</b> Fund. An existing investment from a specific address will remain invested irrespective of any change in that address's whitelist status. The current implementation does not affect an address status after the fact. Whitelist removal does not affect an invested address's current invested status or ability to redeem, but will prevent future subscriptions. The whitelist can be seen as a positive filter, creating a known universe of allowed investor addresses. Investor addresses can be added to- or removed from the whitelist, individually or in batch by the fund manager (`owner`).
 
 ### Future Directions
 
@@ -1748,17 +1737,11 @@ Hard Close - A fund refuses all new investment subscriptions, usually due to cap
 
 Soft Close - A fund refuses investment subscriptions new Investors, but accepts investment top-ups from existing Investors (addresses).
 
-## Whitelist.sol
-
-#### Inherits from
-
-Policy, DSAuth (link)
-
-&nbsp;
+## UserWhitelist.sol
 
 #### Description
 
-This contract defines a positive filter list, against which subscribing addresses are verified for membership. Member addresses are allowed for subscription.
+This contract defines a positive filter list, against which subscribing addresses are verified for membership. Member addresses are permitted to subscribe to the fund.
 
 #### Inherits from
 
@@ -1768,7 +1751,7 @@ Policy, DSAuth (links)
 
 #### On Construction
 
-The Whitelist contract requires an array of addresses which are added to the `whitelisted` mapping.
+The UserWhitelist contract requires an array of addresses (`_preApproved`) which are added to the `whitelisted` mapping.
 
 &nbsp;
 
@@ -1790,29 +1773,35 @@ None.
 
 &nbsp;
 
+#### Events
+
+`event ListAddition(address indexed who)`
+
+This event is triggered when an address is added to the `whitelisted` mapping. The event logs the newly added address.
+&nbsp;
+
+`event ListRemoval(address indexed who)`
+
+This event is triggered when an address is removed from the `whitelisted` mapping. The event logs the removed address.
+&nbsp;
+
 #### Public State Variables
 
 `mapping (address => bool) whitelisted`
 
 Mapping which designates an investor address as being eligible to subscribe to the fund.
-
 &nbsp;
 
 #### Public Functions
 
-`function Whitelist(address[] _preApproved) public`
-
-Constructor function which enables the bulk addition of many addresses designated as eligible for subscription to the fund.
-&nbsp;
-
 `function addToWhitelist(address _who) public auth`
 
-This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `true`.
+This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `true`, then emits the `ListAddition()` event logging the newly added address.
 &nbsp;
 
 `function removeFromWhitelist(address _who) public auth`
 
-This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `false`. Addresses which had previously subscribed and are invested can not subsequently subscribe further amounts.
+This function requires that the caller is the `owner` or the current contract. This function sets the `whitelisted` mapping for the provided address to `false`. Addresses which had previously subscribed and are invested can not subsequently subscribe further amounts. Finally, the function emits the `ListRemoval()` event logging the removed address.
 &nbsp;
 
 `function batchAddToWhitelist(address[] _members) public auth`
@@ -1830,89 +1819,9 @@ This function requires that the caller is the `owner` or the current contract. T
 This function is called by the Policy Manager when functions registered for this specific policy are called. See further documentation under Policy Manager (link).
 &nbsp;
 
-`function position() external view returns (uint)`
+`function position() external view returns (Applied)`
 
-This function is called by the Policy Manager to determine whether the policy should be executed and evaluated as a pre-condition (0) or as a post-condition (1). Compliance contracts are called as a pre-condition to subscription and therefore return 0 during the whitelist compliance check. See further documentation under Policy Manager (link).
-&nbsp;
-
-## Blacklist.sol
-
-#### Description
-
-This contract defines a negative filter list, against which subscribing addresses are verified for membership. Member addresses are disallowed for subscription.
-&nbsp;
-
-#### Inherits from
-
-Policy, DSAuth (links)
-
-&nbsp;
-
-#### On Construction
-
-The Blacklist contract requires an array of addresses which are added to the `blacklisted` mapping.
-&nbsp;
-
-#### Structs
-
-None.
-
-&nbsp;
-
-#### Enums
-
-None.
-
-&nbsp;
-
-#### Modifiers
-
-None.
-
-&nbsp;
-
-#### Public State Variables
-
-`mapping (address => bool) blacklisted`
-
-Mapping which designates an investor address as being ineligible to subscribe to the fund.
-&nbsp;
-
-#### Public functions
-
-`function Blacklist(address[] _preBlacklisted) public`
-
-Constructor function which enables the bulk addition of many addresses designated as ineligible for subscription to the fund.
-&nbsp;
-
-`function addToBlacklist(address _who) public auth`
-
-This function requires that the caller is the `owner` or the current contract. This function sets `blacklisted` mapping for the provided address to `true`.
-&nbsp;
-
-`function removeFromBlacklist(address _who) public auth`
-
-This function requires that the caller is the `owner` or the current contract. This function sets the `blacklisted` mapping for the provided address to `false`. Addresses which previously were denied subscription would now be permitted.
-&nbsp;
-
-`function batchAddToBlacklist(address[] _members) public auth`
-
-This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `blacklisted` mapping to be set to `true`.
-&nbsp;
-
-`function batchRemoveFromWhitelist(address[] _members) public auth`
-
-This function requires that the caller is the `owner` or the current contract. The function, with one transaction, enables multiple addresses in the `blacklisted` mapping to be set to `false`. Addresses which previously were denied subscription would now be permitted.
-&nbsp;
-
-`function rule(bytes4 sig, address[5] addresses, uint[3] values, bytes32 identifier) external view returns (bool)`
-
-This function is called by the Policy Manager when functions registered for this specific policy are called. See further documentation under Policy Manager (link).
-&nbsp;
-
-`function position() external view returns (uint)`
-
-This function is called by the Policy Manager to determine whether the policy should be executed and evaluated as a pre-condition (0) or as a post-condition (1). Compliance contracts are called as a pre-condition to subscription and therefore return 0 during the blacklist compliance check. See further documentation under Policy Manager (link).
+This function is called by the Policy Manager to determine whether the policy should be executed and evaluated as a pre-condition (`Applied.pre`) or as a post-condition (`Applied.post`). Compliance contracts are called as a pre-condition to subscription and therefore return the enum `Applied.pre` during the whitelist compliance check. See further documentation under Policy Manager (link).
 &nbsp;
 
 ---
