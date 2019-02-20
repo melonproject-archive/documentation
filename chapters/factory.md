@@ -60,9 +60,9 @@ This public mapping state variable maps an address to boolean. It is used to det
 
 #### Public Functions
 
-`function isInstance(address _child) public returns (bool)`
+`function isInstance(address _child) public view returns (bool)`
 
-This public function returns a boolean indicating whether the address provided corresponds to a contract created by the `Factory` contract.
+This public view function returns a boolean indicating whether the address provided corresponds to a contract created by the `Factory` contract.
 &nbsp;
 
 ## FundFactory.sol
@@ -134,8 +134,8 @@ The condition is evaluated prior to executing the implementing function's functi
 
 NewFund()
 
-    `address manager` - The address of the water<b>melon</b> fund's manager.
-    `address hub` - The address of the water<b>melon</b> fund's `hub`.
+    `address indexed manager` - The address of the water<b>melon</b> fund's manager.
+    `address indexed hub` - The address of the water<b>melon</b> fund's `hub`.
     `address[12] routes` - An array of 12 address representing relevant water<b>melon</b> fund component addresses.
 
 This event is emitted when the FundFactory creates a new fund. The event logs the parameters listed above.

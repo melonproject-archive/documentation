@@ -213,7 +213,7 @@ This contract is the exchange adapter to the water<b>melon</b> Engine and serves
 
 #### Inherits from
 
-ExchangeAdapter, DSMath (link)
+DSMath, TokenUser, ExchangeAdapter (link)
 
 &nbsp;
 
@@ -274,12 +274,6 @@ The following parameters are used by the function:
 
 This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the water<b>melon</b> fund. The function calls the water<b>melon</b> Engine to get the corresponding quantity of ETH. The water<b>melon</b> Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the water<b>melon</b> fund and transferred to the water<b>melon</b> fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
 &nbsp;
-
-`function () payable`
-
-This function is the adapter contract's fallback function, which makes the contract able to receive ETH sent directly to the contract address.
-&nbsp;
-
 
 ## EthfinexAdapter.sol
 
