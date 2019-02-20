@@ -84,7 +84,7 @@ None.
 
 #### Modifiers
 
-`modifier amguPayable(uint deductFromRefund)`
+`modifier amguPayable(bool deductIncentive)`
 
 This modifier determines the initial gas amount. The functionality in the function implementing this modifier is then executed. Thereafter, the AMGU (Asset Management Gas Unit) price and the MLN token market price is retrieved from the water<b>melon</b> Engine and the price feed, respectively. The modifier calculates the amount of ETH required for the payment of AMGU. Transactions with insufficient ETH amounts to pay the AMGU are reverted. ETH due as AMGU is paid to the water<b>melon</b> Engine and any excess ETH above the Ethereum gas costs and AMGU costs are refunded to the `msg.sender`.
 &nbsp;
@@ -118,6 +118,11 @@ This public view function returns the address of the MLN token contract.
 This public view function returns the address of the price feed contract.
 &nbsp;
 
+`function registry() view returns (address)`
+
+This public view function returns the address of the registry contract.
+&nbsp;
+
 ## Engine.sol
 
 #### Description
@@ -133,8 +138,7 @@ DSMath, DSAuth (link)
 
 #### On Construction
 
-The constructor for this contract requires the parameter `_delay` which specifies the number of seconds, setting the `THAWING_DELAY` state variable to this value. Simultaneously, the `lastThaw`
-state variable is set to the current `block.timestamp` value.
+The constructor for this contract requires the parameters `_delay` and  `_postDeployOwner`.  The parameter `_delay`  specifies the number of delay seconds, setting the `THAWING_DELAY` state variable to this value. The constructor sets the `lastThaw` state variable to the current `block.timestamp` value. Finally, the engine contract's owner is set to the `_postDeployOwner` address provided.
 &nbsp;
 
 #### Structs
@@ -170,6 +174,16 @@ This event is triggered when the `setAmguPrice()` function is called, logging th
 `event Thaw(uint amount)`
 
 This event is triggered when the `thaw()` function is called, logging the thawed ETH `amount`.
+&nbsp;
+
+event AmguPaid(uint amount)
+
+This event is triggered when the `payAmguInEther()` function is called, logging the ETH `amount`.
+&nbsp;
+
+event Burn(uint amount)
+
+This event is triggered when the `sellAndBurnMln()` function is called, logging the burned MLN `amount`.
 &nbsp;
 
 #### Public State Variables
@@ -217,39 +231,53 @@ This public state variable defines the decimal precision of the MLN token. It is
 
 `uint public amguPrice`
 
-This public state variable defines the AMGU price.
+A public state variable specifying the current setting for the Asset Management Gas Unit (AMGU) price. This setting can be changed at the discretion of the water<b>melon</b> Technical Council (MTC).
+
+`uint public totalEtherConsumed`
+
+This public state variable keeps a running total of all ETH sent to the engine contract.
+&nbsp;
+
+`uint public totalAmguConsumed`
+
+This public state variable keeps a running total of all amgu consumed by the engine contract.
+&nbsp;
+
+`uint public totalMlnBurned`
+
+This public state variable keeps a running total of all MLN burned by the engine contract.
 &nbsp;
 
 #### Public Functions
 
-`function setRegistry(address _registry) auth`
+`function setRegistry(address _registry) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function sets the `registry` state variable to the contract with the address specified by the parameter provided and further sets the `priceSource` and `mlnToken` state variables. Finally the function emits the `RegistryChange()` event, logging `registry`.
+This external function requires that the caller is the `owner` or the current contract. The function sets the `registry` state variable to the contract with the address specified by the parameter provided and further sets the `priceSource` and `mlnToken` state variables. Finally the function emits the `RegistryChange()` event, logging `registry`.
 &nbsp;
 
-`function setAmguPrice(uint _price) auth`
+`function setAmguPrice(uint _price) external auth`
 
-This function requires that the caller is the `owner` or the current contract. The function sets the `amguPrice` state variable to the value specified by the parameter provided. Finally the function emits the `SetAmguPrice()` event, logging `_price`.
+This external function requires that the caller is the `owner` or the current contract. The function sets the `amguPrice` state variable to the value specified by the parameter provided. Finally the function emits the `SetAmguPrice()` event, logging `amguPrice`.
 &nbsp;
 
-`function getAmguPrice() view returns (uint)`
+`function getAmguPrice() public view returns (uint)`
 
 This public view function returns the value of the `amguPrice` state variable.
 &nbsp;
 
-`function premiumPercent() view returns (uint)`
+`function premiumPercent() public view returns (uint)`
 
 This public view function determines the market price premium to be offered when the water<b>melon</b> Engine buys MLN tokens. Please see the premium schedule above. The function returns an integer representing the premium percentage, e.g. a return value of "5" represents "5%".
 &nbsp;
 
-`function payAmguInEther() public payable`
+`function payAmguInEther() external payable`
 
-This public payable function is called while sending ETH. The function requires that the function caller must either be the fund managed by msg.sender or the fund factory used in the creation of the manager's fund. The function accepts the ETH amgu payment and increments the `frozenEther` state variable with the ETH value sent in the function call transaction.
+This external payable function is called while sending ETH. The function requires that the function caller must either be the fund managed by msg.sender or the fund factory used in the creation of the manager's fund. The function accepts the ETH amgu payment and increments the `frozenEther` state variable with the ETH value sent in the function call transaction. Finally, the function emits the `AmguPaid()` event, logging `amount` paid.
 &nbsp;
 
-`function thaw() public`
+`function thaw() external`
 
-This public function allocates frozen ETH (`frozenEther`) to liquid ETH (`liquidEther`) after the specified `THAWING_DELAY`. The function requires that sufficient time (minimally the `THAWING_DELAY`) has passed since the previous thaw. The function then requires that the quantity of frozen ETH is positive. The function then sets the `lastThaw` state variable to the current `block.timestamp`. The `liquidEther` state variable is incremented with the `frozenEther` state variable value, the `Thaw()` event is emitted, logging `frozenEther` value and finally, the `frozenEther` state variable is set to "0". Note: this function is independently and externally called. The `lastThaw` is only reset when this function is called, regardless of whether the previous `THAWING_DELAY` has expired.
+This external function allocates frozen ETH (`frozenEther`) to liquid ETH (`liquidEther`) after the specified `THAWING_DELAY`. The function requires that sufficient time (minimally the `THAWING_DELAY`) has passed since the previous thaw. The function then requires that the quantity of frozen ETH is positive. The function then sets the `lastThaw` state variable to the current `block.timestamp`. The `liquidEther` state variable is incremented with the `frozenEther` state variable value, the `Thaw()` event is emitted, logging `frozenEther` value and finally, the `frozenEther` state variable is set to "0". Note: this function is independently and externally called. The `lastThaw` is only reset when this function is called, regardless of whether the previous `THAWING_DELAY` has expired.
 &nbsp;
 
 `function enginePrice() public view returns (uint)`
@@ -262,7 +290,7 @@ This public view function returns the premium-adjusted ETH/MLN rate based on the
 This public view function returns the premium-adjusted quantity of ETH to be delivered to the water<b>melon</b> fund in return for selling the `mlnAmount` quantity of the MLN token.
 &nbsp;
 
-`function sellAndBurnMln(uint mlnAmount) public`
+`function sellAndBurnMln(uint mlnAmount) external`
 
-This public function requires that the fund is the msg.sender, ensuring that only water<b>melon</b> funds may transact with the water<b>melon</b> Engine and benefit from the MLN token premium. The function then requires that approved MLN tokens be transferred from the water<b>melon</b> fund to the water<b>melon</b> Engine. The function calls `ethPayoutForMlnAmount()` to get the current quantity of ETH to send to the transacting water<b>melon</b> fund. This quantity is required to be positive and that a sufficient quantity of liquid ETH is held by the water<b>melon</b> Engine. Finally, the water<b>melon</b> Engine transfers the ETH to the transacting water<b>melon</b> fund and burns the received MLN tokens.
+This external function requires that the fund is the msg.sender, ensuring that only water<b>melon</b> funds may transact with the water<b>melon</b> Engine and benefit from the MLN token premium. The function then requires that approved MLN tokens be transferred from the water<b>melon</b> fund to the water<b>melon</b> Engine. The function calls `ethPayoutForMlnAmount()` to get the current quantity of ETH to send to the transacting water<b>melon</b> fund. This quantity is required to be positive and that a sufficient quantity of liquid ETH is held by the water<b>melon</b> Engine. The water<b>melon</b> Engine transfers the ETH to the transacting water<b>melon</b> fund and burns the received MLN tokens. Finally, the function emits the `Burn()` event, logging `mlnAmount` burned.
 &nbsp;
