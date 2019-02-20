@@ -2,14 +2,14 @@
 
 ## General
 
-The Registry contract is a singleton contract for all funds deployed under a specific water<b>melon</b> protocol version.
+The Registry contract is a singleton contract for all Version contracts. Each specific water<b>melon</b> protocol Version deploys funds generated of that specific version.
 &nbsp;
 
 ## Registry.sol
 
 #### Description
 
-The Registry contract stores, manages and provides functionality to maintain all relevant data pertaining to individual asset tokens and individual exchanges eligible for investment and operation within a specific water<b>melon</b> Protocol version. The contract provides functionality to define, add, update or remove asset tokens and exchanges.
+The Registry contract stores, manages and provides functionality to maintain all relevant data pertaining to individual asset tokens and individual exchanges eligible for investment and operation within the water<b>melon</b> Protocol. The contract provides functionality to define, add, update or remove asset tokens and exchanges.
 &nbsp;
 
 #### Inherits from
