@@ -275,6 +275,151 @@ The following parameters are used by the function:
 This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the water<b>melon</b> fund. The function calls the water<b>melon</b> Engine to get the corresponding quantity of ETH. The water<b>melon</b> Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the water<b>melon</b> fund and transferred to the water<b>melon</b> fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
 &nbsp;
 
+## ZeroExV2Adapter.sol
+
+#### Description
+
+This contract is the exchange adapter to the 0x v2 Exchange contract and serves as the interface from a water<b>melon</b> fund to the 0x v2 Exchange for purposes of exchange of asset tokens listed on the 0x v2 Exchange.
+&nbsp;
+
+#### Inherits from
+
+ExchangeAdapter, DSMath (link)
+
+&nbsp;
+
+#### On Construction
+
+None.
+
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+None.
+
+&nbsp;
+
+#### Events
+
+None.
+
+&nbsp;
+
+#### Public State Variables
+
+None.
+
+&nbsp;
+
+#### Public Functions
+
+`function makeOrder(
+    address targetExchange,
+    address[6] orderAddresses,
+    uint[8] orderValues,
+    bytes32 identifier,
+    bytes wrappedMakerAssetData,
+    bytes takerAssetData,
+    bytes signature
+) onlyManager notShutDown`
+
+Please see parameter descriptions above.
+
+This public function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function creates a make order on the 0x v2 exchange contract. It ensures that the maker asset token is not currently listed in any other open make order the water<b>melon</b> fund may have on any exchange. The taker asset token is preliminarily added to the water<b>melon</b> fund's owned assets and an open make order is added to the water<b>melon</b> fund's internal order tracking. Finally, the order is pre-signed on the 0x v2 exchange contract authorizing manager's signature on behalf of the trading contract.
+&nbsp;
+
+`function cancelOrder(
+    address targetExchange,
+    address[6] orderAddresses,
+    uint[8] orderValues,
+    bytes32 identifier,
+    bytes wrappedMakerAssetData,
+    bytes takerAssetData,
+    bytes signature
+) onlyCancelPermitted(targetExchange, orderAddresses[2])`
+
+Please see parameter descriptions above.
+
+This public function cancels an existing order on the 0x v2 exchange contract by calling the 0x v2 exchange contract's `cancelOrder()` function. The function applies the `onlyCancelPermitted` modifier, allowing the cancel to only be submitted under one of these conditions: the fund manager cancels the order, the fund is shut down or the order has expired. The asset token is finally removed from the water<b>melon</b> fund's internal order tracking.
+&nbsp;
+
+`function getOrder(
+    address onExchange,
+    uint id,
+    address makerAsset)
+view returns (
+    address,
+    address,
+    uint,
+    uint)`
+
+This public view function returns the relevant order information (maker asset token address, taker asset token address, maker asset token quantity and taker asset token quantity) given the exchange contract address, the order identifier and the maker asset token contract address parameters. The function can determine whether the order has been partially or fully filled (returning the remaining maker asset token quantity and the remaining taker asset token quantity)
+&nbsp;
+
+`function approveTakerAsset(
+    address targetExchange,
+    address takerAsset,
+    bytes takerAssetData,
+    uint fillTakerQuantity)
+internal`
+
+This internal view function withdraws fillTakerQuantity amount of the taker asset from the vault and approves the same amount to the asset proxy
+&nbsp;
+
+`function approveMakerAsset(
+    address targetExchange,
+    address makerAsset,
+    bytes makerAssetData,
+    uint makerQuantity)
+internal`
+
+This internal view function withdraws makerQuantity amount of the maker asset from the vault and approves the same amount amount to the asset proxy
+&nbsp;
+
+`function constructOrderStruct(
+    address[6] orderAddresses,
+    uint[8] orderValues,
+    bytes makerAssetData,
+    bytes takerAssetData)
+internal
+view
+    returns (LibOrder.Order memory order)`
+
+This internal view function returns a populated `order` struct based on the parameter values provided.
+&nbsp;
+
+`function getAssetProxy(
+    address targetExchange,
+    bytes assetData)
+internal
+view
+    returns (address assetProxy)`
+
+This internal view function returns the address of the asset proxy given the address of the Ethfinex exchange contract and asset data provided.
+&nbsp;
+
+`function getAssetAddress(
+    bytes assetData)
+internal
+view
+    returns (address assetAddress)`
+
+This internal view function returns the address of the asset given the asset data provided.
+&nbsp;
+
 ## EthfinexAdapter.sol
 
 #### Description
