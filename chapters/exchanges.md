@@ -268,9 +268,11 @@ None.
 The following parameters are used by the function:
 
 `targetExchange` - The address of the water<b>melon</b> Engine exchange contract.
-`orderAddresses[0]` - The address of the MLN token contract (maker asset token).
-`orderAddresses[1]` - The address of the WETH token contract (taker asset token).
-`orderValues[0]` - The quantity of the MLN token, expressed in 18 decimal precision.
+`orderAddresses[2]` - The address of the WETH token contract (maker asset token).
+`orderAddresses[3]` - The address of the MLN token contract (taker asset token).
+`orderValues[0]` - The min quantity of ETH to get back from the Engine.
+`orderValues[1]` - The quantity of the MLN token, expressed in 18 decimal precision.
+`orderValues[6]` - Same as orderValues[1].
 
 This function requires that the `msg.sender` is the fund manager and that the fund is not shut down. The function then requires that desired MLN token trade quantity be approved by the water<b>melon</b> fund. The function calls the water<b>melon</b> Engine to get the corresponding quantity of ETH. The water<b>melon</b> Engine function `sellAndBurnMln` is called, as the fund transfers MLN for WETH, as the WETH is received by the water<b>melon</b> fund and transferred to the water<b>melon</b> fund's vault, `ownedAssets` is updated with the new position if required and finally, the order status is updated.
 &nbsp;
