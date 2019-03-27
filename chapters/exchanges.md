@@ -184,9 +184,9 @@ The function takes the opposite side of an existing make order on a specific exc
 
 This function must ensure that:
 
-    the `msg.sender` is the order owner or the order has expired or the fund is shut down,
-    the order is removed from the fund-internal order-tracking array,
-    the order on the exchange is canceled.
+  the `msg.sender` is the order owner or the order has expired or the fund is shut down,
+  the order is removed from the fund-internal order-tracking array,
+  the order on the exchange is canceled.
 
 The function cancels and removes all order information within the fund and on the exchange where it existed. The function on the base contract remains unimplemented and reverts.
 &nbsp;
