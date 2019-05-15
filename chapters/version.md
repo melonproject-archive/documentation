@@ -2,7 +2,7 @@
 
 ## General
 
-The Version contract is a singleton contract for all funds deployed under a specific water<b>melon</b> protocol version. All Factory contracts are exclusive to the Version contract and cannot be changed once set.
+The Version contract is a singleton contract for all funds deployed under a specific Melon protocol version. All Factory contracts are exclusive to the Version contract and cannot be changed once set.
 
 &nbsp;
 
@@ -10,7 +10,7 @@ The Version contract is a singleton contract for all funds deployed under a spec
 
 #### Description
 
-The Version contract inherits from FundFactory and is the single, exclusive FundFactory contract for a specific water<b>melon</b> Protocol version. The Version contract is the contract creator for all funds of the specific water<b>melon</b> Protocol version.
+The Version contract inherits from FundFactory and is the single, exclusive FundFactory contract for a specific Melon Protocol version. The Version contract is the contract creator for all funds of the specific Melon Protocol version.
 
 #### Inherits from
 

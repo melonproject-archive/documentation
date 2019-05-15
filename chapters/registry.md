@@ -2,14 +2,14 @@
 
 ## General
 
-The Registry contract is a singleton contract for all Version contracts. Each specific water<b>melon</b> protocol Version deploys funds generated of that specific version.
+The Registry contract is a singleton contract for all Version contracts. Each specific Melon protocol Version deploys funds generated of that specific version.
 &nbsp;
 
 ## Registry.sol
 
 #### Description
 
-The Registry contract stores, manages and provides functionality to maintain all relevant data pertaining to individual asset tokens and individual exchanges eligible for investment and operation within the water<b>melon</b> Protocol. The contract provides functionality to define, add, update or remove asset tokens and exchanges.
+The Registry contract stores, manages and provides functionality to maintain all relevant data pertaining to individual asset tokens and individual exchanges eligible for investment and operation within the Melon Protocol. The contract provides functionality to define, add, update or remove asset tokens and exchanges.
 &nbsp;
 
 #### Inherits from
@@ -147,9 +147,9 @@ This event is triggered when the native asset token is migrated to a new contrac
 
 `event EngineChange()`
 
-  `address indexed engine` - The address of the new water<b>melon</b> Engine contract.
+  `address indexed engine` - The address of the new Melon Engine contract.
 
-This event is triggered when the water<b>melon</b> Engine is migrated to a new contract. The parameter listed above are provided with the event.
+This event is triggered when the Melon Engine is migrated to a new contract. The parameter listed above are provided with the event.
 &nbsp;
 
 #### Public State Variables
@@ -191,7 +191,7 @@ This public state variable mapping maps a Fee contract `address` to a boolean in
 
 `mapping (address => address) public fundsToVersions`
 
-This public state variable mapping maps a Version contract `address` to a water<b>melon</b> fund address.
+This public state variable mapping maps a Version contract `address` to a Melon fund address.
 &nbsp;
 
 `mapping (bytes32 => bool) public versionNameExists`
@@ -211,7 +211,7 @@ This public constant state variable represents the maximum quantity of registere
 
 `uint public constant MAX_FUND_NAME_BYTES = 66`
 
-This public constant state variable represents the maximum water<b>melon</b> fund name size in bytes. The maximum is set to 66 bytes.
+This public constant state variable represents the maximum Melon fund name size in bytes. The maximum is set to 66 bytes.
 &nbsp;
 
 `address public priceSource`
@@ -221,7 +221,7 @@ This public state variable is the address of the current, active price source co
 
 `address public mlnToken`
 
-This public state variable is the address of the water<b>melon</b> token contract.
+This public state variable is the address of the Melon token contract.
 &nbsp;
 
 `address public nativeAsset`
@@ -231,7 +231,7 @@ This public state variable is the address of the native asset token contract.
 
 `address public engine`
 
-This public state variable is the address of the water<b>melon</b> Engine contract.
+This public state variable is the address of the Melon Engine contract.
 &nbsp;
 
 `address public ethfinexWrapperRegistry`  
@@ -446,7 +446,7 @@ This public view function returns an exhaustive array of addresses of all regist
 
 `function isFund(address _who) view returns (bool)`
 
-This public view function returns a boolean indicating whether the address provided is a water<b>melon</b> fund contract.
+This public view function returns a boolean indicating whether the address provided is a Melon fund contract.
 &nbsp;
 
 `function isFundFactory(address _who) view returns (bool)`
