@@ -1,0 +1,59 @@
+= @melonproject/protocol documentation
+Willie Laubenheimer <willie@m1d4s.tech>
+:toc:
+:revnumber: v0.1
+:revdate: 29.05.2019
+:revremark: asciidoc
+
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+{empty} +
+
+This documentation is at the stage of commit  `7e698f6` from the @melonproject/documentation repository on Github.
+
+Version: {revnumber}
+
+Version Date: {revdate}
+
+Version Notes: {revremark}
+
+<<<
+
+include::README.adoc[]
+
+include::./chapters/asset.adoc[]
+
+include::./chapters/definitions.adoc[]
+
+include::./chapters/exchanges.adoc[]
+
+include::./chapters/factory.adoc[]
+
+include::./chapters/fund.adoc[]
+
+include::./chapters/governance.adoc[]
+
+include::./chapters/melon_engine.adoc[]
+
+include::./chapters/prices.adoc[]
+
+include::./chapters/registry.adoc[]
+
+include::./chapters/version.adoc[]

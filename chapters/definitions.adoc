@@ -1,0 +1,594 @@
+[[definitions]]
+Definitions
+-----------
+
+[[melon-fund]]
+Melon Fund
+~~~~~~~~~~
+
+A Melon Fund is an Ethereum smart contract deployed to the Ethereum
+blockchain. It is the core smart contract of the Melon Protocol. The
+Melon Fund has one and only one owner. A specific Melon Fund can be
+canonically referenced by its contract address. The Melon Fund provides
+the essential functionality for minimalistic investment management: fund
+accounting, fee calculation, share issuance, custody, security, asset
+segregation and the division of responsibilities.
+
+[[stakeholders]]
+Stakeholders
+~~~~~~~~~~~~
+
+[[owner]]
+Owner
++++++
+
+`owner` in the Solidity context refers to the address retaining special
+privileges regarding the operation of the smart contract.
+
+[[investment-manager]]
+Investment Manager
+++++++++++++++++++
+
+Investment Manager refers to the individual entitled to exercise
+discretionary portfolio management authority over the assets within the
+Melon Fund. As defined by the Melon Protocol, the Investment Manager is
+necessarily also the creator and `owner` of the Melon Fund.
+
+[[investor]]
+Investor
+++++++++
+
+Investor refers to an individual(s) who have successfully transferred
+eligible crypto assets, i.e. subscribed, to the Melon Fund through the
+requestInvestment() mechanism and holding Melon Fund share tokens in
+their address. Investors’ addresses will have a quantity of Melon Fund
+shares commensurate with their subscription(s).
+
+[[actions]]
+Actions
+~~~~~~~
+
+[[redemption]]
+Redemption
+++++++++++
+
+Redemption refers to an action taken by an Investor invoking the
+`requestRedemption()` function of the Melon Fund. A successful
+redemption results in the Investor receiving the Melon Fund NAV
+proportional to their share quantity at the time of redemption and
+Investor share tokens will be destroyed. Redemption requests function
+analogously to a limit sell order, in that the Investor specifies a
+redemption price, but must wait for two price feed update cycles before
+the redemption is actually executed. The redemption execution will fail
+if the portfolio holds insufficient amounts of the redemption asset
+token or if the price of the redemption asset token has moved below the
+Investor’s redemption request price, i.e. to the detriment of the
+Investor. Investors can also elect to redeem their pro-rata share of the
+individual underlying assets in the Melon Fund directly as a ``slice''
+of the fund, i.e. a redemption-in-kind.
+
+[[investmentsubscription]]
+Investment/Subscription
++++++++++++++++++++++++
+
+Subscriptions refers to an action taken by an Investor invoking the
+`requestInvestment()` function of the Melon Fund. Subscription requests
+function analogously to a limit buy order, in that the Investor
+specifies subscription price, but must wait for two price feed update
+cycles before the investment is actually executed and accepted by the
+Melon Fund. The subscription execution will fail if the price of the
+subscription asset token has moved above the Investor’s subscription
+request price, i.e. to the detriment of the Investor. A successful
+subscription results in the transfer of Investor subscription asset
+tokens to the Melon Fund’s custody and the Investor receiving the
+commensurate quantity of newly created Melon Fund share tokens based on
+the subscribing asset’s price and Melon Fund NAV at the time of
+subscription.
+
+[[emergency-redeem]]
+Emergency Redeem
+++++++++++++++++
+
+The Emergency Redeem functionality truly embodies the idea that
+Investors have full, absolute control and custody of their asset tokens
+at all times.
+
+[[trade]]
+Trade
++++++
+
+Trade is an action that can be undertaken by the Investment Manager
+where a specific quantity of a given asset held by the Melon Fund is
+exchanged for another asset via an exchange as specified by the
+Investment Manager at fund set up.
+
+[[version-shutdown]]
+Version Shutdown
+++++++++++++++++
+
+A Version Shutdown is an action which allows anyone to shutdown any
+individual Melon Fund. All trading, investment/subscription and
+redemption in the specified redemption asset is disabled. Redemptions
+are fulfilled only by slice, with Investors receiving their pro-rata
+share of all underlying token assets in the Melon Fund. A redemption by
+slice on a shutdown Melon Fund remains the responsibility of the
+Investor. A Version Shutdown is a high-severity action which is only
+callable by the Melonport governance multi-signature wallet/Technical
+Council.
+
+[[fund-shutdown]]
+Fund Shutdown
++++++++++++++
+
+A Fund Shutdown is an action which can be called by the Investment
+Manager to disable trading, investment/subscription and redemption in
+the specified redemption asset. Redemptions are fulfilled only by slice,
+with Investors receiving their pro-rata share of all underlying token
+assets in the Melon Fund. A redemption by slice on a shutdown Melon Fund
+remains the responsibility of the Investor.
+
+[[terms]]
+Terms
+~~~~~
+
+[[address]]
+Address
++++++++
+
+Address refers to any valid Ethereum address as defined by the Ethereum
+Protocol. Addresses consist of 40 hexadecimal characters prefaced with
+``0x''. External addresses are controlled by a user’s private key. Smart
+contract addresses have no knowable private key and are controlled by
+the functionality defined by the smart contract which generated the
+address. External addresses are usually generated by a user’s wallet.
+
+[[exchange]]
+Exchange
+++++++++
+
+Please refer to the LINK: Exchange section of the documentation.
+
+[[decentralized-exchange-dex]]
+Decentralized Exchange (DEX)
+++++++++++++++++++++++++++++
+
+Please refer to the LINK: Exchange section of the documentation.
+
+[[price-feed-operator]]
+Price Feed Operator
++++++++++++++++++++
+
+Please refer to the LINK: Price Feed section of the documentation.
+
+[[technical-council]]
+Technical Council
++++++++++++++++++
+
+Technical Council refers to the Melon Protocol governance body which
+actions governance functions related to critical operational areas of
+Melon Protocol, such as Price Feed operations, Melon Universe/Asset
+Registrar maintenance and future protocol development direction. The
+Technical Council consists of individuals elected by MLN token holders.
+Please refer to the LINK: Governance section of the documentation.
+
+[[slice]]
+Slice
++++++
+
+A Slice represents a pro-rata share of all individual tokens held in the
+Melon Fund at the time of redemption request. The Investor will not
+receive the NAV value of their investment in the investment token, but
+will receive all individual tokens held by the Melon Fund at the time of
+redemption transferred to their Investor address.
+
+[[shares]]
+Shares
+++++++
+
+An abstraction to facilitate the equitable distribution of ownership of
+assets in a co-mingled, collective investment fund. Ownership of fund
+assets is represented by shares in the Melon Fund. The Melon Fund’s
+share price will fluctuate with the market price of the underlying asset
+tokens held. An Investor buying into the Melon Fund at a specific point
+in time buys shares at that share price, ensuring that an equitable
+amount of shares in the Melon Fund are granted. See also: Open-Ended
+Fund structure.
+
+[[melon-price-feed]]
+Melon Price Feed
+++++++++++++++++
+
+Please refer to the LINK: Price Feed section of the documentation.
+
+[[melon-asset-registrar]]
+Melon Asset Registrar
++++++++++++++++++++++
+
+Please refer to the LINK: Asset Registrar section of the documentation.
+
+[[melon-governance]]
+Melon Governance
+++++++++++++++++
+
+Please refer to the LINK: Governance section of the documentation.
+
+[[melon-risk-engineering]]
+Melon Risk Engineering
+++++++++++++++++++++++
+
+Risk Engineering is a Melon Fund modular smart contract which
+facilitates the customization of Investment Manager interaction with the
+Melon Fund. Currently, the Risk Engineering module can verify if a Make
+Order or Take Order are permitted given the Order price and the
+Reference Price from the Price Feed. The Risk Engineering functionality
+will gain a much richer toolset in forthcoming releases, enabling the
+Investment Manager to demonstrably constrain Investment Manager actions,
+embedding an ex ante trade discipline and rigor within the Melon Fund’s
+strategy. Please refer to the LINK: Risk Engineering section of the
+documentation.
+
+[[melon-compliance]]
+Melon Compliance
+++++++++++++++++
+
+Compliance is a Melon Fund modular smart contract which facilitates the
+customization of Investor interaction with the Melon Fund. Currently,
+the Compliance module can make specific Investor addresses eligible or
+not eligible for investment, that is an address is either allowed or
+disallowed to issue an investment request. Redemptions are currently
+always allowed. For further information on the Compliance module, please
+refer to the LINK: Compliance section of the documentation.
+
+[[custodycustodian]]
+Custody/Custodian
++++++++++++++++++
+
+Custody is a service normally provided to funds in the traditional
+investment management industry. It is the practice of actually holding
+and safeguarding assets on behalf of a representative owner, in this
+case, a fund. A Custodian is a regulated, third party operator of such a
+service, who is entrusted with holding these assets. Contrary to a
+legacy fund where the fund is the legal owner of underlying assets held
+by a third party custodian, the Melon Fund smart contract _is_ the
+Custodian of the fund’s token assets, with the Investor having ultimate
+power of control of Investor assets held within the Melon Fund. At the
+same time, the Investment Manager has discretionary control over the
+asset allocation within the Melon Fund.
+
+[[administrationadministrator]]
+Administration/Administrator
+++++++++++++++++++++++++++++
+
+Administration is a service normally provided to funds in the
+traditional investment management industry and is usually a legal
+requirement which an independent, regulated third party must fulfill.
+There are many facets to fund administration:
+
+* NAV calculation
+* Securities pricing
+* Preparation of financial statement, reports, filings, prospectus, etc.
+* Fund accountant
+* Preparation of filings
+* Reconciliation with Custodian and Broker
+* Daily trade settlement
+* Calculation and payment of fund expenses
+* Performance calculation
+* Monitoring investment Compliance
+* Supervision of liquidation
+
+In the Melon Fund context, these duties are carried out by transparent,
+immutable and dispassionate smart contracts running on the Ethereum
+blockchain infrastructure.
+
+[[auditauditor]]
+Audit/Auditor
++++++++++++++
+
+Auditing is a service normally provided to funds in the traditional
+investment management industry, and is usually a legal requirement which
+an independent third party must fulfill. Auditors reconcile and compare
+books and accounts maintained by various counterparties to a fund such
+as the manager, custodian and administrator, ensuring correct
+record-keeping between them. Auditors issue opinions with the weight of
+their reputation as to the correctness of a fund’s state of affairs. In
+the traditional investment management environment today, a high level of
+certainty and comfort is provided by multiple independent inspections of
+fund operations; essentially counterparties monitoring each other. This
+operational overhead naturally incurs costs which are borne by fund
+performance. In the Melon Fund and blockchain context, much of this
+overhead is obviated in that calculations are deterministic and
+transparent, and the fact that the trade *_IS_* the transfer *_IS_* the
+settlement *_IS_* the record. That is to say, there is only on canonical
+source of truth: the very sending of a transaction/transfer *_IS_* the
+recording of the transaction, rendering comparison and verification
+superfluous.
+
+[[transfer-agent]]
+Transfer Agent
+++++++++++++++
+
+The Transfer Agent in the traditional investment management industry is
+an institution which interacts closely with the Registrar in maintaining
+records and entries for the ownership of securities. Transfer Agents
+also ensure that interest- or dividend payments are made to the security
+owners on time. In the Melon Fund and blockchain context, this duty is
+inherently embedded in the smart contract/blockchain infrastructure of
+an asset token ledger, and is carried out as a matter of course.
+
+[[registrar]]
+Registrar
++++++++++
+
+The Registrar in the traditional investment management industry is an
+institution which maintains the record of ownership of securities. In
+the Melon Fund and blockchain context, this duty is inherently embedded
+in the smart contract/blockchain infrastructure of an asset token
+ledger, and is carried out as a matter of course.
+
+[[order]]
+Order
++++++
+
+An Order is a specification for a desired asset token trade. The
+specification of the trade enumerates the buy asset, sell asset, buy
+quantity and buy price. Taken together, these things derive an implicit
+relative price of one asset in terms of the other. Active Orders
+explicitly created for- and issued to a specific exchange can be seen as
+a live instruction to transact the trade as specified.
+
+[[make-order]]
+Make Order
+++++++++++
+
+Make Orders are Orders for which no matching analog order exists. That
+is, Make Orders provide liquidity to the market for the asset token
+specified. Make Orders will not be executed immediately, but must wait
+for Investor to take the opposite side of the trade.
+
+[[take-orders]]
+Take Orders
++++++++++++
+
+Take Orders are Orders which take the opposite side of a currently
+existing Make Order, agreeing to the specified asset tokens in the
+specified quantities. Take Orders remove liquidity to the market for the
+asset token specified.
+
+[[order-book]]
+Order Book
+++++++++++
+
+An Order Book is a list of buy- and sell orders maintained by a specific
+exchange for a specific asset token pair. Once orders are filled, the
+exchange removes the order from the Order Book. The Order Book
+essentially describes the demand- and supply curves for a specific asset
+token in relative terms of another asset token.
+
+[[best-price-execution]]
+Best Price Execution
+++++++++++++++++++++
+
+When in the position of managing the capital of Investors in a fiduciary
+context, Best Price Execution refers to the practice, of endeavoring to
+find the most favorable terms for a given trade. The practice seeks to
+avoid rewarding illicit behavior at the cost of the Investor. In the
+context of the Melon Fund, Best Price Execution prohibits exchange
+trades which lie below a specified tolerance threshold to the price
+feed, which serves as a proxy of the current market price.
+
+[[management-fee]]
+Management Fee
+++++++++++++++
+
+Management Fee is the fee charged to the Investor by the Investment
+Manager for the service of discretionary management of the Melon Fund’s
+assets. The Management Fee is specified as a percentage of the Investor
+Gross Asset Value (GAV) on a per annum basis. The Management Fee is paid
+in shares of the Melon Fund. Fee shares are created out of inflating the
+total supply of Melon Fund shares, achieving the same impact as directly
+paying fees out of the Melon Fund’s underlying token assets, but in a
+more simple and elegant mechanism that further aligns Investment Manager
+incentives with Investors.
+
+[[performance-fee]]
+Performance Fee
++++++++++++++++
+
+Performance Fee is the fee charged to the Investor by the Investment
+Manager for achieving positive performance in the management of the
+Melon Fund’s assets. The Performance Fee is specified as a percentage of
+the positive performance achieved over a given time period, i.e. the
+crystalization period. The Performance Fee is paid in shares of the
+Melon Fund. Fee shares are created out of inflating the total supply of
+Melon Fund shares, achieving the same impact as directly paying fees out
+of the Melon Fund’s underlying token assets, but in a more simple and
+elegant mechanism that further aligns Investment Manager incentives with
+Investors.
+
+[[highwatermark]]
+Highwatermark
++++++++++++++
+
+Highwatermark is the NAV/Share level indicating the highest performance
+the Melon Fund has achieved since the last fee claim by the Investment
+Manager. This metric is used to determine the level of performance fees
+due to the Investment Manager at an given point in time.
+
+[[crystalization-period]]
+Crystalization Period
++++++++++++++++++++++
+
+Crystalization period is the interval of time over which a performance
+fee, if earned, can duly be collected. Here, earned is taken to mean
+that the current NAV/Share is higher than the ending NAV/Share level of
+the previous period for which fees were claimed.
+
+[[hurdle]]
+Hurdle
+++++++
+
+A hurdle is a percentage figure indicating a positive performance amount
+below which performance fees will not be charged. Performance exceeding
+the hurdle rate will be charged as specified under
+link:#performancefee[Performance Fee]. Hurdle functionality in Melon
+Fund performance measurement is not yet implemented.
+
+[[breach]]
+Breach
+++++++
+
+A breach occurs when a specific measurement exceeds a defined threshold.
+
+[[stake]]
+Stake
++++++
+
+Stake is a form of security deposit held by a smart contract and used to
+incentivize desired behavior. When observed behavior in contrast to
+specified behavior is detected, the smart contract has the ability to
+burn all, or a portion of the staked security deposit.
+
+[[open-ended-fund]]
+Open-Ended Fund
++++++++++++++++
+
+An Open-Ended Fund is a fund structure which places no upper limit on
+the amount which can be invested. As capital enters the Open-Ended Fund,
+new shares are created commensurate with the current NAV of the fund and
+the amount of capital invested. As investment capital leaves the fund
+through redemptions, the representative shares are destroyed,
+commensurate with the redemption amount.
+
+[[token]]
+Token
++++++
+
+A Token is a symbolic representation of a unitized measure in a
+cryptographic decentralized ledger system. Token ownership (or control)
+resides exclusively with a cryptographic address and can only be
+transferred (or interacted with) by the use of the private key belonging
+to the holding address. The private key is used to create a
+cryptographically-signed transaction which is submitted to the
+blockchain network, which in turn executes the instructions specified
+therein.
+
+[[erc20-standard]]
+ERC20 Standard
+++++++++++++++
+
+The ERC20 Standard is a standardized token interface which specifies
+certain functionsand events, which when implemented, allow a token to
+interact with other tokens and infrastructure smart contracts. See
+https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md[ERC20 Token
+Standard].
+
+[[ethereum]]
+Ethereum
+++++++++
+
+The Ethereum blockchain is a blockchain network which implements smart
+contract allowing the user to specify how state may change. Ethereum is
+the foundation for many decentralized applications including the Melon
+Protocol and Melon Funds, as well as all asset tokens traded and held in
+Melon Funds.
+
+[[blockchain]]
+Blockchain
+++++++++++
+
+A Blockchain is a general purpose technology which can store data in a
+decentralized and immutable way. The storage and maintenance of the data
+is incentivized by the internal issuance of a blockchain-native token of
+value.
+
+[[transaction]]
+Transaction
++++++++++++
+
+A Transaction is a transfer of tokens/value from one cryptographic
+account to another or the calling of a function on a smart contract to
+affect some behavior on the part of the called smart contract. In some
+cases, a smart contract function call can also include the transfer of
+tokens/value.
+
+[[nav]]
+NAV
++++
+
+The NAV is the Net Asset Value of the Melon Fund. The price of a fund is
+quoted on a per-share basis, i.e. NAV/Share. The NAV will fluctuate with
+the market price of the underlying holdings of the fund. Market prices
+are represented by the Canonical Price Feed providing a periodic
+valuation of the fund assets. Net Asset Value is value of net long
+positions in the portfolio less any credit positions (e.g. leverage)
+less any fees due. Currently Melon Funds can only hold long exposure
+positions and cannot implement leverage. This means that the NAV will be
+the GAV less unclaimed fees at a given point in time.
+
+[[gav]]
+GAV
++++
+
+The GAV is the Gross Asset Value of the Melon Fund. The GAV will
+fluctuate with the market price of the underlying holdings of the fund.
+Market prices are represented by the Canonical Price Feed providing a
+periodic valuation of the fund assets. The GAV represents the current
+market value of the Melon Fund before the consideration of any fees due
+at a given point in time.
+
+[[investmentsubscription-asset]]
+Investment/Subscription Asset
++++++++++++++++++++++++++++++
+
+The Investment/Subscription Asset is the token asset defined by the
+Investment Manager with which Investors may invest or subscribe to the
+Melon Fund.
+
+[[redemption-asset]]
+Redemption Asset
+++++++++++++++++
+
+The Redemption Asset is the token asset defined by the Investment
+Manager in which Investors may redeem from the Melon Fund.
+
+[[quote-asset]]
+Quote Asset
++++++++++++
+
+The Quote Asset is the asset in which the Melon Fund is valued. The
+Quote Asset is specified by the Investment Manager at the time of the
+Melon Fund’s set up.
+
+[[native-asset]]
+Native Asset
+++++++++++++
+
+The Native Asset is the token asset used by a blockchain for internal
+accounting, incentivization and transaction fee payment. The Native
+Asset on the Ethereum blockchain network is Ether (ETH).
+
+[[base-asset]]
+Base Asset
+++++++++++
+
+TBD
+
+[[reference-asset]]
+Reference Asset
++++++++++++++++
+
+TBD
+
+[[allocate-vs-invest]]
+Allocate vs Invest
+++++++++++++++++++
+
+Allocate: The Investment Manager chooses and trades for specific assets
+within the fund. Allocation is the only discretionary power with the
+Investment Manager regarding the Melon Fund’s underlying holdings.
+
+Invest: The Investor transfers tokens to the Melon Fund. Technically,
+the Melon Fund also invests into the underlying holdings; this
+underscores the fact that the underlying holdings’ ownership is
+completely segregated from the Investment Manager and resided with the
+Melon Fund smart contract, and ultimately, with the Investor.
