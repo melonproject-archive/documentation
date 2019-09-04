@@ -915,3 +915,181 @@ view returns (
 
 This public view function returns the current relevant order information (maker asset token address, taker asset token address, maker asset token quantity and taker asset token quantity) given the exchange contract address, the order identifier and the maker asset token contract address parameters. Orders which have been partially filled will return the remaining, respective token quantities.
 &nbsp;
+
+## UniswapAdapter.sol
+
+#### Description
+
+This contract is the exchange adapter to the Uniswap Exchange contract and serves as the interface from a Melon fund to the Uniswap Exchange contract for purposes of exchange of asset tokens listed on it.
+&nbsp;
+
+#### Inherits from
+
+ExchangeAdapter, DSMath (link)
+
+&nbsp;
+
+#### On Construction
+
+None.
+
+&nbsp;
+
+#### Structs
+
+None.
+
+&nbsp;
+
+#### Enums
+
+None.
+
+&nbsp;
+
+#### Modifiers
+
+None.
+
+&nbsp;
+
+#### Events
+
+None.
+
+&nbsp;
+
+#### Public State Variables
+
+None.
+&nbsp;
+
+
+#### Public Functions
+
+`function takeOrder(
+    address targetExchange,
+    address[6] orderAddresses,
+    uint[8] orderValues,
+    bytes32 identifier,
+    bytes makerAssetData,
+    bytes takerAssetData,
+    bytes signature)
+onlyManager notShutDown`
+
+Please see parameter descriptions above.
+
+This public function must ensure that:
+
+  the fund is not shut down,
+  the `msg.sender` is the fund manager.
+  take fill quantity is equal to the taker asset quantity,
+  asset tokens to be traded are approved (if required),
+  the swap on Uniswap exchange contract is performed,
+  the acquired asset token, if not already held, is added to `ownedAssets`. Finally, the acquired asset tokens are returned to the Melon fund's vault and the order status is updated.
+
+The function executes a swap function on the Uniswap exchange contract specifying the assets to swap and the corresponding quantities. The makerAssetAmount (orderAddresses [2]) functions as a minimum acceptable quantity of token acquired in the swap. Finally, the function returns acquired token assets to the fund's vault and updates the fund's internal order tracking.
+&nbsp;
+
+`function getInputPrice(
+    address targetExchange,
+    address nativeAsset,
+    address srcToken,
+    uint srcAmount,
+    address destToken)
+view returns (uint expectedDestAmount)`
+
+This public view function returns the expected quantity of destToken in return for the srcAmount of srcToken as returned by the Uniswap exchange contract.
+&nbsp;
+
+`function dispatchSwap(
+    address targetExchange,
+    address srcToken,
+    uint srcAmount,
+    address destToken,
+    uint minDestAmount)
+internal
+    returns (uint actualReceiveAmount)`
+
+This internal function routes the call logic depending on the asset tokens involved. The three possibilities are:
+
+  Fund trades ETH for other asset token - call made to `swapNativeAssetToToken()`
+  Fund trades other asset token for ETH - call made to `swapTokenToNativeAsset()`
+  Fund trades non-ETH tokens - call made to `swapTokenToToken()`
+
+The function takes the following parameters:
+
+`targetExchange` - The address of the intended exchange contract (i.e. the Uniswap Exchange).
+`srcToken` - The address of the asset token the fund will deliver.
+`srcAmount` - The quantity of delivering asset token.
+`destToken` - The address of the asset token the fund will receive.
+`minRate` - The minimum acceptable quantity of the receiving asset token.
+
+The function returns the quantity of the asset token to be received by the fund.
+&nbsp;
+
+`function swapNativeAssetToToken(
+    address targetExchange,
+    address nativeAsset,
+    uint srcAmount,
+    address destToken,
+    uint minDestAmount)
+internal
+    returns (uint receivedAmount)`
+
+This internal function initiates the trade where the Melon fund delivers ETH for the receiving asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of ETH from the fund's vault sends the ETH quantity to the Uniswap exchange contract calling its `ethToTokenSwapInput()` function.
+
+The function takes the following parameters:
+
+`targetExchange` - The address of the intended exchange contract (i.e. the Uniswap exchange).
+`nativeAsset` - The address of the native asset token the fund will deliver, ETH.
+`srcAmount` - The quantity of delivering asset token.
+`destToken` - The address of the asset token the fund will receive.
+`minDestAmount` - The minimum acceptable quantity of the receiving asset token.
+
+The function returns the quantity of the `destToken` received. The Uniswap exchange contract function transfers the asset to this (adapter) contract, where it is then transferred back to the vault in the `takeOrder` function.
+&nbsp;
+
+`function swapTokenToNativeAsset(
+    address targetExchange,
+    address srcToken,
+    uint srcAmount,
+    address nativeAsset,
+    uint minDestAmount)
+internal
+    returns (uint receivedAmount)`
+
+This internal function initiates the trade where the Melon fund delivers the asset token specified by the `srcToken` address parameter for receiving ETH. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Uniswap exchange contract calling its `tokenToEthSwapInput()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
+
+The function takes the following parameters:
+
+  `targetExchange` - The address of the intended exchange contract (i.e. the Uniswap exchange).
+  `srcToken` - The address of the asset token the fund will deliver.
+  `srcAmount` - The quantity of delivering asset token.
+  `nativeAsset` - The address of the native asset token the fund will receive, ETH.
+  `minDestAmount` - The minimum acceptable quantity of the receiving asset token.
+
+The function returns the quantity of the `nativeAsset` received, ETH. The Uniswap exchange contract function transfers the asset to this (adapter) contract, where it is then transferred back to the vault in the `takeOrder` function.
+&nbsp;
+
+`function swapTokenToToken(
+    address targetExchange,
+    address srcToken,
+    uint srcAmount,
+    address destToken,
+    uint minRate)
+internal
+    returns (uint receivedAmount)`
+
+This internal function initiates the trade where the Melon fund delivers the asset token specified by the `srcToken` address parameter for receiving the asset token specified by the `destToken` address parameter. The function withdraws the specified quantity of the delivery asset token from the fund's vault and sends the quantity to the Uniswap exchange contract calling its `tokenToTokenSwapInput()` function. The function then approves the transfer quantity for the exchange. Finally, the function converts any ETH received to WETH.
+
+The function takes the following parameters:
+
+  `targetExchange` - The address of the intended exchange contract (i.e. the Uniswap exchange).
+  `srcToken` - The address of the asset token the fund will deliver.
+  `srcAmount` - The quantity of delivering asset token.
+  `destToken` - The address of the asset token the fund will receive.
+  `minDestAmount` - The minimum acceptable quantity of the receiving asset token (`destToken`).
+
+The function returns the quantity of the `destToken` received. The Uniswap exchange contract function transfers the asset to this (adapter) contract, where it is then transferred back to the vault in the `takeOrder` function.
+&nbsp;
