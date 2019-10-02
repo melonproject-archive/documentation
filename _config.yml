@@ -3,3 +3,4 @@ title: "Melon"
 description: "Documentation Reference"
 submodule_section: "Submodules"
 submodules: "brief"
+repository: https://github.com/melonproject/documentation.git
