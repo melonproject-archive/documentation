@@ -588,6 +588,7 @@ This function requires that the caller is the `owner` or the participation compo
 &nbsp;
 
 #### Reverting functions:
+
 create
 `function transfer(address to, uint amount) public returns (bool)`
 &nbsp;
@@ -700,7 +701,7 @@ Member Variables:
  `uint allocatedFees` - Fee shares accrued since the previous fee calculation about to be allocated
 `uint totalSupply` - The quantity of fund shares  
  `uint timestamp` - The timestamp of the current transactions block
- &nbsp;
+&nbsp;
 
 #### Enums
 
@@ -869,26 +870,26 @@ The Management Fee calculation business logic is fully encapsulated by the Manag
 First, the time-weighted, pre-dilution share quantity is calculated:
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
 &nbsp;
 
 ## Performance Fees
@@ -906,39 +907,39 @@ The calculation of the Performance Fee requires that, at that moment, no Managem
 The Performance Fee calculation business logic is fully encapsulated by the Performance Fee contract. This logic can be represented as follows.
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
 
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://latex.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
 &nbsp;
 
 While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
@@ -1200,7 +1201,7 @@ This function sets the `highwatermark` and `lastPayoutTime` if applicable. The f
 This public view function returns a boolean indicating whether conditions are met to trigger the collection of a performance fee. Theses conditions are: the current time is within the update window and that an update has not already been performed for the current measurement period.
 &nbsp;
 
-***
+---
 
 ## Trading
 
@@ -1335,7 +1336,7 @@ A public mapping a ZeroEx order identifier to a ZeroEx Order struct.
 
 `uint public constant ORDER_LIFESPAN = 1 days`
 
-A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 * 60 * 24 ).
+A public constant specifying the number of seconds that an order will remain active on an exchange. This number is added to the order creation date's timestamp to fully specify the order's expiration date. `1 days` is equal to 86400 ( 60 _ 60 _ 24 ).
 &nbsp;
 
 #### Modifiers
@@ -1362,46 +1363,22 @@ This public view function returns a boolean indicating whether an order for the 
 This is an internal function which is called for each exchange address passed to the constructor, adding the full exchange struct to the exchanges array state variable. The function ensures that an exchange has not previously been registered.
 &nbsp;
 
-`function callOnExchange(
-    uint exchangeIndex,
-    string methodSignature,
-    address[6] orderAddresses,
-    uint[8] orderValues,
-    bytes32 identifier,
-    bytes makerAssetData,
-    bytes takerAssetData,
-    bytes signature
-) public onlyInitialized`
+`function callOnExchange( uint exchangeIndex, string methodSignature, address[6] orderAddresses, uint[8] orderValues, bytes32 identifier, bytes makerAssetData, bytes takerAssetData, bytes signature ) public onlyInitialized`
 
 This is the fund's general interface to each registered exchange for trading asset tokens. The client will call this function for specific exchange/trading interactions. This function first calls the policyManager to ensure that function-specific policies are pre- or post-executed to ensure that the exchange trade adheres to the policies configured for the fund. This function implements the `onlyInitialized` modifier. Finally, the function emits the `ExchangeMethodCall()` event, logging the specified parameters.
 &nbsp;
 
-`function addOpenMakeOrder(
-    address ofExchange,
-    address sellAsset,
-    address buyAsset,
-    uint orderId,
-    uint expirationTime
-) public delegateInternal`
+`function addOpenMakeOrder( address ofExchange, address sellAsset, address buyAsset, uint orderId, uint expirationTime ) public delegateInternal`
 
 This public function can only be called from within the current contract. The function ensures that the sell asset token does not already have a current open sell order and that there are one or more orders in the `orders` array. If the `expirationTime` is set to "0", the order's expiration time is set to `ORDER_LIFESPAN`. The expiration time is required to be greater that the current `block.timestamp` and less than or equal to the sum of the `ORDER_LIFESPAN` and `block.timestamp`. The function then sets the `isInOpenMakeOrder` mapping for the sell asset token address to `true`, and sets the details of the address's `openMakeOrder` struct on the contracts `exchangesToOpenMakeOrders` mapping.
 &nbsp;
 
-`function removeOpenMakeOrder(
-    address exchange,
-    address sellAsset
-) public delegateInternal`
+`function removeOpenMakeOrder( address exchange, address sellAsset ) public delegateInternal`
 
 This public function can only be called from within the current contract. The function removes the provided sell asset token address entry for the provided exchange address.
 &nbsp;
 
-`function orderUpdateHook(
-    address ofExchange,
-    bytes32 orderId,
-    UpdateType updateType,
-    address[2] orderAddresses,
-    uint[3] orderValues
-) public delegateInternal`
+`function orderUpdateHook( address ofExchange, bytes32 orderId, UpdateType updateType, address[2] orderAddresses, uint[3] orderValues ) public delegateInternal`
 
 This public function can only be called from within the current contract. The function used the input parameters and the current execution block's timestamp to push make- or take orders to the `orders` array. [Why only make or take orders??]
 &nbsp;
@@ -1488,7 +1465,6 @@ Note that fund is not limited to these functions and can call arbitrary function
 &nbsp;
 
 ---
-
 
 ## Fund Policy
 
