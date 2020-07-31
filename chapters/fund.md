@@ -907,11 +907,11 @@ The calculation of the Performance Fee requires that, at that moment, no Managem
 The Performance Fee calculation business logic is fully encapsulated by the Performance Fee contract. This logic can be represented as follows.
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}$=\begin{cases}S_{n},&S_{n}>HWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}=\begin{Bmatrix}S_{n},&S_{n}%3EHWM_{MP-1}\\HWM_{MP-1},&S_{n}\leq{HWM_{MP-1}}\end{Bmatrix}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}$=\begin{cases}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{cases}"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}=\begin{Bmatrix}GAV_{s}-HWM_{MP-1},&GAV_{s}>HWM_{MP-1}\\0,&GAV_{s}\leq{HWM_{MP-1}}\end{Bmatrix}"/>
 
 &nbsp;
 
