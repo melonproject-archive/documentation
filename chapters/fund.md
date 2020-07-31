@@ -870,26 +870,26 @@ The Management Fee calculation business logic is fully encapsulated by the Manag
 First, the time-weighted, pre-dilution share quantity is calculated:
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m}$)"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;PD_{f}$=($T_{n}$)($\frac{t_{e}}{t_{y}}$)($f_{m})"/>
 
 then, this figure is scaled such that investors retain their original share holdings quantity, but newly created shares represent the commensurate fee percentage amount:
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}"/>
 
 where,
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;PD_{f}"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}"/> = current shares outstanding
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{e}$"/> = number of seconds elapsed since previous conversion event
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{e}"/> = number of seconds elapsed since previous conversion event
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{y}$"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;t_{y}"/> = number of seconds in a year ( = 60 _ 60 _ 24 \* 365 )
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;f_{m}$"/> = Management Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;f_{m}"/> = Management Fee rate
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}$"/> = number shares to create to compensate Management Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;SMF_{e}"/> = number shares to create to compensate Management Fees earned during the conversion period
 &nbsp;
 
 ## Performance Fees
@@ -915,31 +915,31 @@ The Performance Fee calculation business logic is fully encapsulated by the Perf
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}=\frac{P_{MP}T_{n}^2f_{p}}{GAV}"/>
 
 &nbsp;
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}$"/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}=\frac{PD_{f}T_{n}}{T_{n}-PD_{f}}"/>
 
 where,
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}$"/> = high-water mark for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?HWM_{MP}"/> = high-water mark for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?S_{n}$"/> = current share price net of Management Fee
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?S_{n}"/> = current share price net of Management Fee
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV$"/> = current fund Gross Asset Value
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV"/> = current fund Gross Asset Value
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}$"/> = current fund GAV per share
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?GAV_{s}=\frac{GAV}{T_{n}}"/> = current fund GAV per share
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}$"/> = performance for the Measurement Period
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?P_{MP}"/> = performance for the Measurement Period
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}$"/> = pre-dilution quantity of shares
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?PD_{f}"/> = pre-dilution quantity of shares
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}$"/> = current shares outstanding
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?\Large&space;T_{n}"/> = current shares outstanding
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?f_{p}$"/> = Performance Fee rate
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?f_{p}"/> = Performance Fee rate
 
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}$"/> = number shares to create to compensate Performance Fees earned during the conversion period
+&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://ibm.codecogs.com/svg.latex?SPF_{e}"/> = number shares to create to compensate Performance Fees earned during the conversion period
 &nbsp;
 
 While Performance Fees are only crystalized at the end of each measurement period, there must be a mechanism whereby redeeming investors compensate for _their_ current share of accrued performance fees prior to redemption.
